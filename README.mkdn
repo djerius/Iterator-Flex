@@ -1,0 +1,131 @@
+# NAME
+
+Iterator::Flex - Iterators which can be rewound and serialized
+
+# VERSION
+
+version 0.01
+
+# SYNOPSIS
+
+# SUBROUTINES
+
+## iterator
+
+## iter
+
+    $iter = iter( $object );
+
+Transform `$object` into an iterator.  It accepts
+
+## iarray
+
+    $iterator = iarray( $array_ref );
+
+Wrap an array in an iterator. 
+
+The returned iterator supports the following methods:
+
+- next
+- prev
+- rewind
+- freeze
+
+## igrep
+
+    $iterator = igrep { CODE } $iterable;
+
+Returns an iterator equivalent to running [grep](https://metacpan.org/pod/grep) on `$iterable` with the specified code.
+
+The iterator supports the following methods:
+
+- next
+- rewind
+
+## imap
+
+    $iterator = imap { CODE } $iteraable;
+
+Returns an iterator equivalent to running [map](https://metacpan.org/pod/map) on `$iterable` with the specified code.
+
+The iterator supports the following methods:
+
+- next
+- rewind
+
+## iproduct
+
+    $iterator = iproduct( $iterable1, $iterable2, ... );
+    $iterator = iproduct( key1 => $iterable1, key2 => iterable2, ... );
+
+Returns an iterator which produces a Cartesian product of the input iterables.
+If the input to **iproduct** is a list of iterables, `$iterator` will return an
+array reference containing an element from each iterable.
+
+If the input is a list of key, iterable pairs, `$iterator` will return a
+hash reference.
+
+All of the iterables must support the `rewind` method.
+
+The iterator supports the following methods:
+
+- next
+- rewind
+- freeze
+
+    This iterator may be frozen only if all of the iterables support the
+    `prev` or `__prev__` method.
+
+## iseq
+
+    # integer sequence starting at 0
+    $iterator = iseq( $end );
+
+    # integer sequence starting at $begin, incrementing by 1, ending at $end
+    $iterator = iseq( $begin, $end );
+
+    # real sequence starting at $begin, incrementing by $step, ending <= $end
+    $iterator = iseq( $begin, $end, $step );
+
+The iterator supports the following methods:
+
+- next
+- prev
+- rewind
+- freeze
+
+## thaw
+
+    $frozen = $iterator->freeze;
+    $iterator = thaw( $frozen );
+
+Restore an iterator that has been frozen.  See ["Serialization of
+Iterators"](#serialization-of-iterators) for more information.
+
+# BUGS
+
+Please report any bugs or feature requests on the bugtracker website
+[https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex](https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex) or by
+email to
+[bug-Iterator-Flex@rt.cpan.org](mailto:bug-Iterator-Flex@rt.cpan.org).
+
+When submitting a bug or request, please include a test-file or a
+patch to an existing test-file that illustrates the bug or desired
+feature.
+
+# SOURCE
+
+The development version is on github at [https://github.com/djerius/iterator-flex](https://github.com/djerius/iterator-flex)
+and may be cloned from [git://github.com/djerius/iterator-flex.git](git://github.com/djerius/iterator-flex.git)
+
+# AUTHOR
+
+Diab Jerius <djerius@cpan.org>
+
+# COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2018 by Smithsonian Astrophysical Observatory.
+
+This is free software, licensed under:
+
+    The GNU General Public License, Version 3, June 2007
