@@ -29,7 +29,7 @@ sub freeze {
 
     if ( defined $self->{depends} ) {
 
-        # first check if dependencies can freeze. 
+        # first check if dependencies can freeze.
         my $cant = List::Util::first { ! $_->can( 'freeze' ) } @{ $self->{depends} };
         Carp::croak( "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
             if $cant;
@@ -42,7 +42,5 @@ sub freeze {
 
     return \@freeze;
 }
-
-
 
 1;

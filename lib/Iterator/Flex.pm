@@ -115,7 +115,7 @@ sub iter {
 
   $iterator = iarray( $array_ref );
 
-Wrap an array in an iterator. 
+Wrap an array in an iterator.
 
 The returned iterator supports the following methods:
 
@@ -571,4 +571,3 @@ __END__
 
 
 =head1 SEE ALSO
-
