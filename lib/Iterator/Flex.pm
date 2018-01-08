@@ -38,7 +38,13 @@ sub _can_meth {
 
     my $obj = shift;
 
-    return first { $obj->can( $_ ) } @_;
+    my $sub;
+    foreach ( @_ )  {
+
+        last if defined ($sub = $obj->can( $_ ));
+    }
+
+    return $sub;
 }
 
 =sub iterator
