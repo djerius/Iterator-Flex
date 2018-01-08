@@ -24,6 +24,11 @@ use Iterator::Flex::Iterator;
 use constant ITERATOR_CLASS => __PACKAGE__ . '::Iterator';
 
 
+sub _can_freeze {
+
+    return _can_meth( $_[0], qw[ __freeze__ freeze ] );
+}
+
 sub _can_prev {
 
     return _can_meth( $_[0], qw[ __prev__ prev previous ] );
