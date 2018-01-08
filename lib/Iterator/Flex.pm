@@ -392,7 +392,7 @@ sub _iproduct_thaw {
 
 =sub iseq
 
-  # integer sequence starting at 0
+  # integer sequence starting at 0, incrementing by 1, ending at $end
   $iterator = iseq( $end );
 
   # integer sequence starting at $begin, incrementing by 1, ending at $end
