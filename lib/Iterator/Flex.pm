@@ -534,6 +534,9 @@ sub thaw {
 
     my $step = shift;
 
+    croak( "thaw: too many args\n" )
+      if @_;
+
     my @steps = @$step;
 
     # parent data is last
