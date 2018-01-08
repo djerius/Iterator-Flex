@@ -189,6 +189,7 @@ sub _iarray {
   $iterator = igrep { CODE } $iterable;
 
 Returns an iterator equivalent to running L<grep> on C<$iterable> with the specified code.
+C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
 
 The iterator supports the following methods:
 
@@ -228,6 +229,7 @@ sub igrep(&$) {
   $iterator = imap { CODE } $iteraable;
 
 Returns an iterator equivalent to running L<map> on C<$iterable> with the specified code.
+C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
 
 The iterator supports the following methods:
 
