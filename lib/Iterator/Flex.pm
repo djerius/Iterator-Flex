@@ -156,12 +156,13 @@ sub _iarray {
       unless is_arrayref( $arr );
 
     $idx = 0 unless defined $idx;
+    my $len = @$arr;
 
     return ITERATOR_CLASS->new(
         rewind => sub { $idx = 0 },
         next => sub {
-            return undef if $idx == @$arr;
-            return $arr->[ $idx++ ];
+            return $arr->[ $idx++ ] unless $idx == $len;
+            return undef;
         },
         freeze => sub {
             return [ __PACKAGE__, '_iarray', [ $arr, $idx ] ];
