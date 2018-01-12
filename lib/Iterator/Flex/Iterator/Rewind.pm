@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.02';
 
-use Carp ();
+use Carp       ();
 use List::Util ();
 
 use Role::Tiny;
@@ -29,14 +29,16 @@ sub rewind {
     if ( defined $self->{depends} ) {
 
         # first check if dependencies can rewind.
-        my $cant = List::Util::first { ! $_->can( 'rewind' ) } @{ $self->{depends} };
+        my $cant
+          = List::Util::first { !$_->can( 'rewind' ) } @{ $self->{depends} };
         Carp::croak( "dependency: @{[ $cant->{name} ]} is not rewindable\n" )
-            if $cant;
+          if $cant;
 
         # now rewind them
         $_->rewind foreach @{ $self->{depends} };
     }
 
+    local $_ = $self;
     $self->{rewind}->();
 
     return;

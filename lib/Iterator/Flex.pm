@@ -9,7 +9,8 @@ our $VERSION = '0.02';
 
 use Exporter 'import';
 
-our @EXPORT_OK = qw[ iterator iter iarray igrep imap iproduct iseq ifreeze thaw ];
+our @EXPORT_OK
+  = qw[ iterator iter iarray igrep imap iproduct iseq ifreeze thaw ];
 
 use Carp;
 use Scalar::Util qw[ blessed looks_like_number ];
@@ -20,6 +21,7 @@ use List::Util qw[ pairkeys pairvalues all first ];
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
 use Iterator::Flex::Iterator;
+use Iterator::Flex::Constants;
 
 use constant ITERATOR_CLASS => __PACKAGE__ . '::Iterator';
 
@@ -44,9 +46,9 @@ sub _can_meth {
     my $obj = shift;
 
     my $sub;
-    foreach ( @_ )  {
+    foreach ( @_ ) {
 
-        last if defined ($sub = $obj->can( $_ ));
+        last if defined( $sub = $obj->can( $_ ) );
     }
 
     return $sub;
@@ -162,6 +164,7 @@ sub _iarray {
         rewind => sub { $idx = 0 },
         next => sub {
             return $arr->[ $idx++ ] unless $idx == $len;
+            $_->set_exhausted;
             return undef;
         },
         freeze => sub {
@@ -222,11 +225,15 @@ sub igrep(&$) {
 
     my %params = (
         next => sub {
-            while ( defined( my $rv = $src->() ) ) {
+
+            foreach (;;) {
+                my $rv = $src->();
+                last if $src->is_exhausted;
                 local $_ = $rv;
                 return $rv if $code->();
             }
-            return;
+            $_->set_exhausted;
+            return undef;
         },
         rewind  => sub { },
         depends => $src,
@@ -263,8 +270,12 @@ sub imap(&$) {
 
     ITERATOR_CLASS->new(
         next => sub {
-            local $_ = $src->next;
-            return if not defined $_;
+            my $value = $src->next;
+            if ( $src->is_exhausted ) {
+                $_->set_exhausted;
+                return undef;
+            }
+            local $_ = $value;
             return $code->();
         },
         rewind  => sub { },
@@ -337,32 +348,54 @@ sub _iproduct {
       unless @iterator == grep { defined } map { _can_rewind( $_ ) } @iterator;
 
     my @value = @$value;
+    my @set = ( 1 ) x @value;
 
     my %params = (
         next => sub {
             # first time through
             if ( !@value ) {
-                @value = map { $_->next } @iterator;
+
+                for my $iter ( @iterator ) {
+                    push @value, $iter->next;
+
+                    if ( $iter->is_exhausted ) {
+                        $_->set_exhausted;
+                        return undef;
+                    }
+                }
+
+                @set = ( 1 ) x @value;
             }
 
-            elsif ( !defined( $value[0] ) ) {
+            elsif ( !$set[0] ) {
                 return;
             }
 
-            elsif ( !defined( $value[-1] = $iterator[-1]->next ) ) {
+            else {
 
-                my $idx = @iterator - 1;
-                1 while --$idx >= 0
-                  && !defined( $value[$idx] = $iterator[$idx]->next );
+                $value[-1] = $iterator[-1]->next;
+                if ( $iterator[-1]->is_exhausted ) {
+                    $set[-1] = 0;
+                    my $idx = @iterator - 1;
+                    while ( --$idx >= 0 ) {
+                        $value[$idx] = $iterator[$idx]->next;
+                        last unless $iterator[$idx]->is_exhausted;
+                        $set[$idx] = 0;
+                    }
 
-                return if !defined $value[0];
+                    if ( !$set[0] ) {
+                        $_->set_exhausted;
+                        return undef;
+                    }
 
-                while ( ++$idx < @iterator ) {
-                    $iterator[$idx]->rewind;
-                    $value[$idx] = $iterator[$idx]->next;
+                    while ( ++$idx < @iterator ) {
+                        $iterator[$idx]->rewind;
+                        $value[$idx] = $iterator[$idx]->next;
+                        $set[$idx]   = 1;
+                    }
                 }
-            }
 
+            }
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -456,7 +489,10 @@ sub _iseq {
 
         %params = (
             next => sub {
-                return undef if $next > $end;
+                if ( $next > $end ) {
+                    $_->set_exhausted;
+                    return undef;
+                }
                 $prev = $next++;
                 return $prev;
             },
@@ -477,7 +513,10 @@ sub _iseq {
 
         %params = (
             next => sub {
-                return undef if $next > $end;
+                if ( $next > $end ) {
+                    $_->set_exhausted;
+                    return undef;
+                }
                 $prev = $next++;
                 return $prev;
             },
@@ -514,13 +553,19 @@ sub _iseq {
 
             next => $begin < $end
             ? sub {
-                return undef if $next > $end;
+                if ( $next > $end ) {
+                    $_->set_exhausted;
+                    return undef;
+                }
                 $prev = $next;
                 $next += $step;
                 return $prev;
             }
             : sub {
-                return undef if $next < $end;
+                if ( $next < $end ) {
+                    $_->set_exhausted;
+                    return undef;
+                }
                 $prev = $next;
                 $next += $step;
                 return $prev;

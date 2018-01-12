@@ -19,7 +19,7 @@ Returns the previous value.
 
 =cut
 
-sub prev { goto $_[0]->{prev} }
+sub prev { local $_ = $_[0]; $_->{prev}->() }
 *__prev__ = \&prev;
 
 

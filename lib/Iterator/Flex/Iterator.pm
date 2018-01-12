@@ -11,12 +11,12 @@ use Carp ();
 use Ref::Util;
 use Scalar::Util;
 use Role::Tiny ();
+use Import::Into;
 
-use overload (
-    '<>'     => 'next',
-    '&{}'    => sub { $_[0]->{next} },
-    fallback => 1,
-);
+use Iterator::Flex::Constants;
+use Iterator::Flex::Failure;
+
+use overload ( '<>' => 'next' );
 
 =method new
 
@@ -87,58 +87,91 @@ Dependencies are passed to the thaw routine only if they are present.
 sub new {
 
     my $class = shift;
-    my %attr = @_ ;
+    my %attr = ( throw => 0, @_ );
 
     for my $key ( keys %attr ) {
 
-        if ( $key =~ /^(next|prev|rewind|freeze)$/ ) {
+        if ( $key =~ /^(init|next|prev|rewind|freeze)$/ ) {
             Carp::croak( "value for $_ attribute must be a code reference\n" )
-                unless Ref::Util::is_coderef  $attr{$key};
+              unless Ref::Util::is_coderef $attr{$key};
         }
         elsif ( $key eq 'depends' ) {
 
-            $attr{$key} = [ $attr{$key} ] unless Ref::Util::is_arrayref( $attr{$key} );
+            $attr{$key} = [ $attr{$key} ]
+              unless Ref::Util::is_arrayref( $attr{$key} );
             my $depends = $attr{$key};
 
             Carp::croak( "dependency #$_ is not an iterator object\n" )
-              for grep { ! ( Scalar::Util::blessed( $depends->[$_] ) && $depends->[$_]->isa( $class ) ) } 0..$#{$depends};
+              for grep {
+                !( Scalar::Util::blessed( $depends->[$_] )
+                    && $depends->[$_]->isa( $class ) )
+              } 0 .. $#{$depends};
         }
         elsif ( $key eq 'name' ) {
             Carp::croak( "$_ must be a string\n" )
-              if ! defined $attr{$key} or Ref::Util::is_ref($attr{$key});
+              if !defined $attr{$key}
+              or Ref::Util::is_ref( $attr{$key} );
+        }
+        elsif ( $key eq 'throw' ) {
         }
         else {
-            Carp::croak( "unknown attribute: $key\n" )
-          }
+            Carp::croak( "unknown attribute: $key\n" );
+        }
     }
 
+
     my @roles;
-    push @roles, 'Rewind' if exists $attr{rewind};
-    push @roles, 'Previous' if exists $attr{prev};
+    push @roles, $attr{throw} ? 'ExhaustedThrow' : 'ExhaustedUndef';
+    push @roles, 'Rewind'    if exists $attr{rewind};
+    push @roles, 'Previous'  if exists $attr{prev};
     push @roles, 'Serialize' if exists $attr{freeze};
 
-    my $composed_class = Role::Tiny->create_class_with_roles( $class, map { "$class::$_" } @roles );
+    my $composed_class = Role::Tiny->create_class_with_roles( $class,
+        map { "$class::$_" } @roles );
+
+    my $next = $composed_class->can( 'next' );
+
+    # this slows down the class, even if the overload is never used.
+    overload->import::into(
+        $composed_class,
+        '&{}' => sub {
+            my $self = shift;
+            sub { &$next( $self ) }
+        } );
 
     $attr{name} = $composed_class unless exists $attr{name};
 
     my $obj = bless \%attr, $composed_class;
+    $obj->{state} = INACTIVE;
+
+    if ( defined $attr{init} ) {
+        local $_ = $obj;
+        &{$attr{init}};
+        delete $attr{init};
+    }
+
+    return $obj;
 }
 
 
-=method next
+=method is_exhausted
 
-=method __next__
+  $bool = $iter->is_exhausted;
 
-  $value = $iter->next;
+Returns true if the iterator is exhausted
 
-Return the next value from the iterator.  Returns C<undef> if the
-iterator is exhausted.
 
 =cut
 
+sub set_exhausted { $_[0]->state( EXHAUSTED ) ; return; }
 
-sub next { goto $_[0]->{next} }
-*__next__ = \&next;
+sub is_exhausted { $_[0]->state eq EXHAUSTED }
+
+sub state {
+    my $self = shift;
+    $self->{state} = shift if @_;
+    return $self->{state};
+}
 
 =method __iter__
 

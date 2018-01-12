@@ -38,6 +38,7 @@ sub freeze {
         @freeze = map $_->freeze, @{$self->{depends} };
     }
 
+    local $_ = $self;
     push @freeze, $self->{freeze}->();
 
     return \@freeze;
