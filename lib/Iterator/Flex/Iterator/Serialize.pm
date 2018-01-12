@@ -39,7 +39,7 @@ sub freeze {
     }
 
     local $_ = $self;
-    push @freeze, $self->{freeze}->();
+    push @freeze, $self->{freeze}->(), $_->state;
 
     return \@freeze;
 }

@@ -7,16 +7,32 @@ use Iterator::Flex qw[ iseq ifreeze thaw ];
 sub _test_values {
 
     my $iter = shift;
-    my $start = shift || 0;
 
-    my @values = map { [ $iter->prev, $iter->next ] } $start .. 4;
-    my @expected
-      = ( [ undef, 0 ], [ 0, 1 ], [ 1, 2 ], [ 2, 3 ], [ 3, undef ] )
-      [ $start .. 4 ];
+    my %p = (
+        pull_end   => 6,
+        pull_begin => 1,
+        begin      => 0,
+        end        => 5,
+        expected   => [
+            [ undef, undef, 0, ],
+            [ undef, 0,     1 ],
+            [ 0,     1,     2 ],
+            [ 1,     2,     3 ],
+            [ 2,     3,     undef ],
+            [ 3,     undef, undef ],
+        ],
+        @_
+    );
 
-    is( $iter->next, undef, "iterator exhausted" );
 
-    is( \@values, \@expected, "values are correct" );
+    my @values
+      = map { [ $iter->prev, $iter->current, $iter->next ] }
+      $p{pull_begin} .. $p{pull_end};
+
+    my @expected = ( @{ $p{expected} } )[ $p{begin} .. $p{end} ];
+
+    is( \@values, \@expected, "values are correct" )
+      or do { use Data::Dump 'pp'; diag pp( \@values, \@expected ) };
 }
 
 
@@ -26,24 +42,28 @@ subtest "basic" => sub {
 
     subtest "object properties" => sub {
 
-        my @methods = ( 'rewind', 'prev' );
+        my @methods = ( 'rewind', 'prev', 'reset', 'current' );
         isa_ok( $iter, ['Iterator::Flex::Iterator'], "correct parent class" );
         can_ok( $iter, \@methods, join( ' ', "has", @methods ) );
     };
 
-    subtest "values" => sub { _test_values( $iter ) };
+    _test_values( $iter );
+    is( $iter->next, undef, "iterator exhausted" );
+    ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+
 };
 
-subtest "rewind" => sub {
+subtest "reset" => sub {
 
     my $iter = ifreeze {} iseq( 3 );
 
     1 while <$iter>;
 
-    try_ok { $iter->rewind } "rewind";
+    try_ok { $iter->reset } "reset";
 
-    subtest "rewound values" => sub { _test_values( $iter ) };
-
+    _test_values( $iter );
+    is( $iter->next, undef, "iterator exhausted" );
+    ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 };
 
 subtest "serialize" => sub {
@@ -60,7 +80,10 @@ subtest "serialize" => sub {
         subtest(
             "thaw state $_" => sub {
                 my $idx = shift;
-                _test_values( thaw( $freeze[$idx] ), $idx + 1 );
+                _test_values( thaw( $freeze[$idx] ),
+                              pull_begin => $idx + 2,
+                              begin => $idx + 1,
+                            );
             },
             $_
         );

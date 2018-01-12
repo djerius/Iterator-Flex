@@ -11,7 +11,7 @@ subtest "basic" => sub {
     subtest "object properties" => sub {
 
         isa_ok( $iter, ['Iterator::Flex::Iterator'], "correct parent class" );
-        can_ok( $iter, [ 'rewind', ], "has rewind" );
+        can_ok( $iter, [ 'reset', ], "has reset" );
         is( $iter->can( 'freeze'), undef, "can't freeze" );
     };
 
@@ -24,7 +24,7 @@ subtest "basic" => sub {
     };
 };
 
-subtest "rewind" => sub {
+subtest "reset" => sub {
 
     my $iter = igrep { $_ >= 10 } imap { $_ + 2 } iarray( [ 0, 10, 20 ] );
 
@@ -36,7 +36,7 @@ subtest "rewind" => sub {
         is( $iter->next, undef, "iterator exhausted" );
     };
 
-    try_ok { $iter->rewind } "rewind";
+    try_ok { $iter->reset } "reset";
 
     subtest "rewound values" => sub {
         my @values;

@@ -13,7 +13,7 @@ use Scalar::Util;
 use Role::Tiny ();
 use Import::Into;
 
-use Iterator::Flex::Constants;
+use Iterator::Flex::Constants qw[ :all ];
 use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next' );
@@ -91,7 +91,7 @@ sub new {
 
     for my $key ( keys %attr ) {
 
-        if ( $key =~ /^(init|next|prev|rewind|freeze)$/ ) {
+        if ( $key =~ /^(init|next|prev|rewind|reset|freeze|current)$/ ) {
             Carp::croak( "value for $_ attribute must be a code reference\n" )
               unless Ref::Util::is_coderef $attr{$key};
         }
@@ -123,7 +123,9 @@ sub new {
     my @roles;
     push @roles, $attr{throw} ? 'ExhaustedThrow' : 'ExhaustedUndef';
     push @roles, 'Rewind'    if exists $attr{rewind};
+    push @roles, 'Reset'     if exists $attr{reset};
     push @roles, 'Previous'  if exists $attr{prev};
+    push @roles, 'Current'   if exists $attr{current};
     push @roles, 'Serialize' if exists $attr{freeze};
 
     my $composed_class = Role::Tiny->create_class_with_roles( $class,
@@ -163,11 +165,17 @@ Returns true if the iterator is exhausted
 
 =cut
 
-sub set_exhausted { $_[0]->state( EXHAUSTED ) ; return; }
+sub set_exhausted { $_[0]->_set_state( EXHAUSTED )  }
 
 sub is_exhausted { $_[0]->state eq EXHAUSTED }
 
-sub state {
+sub is_inactive { $_[0]->state eq INACTIVE }
+
+sub is_active { $_[0]->state eq ACTIVE }
+
+sub state {  $_[0]->{state} };
+
+sub _set_state {
     my $self = shift;
     $self->{state} = shift if @_;
     return $self->{state};

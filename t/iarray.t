@@ -4,75 +4,172 @@ use Test2::V0;
 
 use Iterator::Flex qw[ iarray thaw ];
 
+sub _test_values {
+
+    my $iter = shift;
+
+    my %p = (
+        npull    => 5,
+        begin    => 0,
+        end      => 4,
+        expected => [
+            [ undef, undef, 0 ],
+            [ undef, 0,     10 ],
+            [ 0,     10,    20 ],
+            [ 10,    20,    undef ],
+            [ 20,    undef, undef ],
+        ],
+        @_
+    );
+
+
+    my @values
+      = map { [ $iter->prev, $iter->current, $iter->next ] } 1 .. $p{npull};
+
+    my @expected = ( @{ $p{expected} } )[ $p{begin} .. $p{end} ];
+
+    is( \@values, \@expected, "values are correct" );
+}
+
 subtest "basic" => sub {
 
     my $iter = iarray( [ 0, 10, 20 ] );
 
     subtest "object properties" => sub {
 
-        my @methods = ( 'rewind', 'freeze', 'prev' );
+        my @methods = ( 'rewind', 'freeze', 'prev', 'current' );
         isa_ok( $iter, ['Iterator::Flex::Iterator'], "correct parent class" );
         can_ok( $iter, \@methods, join( ' ', "has", @methods ) );
     };
 
-    subtest "prev, next" => sub {
-
-        my @values = map { [ $iter->prev, $iter->next ] } 1 .. 4;
-
+    subtest "values" => sub {
+        _test_values( $iter );
         is( $iter->next, undef, "iterator exhausted" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+    };
+};
 
-        is(
-            \@values,
-            [ [ undef, 0 ], [ 0, 10 ], [ 10, 20 ], [ 20, undef ] ],
-            "values are correct"
-        );
+subtest "reset" => sub {
 
 
+    subtest "fully drain iterator" => sub {
+        my $iter = iarray( [ 0, 10, 20 ] );
+
+        1 while <$iter>;
+
+        try_ok { $iter->reset } "reset";
+
+        _test_values( $iter );
+        is( $iter->next, undef, "iterator exhausted" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+    };
+
+    subtest "partially drain iterator" => sub {
+        my $iter = iarray( [ 0, 10, 20 ] );
+
+        <$iter>;
+
+        try_ok { $iter->reset } "reset";
+
+        _test_values( $iter );
+        is( $iter->next, undef, "iterator exhausted" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
 };
 
 subtest "rewind" => sub {
 
-    my $iter = iarray( [ 0, 10, 20 ] );
 
-    subtest "values" => sub {
-        my @values = map { <$iter> } 1 .. 3;
+    subtest "fully drain iterator" => sub {
+        my $iter = iarray( [ 0, 10, 20 ] );
+
+        1 while <$iter>;
+
+        is(
+            [ $iter->prev, $iter->current ],
+            [ 20,          undef ],
+            "prev/current before rewind"
+        );
+
+        try_ok { $iter->rewind } "rewind";
+
+        is(
+            [ $iter->prev, $iter->current ],
+            [ 20,          undef ],
+            "prev/current after rewind"
+        );
+
+        _test_values(
+            $iter,
+            expected => [
+                [ 20,    undef, 0 ],
+                [ undef, 0,     10 ],
+                [ 0,     10,    20 ],
+                [ 10,    20,    undef ],
+                [ 20,    undef, undef ],
+            ],
+        );
         is( $iter->next, undef, "iterator exhausted" );
-        is( \@values, [ 0, 10, 20 ], "values are correct" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
 
-    try_ok { $iter->rewind } "rewind";
+    subtest "partially drain iterator" => sub {
+        my $iter = iarray( [ 0, 10, 20 ] );
 
-    subtest "rewound values" => sub {
-        my @values = map { <$iter> } 1 .. 3;
+        <$iter> for 1 .. 2;
+
+        is(
+            [ $iter->prev, $iter->current ],
+            [ 0,           10 ],
+            "prev/current before rewind"
+        );
+
+        try_ok { $iter->rewind } "rewind";
+
+        is(
+            [ $iter->prev, $iter->current ],
+            [ 0,           10 ],
+            "prev/current after rewind"
+        );
+
+        _test_values(
+            $iter,
+            expected => [
+                [ 0,  10,    0 ],
+                [ 10, 0,     10 ],
+                [ 0,  10,    20 ],
+                [ 10, 20,    undef ],
+                [ 20, undef, undef ],
+            ],
+        );
+
         is( $iter->next, undef, "iterator exhausted" );
-        is( \@values, [ 0, 10, 20 ], "values are correct" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
-
 };
+
 
 subtest "freeze" => sub {
 
     my @values;
     my $freeze;
-    subtest "setup iter and pull some values" => sub {
-        my $iter = iarray( [ 0, 10, 20 ] );
-        push @values, <$iter>;
-        is( \@values, [0], "values are correct" );
-        try_ok { $freeze = $iter->freeze } "freeze iterator";
-    };
 
-    subtest "thaw" => sub {
+    {
+        my $iter = iarray( [ 0, 10, 20 ] );
+        _test_values( $iter, npull => 1, begin => 0, end => 0 );
+
+        try_ok { $freeze = $iter->freeze } "freeze iterator";
+    }
+
+    {
         my $iter;
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";
 
-        push @values, <$iter> for 1 .. 2;
-
-        is( \@values, [ 0, 10, 20 ], "values are correct" );
+        _test_values( $iter, npull => 4, begin => 1, end => 4 );
         is( $iter->next, undef, "iterator exhausted" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
 
 };
-
 
 done_testing;

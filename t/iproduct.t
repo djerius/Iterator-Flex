@@ -4,6 +4,30 @@ use Test2::V0;
 
 use Iterator::Flex qw[ iproduct thaw ];
 
+sub _test_values {
+
+    my $iter = shift;
+    my $npull = shift || 6;
+    my ( $begin, $end );
+
+    defined( $begin = shift ) or $begin = 0;
+    defined( $end   = shift ) or $end   = 5;
+
+    my @values = map { [ $iter->current, $iter->next ] } 1 .. $npull;
+
+    my @expected = (
+        [ undef, [ 0, 2 ] ],
+        [ [ 0, 2 ], [ 0, 3 ] ],
+        [ [ 0, 3 ], [ 1, 2 ] ],
+        [ [ 1, 2 ], [ 1, 3 ] ],
+        [ [ 1, 3 ], undef ],
+        [ undef, undef ],
+    )[ $begin .. $end ];
+
+    is( \@values, \@expected, "values are correct" )
+      or do { use Data::Dump 'pp'; diag pp( \@values ) };
+}
+
 subtest "basic" => sub {
 
     subtest "unlabeled iterators" => sub {
@@ -22,16 +46,9 @@ subtest "basic" => sub {
 
         subtest "values" => sub {
 
-            my @values = map { <$iter> }  1..4;
-
+            _test_values( $iter );
             is( $iter->next, undef, "iterator exhausted" );
-
-            is(
-                \@values,
-                [ [ 0, 2 ], [ 0, 3 ], [ 1, 2 ], [ 1, 3 ] ],
-                "values are correct"
-            );
-
+            ok( $iter->is_exhausted, "iterator exhausted (officially)" );
         };
 
     };
@@ -40,15 +57,23 @@ subtest "basic" => sub {
         my $iter = iproduct( a => [ 0, 1 ], b => [ 2, 3 ] );
 
         subtest "values" => sub {
-            my @values = map { <$iter> }  1..4;
+            my @values = map { [ $iter->current, $iter->next ] } 1 .. 6;
 
             is( $iter->next, undef, "iterator exhausted" );
+            ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
             is(
                 \@values,
-               [ { a=> 0, b => 2 }, { a => 0, b => 3 }, { a => 1, b => 2 }, { a => 1, b => 3 } ],
+                [
+                    [ undef, { a => 0, b => 2 } ],
+                    [ { a => 0, b => 2 }, { a => 0, b => 3 } ],
+                    [ { a => 0, b => 3 }, { a => 1, b => 2 } ],
+                    [ { a => 1, b => 2 }, { a => 1, b => 3 } ],
+                    [ { a => 1, b => 3 }, undef ],
+                    [ undef, undef ],
+                ],
                 "values are correct"
-            );
+            ) or do { use Data::Dump 'pp'; diag pp( \@values ) };
 
         };
 
@@ -61,60 +86,42 @@ subtest "rewind" => sub {
 
     my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
 
-    subtest "values" => sub {
-        my @values = map { <$iter> }  1..4;
+    1 while <$iter>;
 
-        is( $iter->next, undef, "iterator exhausted" );
-
-        is(
-           \@values,
-           [ [ 0, 2 ], [ 0, 3 ], [ 1, 2 ], [ 1, 3 ] ],
-           "values are correct"
-          );
-    };
+    is( $iter->next, undef, "iterator exhausted" );
+    ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
     try_ok { $iter->rewind } "rewind";
 
-    subtest "rewound values" => sub {
 
-        my @values = map { <$iter> }  1..4;
-
-        is( $iter->next, undef, "iterator exhausted" );
-        is(
-           \@values,
-           [ [ 0, 2 ], [ 0, 3 ], [ 1, 2 ], [ 1, 3 ] ],
-           "values are correct"
-          );
-    };
+    _test_values( $iter );
+    is( $iter->next, undef, "iterator exhausted" );
+    ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
 };
 
 subtest "freeze" => sub {
 
-    my @values;
     my $freeze;
 
     subtest "setup iter and pull some values" => sub {
         my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
 
-        @values = map { <$iter> } 1..2;
+        _test_values( $iter, 2, 0, 1 );
 
-        is( \@values, [ [0, 2], [0, 3] ], "values are correct" );
         try_ok { $freeze = $iter->freeze } "freeze iterator";
     };
+
+    use Data::Dump; dd $freeze;
 
     subtest "thaw" => sub {
         my $iter;
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";
 
-        push @values, map { <$iter> } 1..2;
+        _test_values( $iter, 4, 2, 5 );
 
-        is(
-           \@values,
-           [ [ 0, 2 ], [ 0, 3 ], [ 1, 2 ], [ 1, 3 ] ],
-           "values are correct"
-          );
         is( $iter->next, undef, "iterator exhausted" );
+        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
 
 };

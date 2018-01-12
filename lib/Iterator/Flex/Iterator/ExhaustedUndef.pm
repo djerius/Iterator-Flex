@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.02';
 
 use Role::Tiny;
-use Iterator::Flex::Constants;
+use Iterator::Flex::Constants qw[ :all ];
 
 =method next
 

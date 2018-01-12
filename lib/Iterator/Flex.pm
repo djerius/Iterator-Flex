@@ -21,32 +21,17 @@ use List::Util qw[ pairkeys pairvalues all first ];
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
 use Iterator::Flex::Iterator;
-use Iterator::Flex::Constants;
+use Iterator::Flex::Constants qw[ :all ];
 
 use constant ITERATOR_CLASS => __PACKAGE__ . '::Iterator';
 
 
-sub _can_freeze {
-
-    return _can_meth( $_[0], qw[ __freeze__ freeze ] );
-}
-
-sub _can_prev {
-
-    return _can_meth( $_[0], qw[ __prev__ prev previous ] );
-}
-
-sub _can_rewind {
-
-    return _can_meth( $_[0], qw[ __rewind__ rewind ] );
-}
-
 sub _can_meth {
 
-    my $obj = shift;
+    my ( $obj, $meth ) = @_;
 
     my $sub;
-    foreach ( @_ ) {
+    foreach ( "__${meth}__", $meth ) {
 
         last if defined( $sub = $obj->can( $_ ) );
     }
@@ -134,11 +119,15 @@ The returned iterator supports the following methods:
 
 =over
 
+=item current
+
 =item next
 
 =item prev
 
 =item rewind
+
+=item reset
 
 =item freeze
 
@@ -152,51 +141,139 @@ sub iarray {
 
 sub _iarray {
 
-    my ( $arr, $idx ) = @_;
+    my ( $arr, $prev, $current, $next ) = @_;
 
     croak 'Argument to iarray must be ARRAY reference'
       unless is_arrayref( $arr );
 
-    $idx = 0 unless defined $idx;
     my $len = @$arr;
 
+    $next = 0 unless defined $next;
+
     return ITERATOR_CLASS->new(
-        rewind => sub { $idx = 0 },
-        next => sub {
-            return $arr->[ $idx++ ] unless $idx == $len;
-            $_->set_exhausted;
-            return undef;
+        reset => sub {
+            $prev = $current = undef;
+            $next = 0;
         },
-        freeze => sub {
-            return [ __PACKAGE__, '_iarray', [ $arr, $idx ] ];
+
+        rewind => sub {
+            $next = 0;
         },
 
         prev => sub {
-            return undef if $idx == 0;
-            return $arr->[ $idx - 1 ];
+            return defined $prev && $prev < $len ? $arr->[$prev] : undef;
         },
+
+        current => sub {
+            return
+              defined $current && $current < $len ? $arr->[$current] : undef;
+        },
+
+        next => sub {
+            if ( $next == $len ) {
+                # if first time through, set current/prev
+                if ( !$_->is_exhausted ) {
+                    $prev    = $current;
+                    $current = $next;
+                    $_->set_exhausted;
+                }
+                return undef;
+            }
+            $prev    = $current;
+            $current = $next++;
+            return $arr->[$current];
+        },
+
+        freeze => sub {
+            return [ __PACKAGE__, '_iarray', [ $arr, $prev, $current, $next ] ];
+        },
+
     );
 }
 
 
-# =sub icache
+=sub icache
 
-#   $iterator = cache( $iterable, ?$cache_size );
+  $iterator = icache( $iterable );
 
-# Returns a caching iterator.  The iterator will cache C<$cache_size>
-# values (defaults to 1) from C<$iterable>.
+Returns a caching iterator.  The iterator will cache C<$cache_size>
+values (defaults to 1) from C<$iterable>.
 
-# The returned iterator supports the following methods:
+The returned iterator supports the following methods:
 
-# =over
+=over
 
-# =item rewind
+=item reset
 
-# =item next
+=item rewind
 
-# =item prev
+=item next
 
-# =back
+=item prev
+
+=back
+
+=cut
+
+sub icache {
+    _icache( iter( shift ), undef, undef );
+}
+
+sub _icache_thaw {
+
+    my ( $state, $src ) = @_;
+
+    _icache( @$src, @$state );
+}
+
+sub _icache {
+
+    my ( $src, $prev, $current ) = @_;
+
+    return ITERATOR_CLASS->new(
+
+        reset => sub {
+            $prev = $current = undef;
+        },
+
+        rewind => sub {
+        },
+
+        prev => sub {
+            return $prev;
+        },
+
+        current => sub {
+
+            # is this the first pull from the iterator, or is it
+            # exhausted?
+
+            # exhausted
+            return undef if $current == undef && defined $prev;
+
+            $current = $src->next;
+            return $current;
+        },
+
+        next => sub {
+            # did we preload current on the first pull?
+            if ( defined $current && defined $prev ) {
+                $prev    = $current;
+                $current = $src->next;
+            }
+            return $current;
+        },
+
+        freeze => sub {
+            return [ __PACKAGE__, '_icache_thaw', [ $prev, $current ] ];
+        },
+
+        depends => $src,
+    );
+
+
+}
+
 
 
 =sub igrep
@@ -212,7 +289,7 @@ The iterator supports the following methods:
 
 =item next
 
-=item rewind
+=item reset
 
 =back
 
@@ -226,7 +303,7 @@ sub igrep(&$) {
     my %params = (
         next => sub {
 
-            foreach (;;) {
+            foreach ( ; ; ) {
                 my $rv = $src->();
                 last if $src->is_exhausted;
                 local $_ = $rv;
@@ -235,7 +312,7 @@ sub igrep(&$) {
             $_->set_exhausted;
             return undef;
         },
-        rewind  => sub { },
+        reset   => sub { },
         depends => $src,
     );
 
@@ -256,7 +333,7 @@ The iterator supports the following methods:
 
 =item next
 
-=item rewind
+=item reset
 
 =back
 
@@ -278,7 +355,7 @@ sub imap(&$) {
             local $_ = $value;
             return $code->();
         },
-        rewind  => sub { },
+        reset   => sub { },
         depends => $src,
     );
 }
@@ -302,7 +379,11 @@ The iterator supports the following methods:
 
 =over
 
+=item current
+
 =item next
+
+=item reset
 
 =item rewind
 
@@ -345,13 +426,16 @@ sub _iproduct {
 
     # can only work if the iterators support a rwind method
     croak( "iproduct requires that all iteratables provide a rewind method\n" )
-      unless @iterator == grep { defined } map { _can_rewind( $_ ) } @iterator;
+      unless @iterator == grep { defined }
+      map { _can_meth( $_, 'rewind' ) } @iterator;
 
     my @value = @$value;
-    my @set = ( 1 ) x @value;
+    my @set   = ( 1 ) x @value;
 
     my %params = (
         next => sub {
+            return undef if $_->is_exhausted;
+
             # first time through
             if ( !@value ) {
 
@@ -365,10 +449,6 @@ sub _iproduct {
                 }
 
                 @set = ( 1 ) x @value;
-            }
-
-            elsif ( !$set[0] ) {
-                return;
             }
 
             else {
@@ -406,12 +486,28 @@ sub _iproduct {
             }
         },
 
+        current => sub {
+            return undef unless $_->is_active;
+            if ( @keys ) {
+                my %value;
+                @value{@keys} = @value;
+                return \%value;
+            }
+            else {
+                return [@value];
+            }
+        },
+        reset  => sub { @value = () },
         rewind => sub { @value = () },
         depends => \@iterator,
     );
 
     # can only freeze if the iterators support a prev method
-    if ( @iterator == grep { defined } map { _can_prev( $_ ) } @iterator ) {
+    if (
+        @iterator == grep { defined }
+        map { _can_meth( $_, 'current' ) } @iterator
+      )
+    {
 
         $params{freeze} = sub {
             return [ __PACKAGE__, '_iproduct_thaw', [ \@keys ] ];
@@ -424,7 +520,7 @@ sub _iproduct {
 sub _iproduct_thaw {
 
     my ( $keys, $iterators ) = @_;
-    my @value = map { $_->prev } @$iterators;
+    my @value = map { $_->current } @$iterators;
 
     if ( @$keys ) {
         my %iterators;
@@ -450,6 +546,8 @@ The iterator supports the following methods:
 
 =over
 
+=item current
+
 =item next
 
 =item prev
@@ -466,73 +564,55 @@ The iterator supports the following methods:
 
 sub iseq {
     splice( @_, 3 );
-    push @_, undef, undef;
+    push @_, ( undef ) x 3;
     goto \&_iseq;
 }
 
 sub _iseq {
 
-    # these get pushed on as $prev, $next, so pop in opposite
+    # these get pushed on as $prev, $current, $next, so pop in opposite
     # order
-    my ( $next, $prev ) = ( pop, pop );
+    my ( $next, $current, $prev ) = ( pop, pop, pop );
 
     croak( "iseq: arguments must be numbers\n" )
       if first { !looks_like_number( $_ ) } @_;
 
+    my ( $begin, $end, $step );
     my %params;
 
-    if ( @_ == 1 ) {
+    if ( @_ < 3 ) {
 
-        my ( $end ) = @_;
+        $end   = pop;
+        $begin = shift;
 
-        $next = 0 unless defined $next;
-
-        %params = (
-            next => sub {
-                if ( $next > $end ) {
-                    $_->set_exhausted;
-                    return undef;
-                }
-                $prev = $next++;
-                return $prev;
-            },
-            rewind => sub {
-                $prev = undef;
-                $next = 0;
-            },
-            freeze => sub {
-                [ __PACKAGE__, '_iseq', [ $end, $prev, $next ] ];
-            } );
-    }
-
-    elsif ( @_ == 2 ) {
-
-        my ( $begin, $end ) = @_;
-
-        $next = $begin unless defined $next;
+        $begin = 0      unless defined $begin;
+        $next  = $begin unless defined $next;
 
         %params = (
             next => sub {
                 if ( $next > $end ) {
-                    $_->set_exhausted;
+                    if ( !$_->is_exhausted ) {
+                        $prev    = $current;
+                        $current = undef;
+                        $_->set_exhausted;
+                    }
                     return undef;
                 }
-                $prev = $next++;
-                return $prev;
-            },
-            rewind => sub {
-                $prev = undef;
-                $next = $begin;
+                $prev    = $current;
+                $current = $next++;
+                return $current;
             },
             freeze => sub {
-                [ __PACKAGE__, '_iseq', [ $begin, $end, $prev, $next ] ];
+                [
+                    __PACKAGE__, '_iseq',
+                    [ $begin, $end, $prev, $current, $next ] ];
             },
         );
     }
 
     else {
 
-        my ( $begin, $end, $step ) = @_;
+        ( $begin, $end, $step ) = @_;
 
         croak(
             "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
@@ -542,49 +622,67 @@ sub _iseq {
         $next = $begin unless defined $next;
 
         %params = (
-            rewind => sub {
-                $prev = undef;
-                $next = $begin;
-            },
-
             freeze => sub {
-                [ __PACKAGE__, '_iseq', [ $begin, $end, $step, $prev, $next ] ];
+                [
+                    __PACKAGE__, '_iseq',
+                    [ $begin, $end, $step, $prev, $current, $next ] ];
             },
 
             next => $begin < $end
             ? sub {
                 if ( $next > $end ) {
-                    $_->set_exhausted;
+                    if ( !$_->is_exhausted ) {
+                        $prev    = $current;
+                        $current = undef;
+                        $_->set_exhausted;
+                    }
                     return undef;
                 }
-                $prev = $next;
+                $prev    = $current;
+                $current = $next;
                 $next += $step;
-                return $prev;
+                return $current;
             }
             : sub {
                 if ( $next < $end ) {
-                    $_->set_exhausted;
+                    if ( !$_->is_exhausted ) {
+                        $prev    = $current;
+                        $current = undef;
+                        $_->set_exhausted;
+                    }
                     return undef;
                 }
-                $prev = $next;
+                $prev    = $current;
+                $current = $next;
                 $next += $step;
-                return $prev;
+                return $current;
             },
         );
     }
 
-    $params{prev} = sub { $prev };
+    ITERATOR_CLASS->new(
+        %params,
+        current => sub { $current },
+        prev    => sub { $prev },
+        rewind  => sub {
+            $next = $begin;
+        },
+        reset => sub {
+            $prev = $current = undef;
+            $next = $begin;
+        },
+    );
 
-    ITERATOR_CLASS->new( %params );
 }
 
 =sub ifreeze
 
   $iter = ifreeze { CODE } $iterator;
 
-Freeze an iterator after every call to C<next>.  C<CODE> will be
-passed a frozen state (generated by calling C<$iterator->freeze> via
-C<$_>, with which it can do as it pleases.
+Construct a pass-through iterator which freezes the input iterator
+after every call to C<next>.  C<CODE> will be passed the frozen state
+(generated by calling C<$iterator->freeze> via C<$_>, with which it
+can do as it pleases.
 
 <CODE> I<is> executed when C<$iterator> returns I<undef> (that is,
 when C<$iterator> is exhausted).
@@ -611,23 +709,28 @@ If C<$iterator> provides a C<prev> method.
 sub ifreeze (&$) {
 
     my $serialize = shift;
-    my $iter      = iter( shift );
+    my $src      = iter( shift );
 
     croak( "ifreeze requires that the iterator provide a freeze method\n" )
-      unless _can_freeze( $iter );
+      unless _can_meth( $src, 'freeze' );
 
     my %params = (
         rewind  => sub { },
-        depends => $iter,
+        reset   => sub { },
+        depends => $src,
         next    => sub {
-            my $value = $iter->next;
-            local $_ = $iter->freeze;
+            my $value = $src->next;
+            local $_ = $src->freeze;
             &$serialize();
             $value;
         } );
 
-    if ( defined( my $sub = _can_prev( $iter ) ) ) {
-        $params{prev} = sub { $iter->$sub() };
+    for my $meth ( 'prev', 'current' ) {
+
+        my $sub = _can_meth( $src, $meth );
+
+        $params{$meth} = sub { $src->$sub() }
+          if defined $sub;
     }
 
     ITERATOR_CLASS->new( %params );
@@ -654,7 +757,8 @@ sub thaw {
 
     my @steps = @$step;
 
-    # parent data is last
+    # parent data and iterator state is last
+    my $state  = pop @steps;
     my $parent = pop @steps;
 
     my @depends = map { thaw( $_ ) } @steps;
@@ -675,7 +779,9 @@ sub thaw {
       : ( \@depends )
       if @depends;
 
-    return &$func( @args );
+    my $iter = &$func( @args );
+    $iter->_set_state( $state );
+    return $iter;
 }
 
 1;
@@ -686,6 +792,127 @@ __END__
 
 
 =head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+C<Iterator::Flex> implements iterators with the following characteristics:
+
+=over
+
+=item I<next>
+
+All iterators provide a C<next> method which advances the iterator and
+returns the new value.
+
+=item I<exhaustion>
+
+Iterator exhaustion is signified by C<next> return C<undef>.
+
+=item I<reset>
+
+Iterators may optionally be rewound to their initial state
+
+=item I<previous values>
+
+Iterators may optionally return their previous value.
+
+=item I<current>
+
+Iterators return their current value.
+
+=item I<freeze>
+
+Iterators may optionally provide a C<freeze> method for serialization.
+Iterators may be chained, and an iterator's dependencies are frozen automatically.
+
+=back
+
+
+=head1 SUBROUTINES
+
+=head1 METHODS
+
+Not all iterators support all methods.
+
+=over
+
+=item prev
+
+  $value = $iter->prev;
+
+Returns the previous value of the iterator.  If the iterator was never
+advanced, this returns C<undef>.  If the iterator is exhausted, this
+returns the last retrieved value. Use the L<state> method to determine
+which state the iterator is in.
+
+=item current
+
+  $value = $iter->current;
+
+Returns the current value of the iterator.  If the iterator was never
+advanced, this returns undef.  If the iterator is exhausted, this
+returns C<undef>.  Use the L<state> method to determine which state
+the iterator is in.
+
+=item next
+
+  $value = $iter->next;
+
+Return the next value from the iterator.
+
+=item rewind
+
+  $iter->rewind;
+
+Resets the iterator so that the next value returned is the very first
+value.  It should not affect the results of the L<prev> and L<current>
+methods.  The iterator's state is set to I<active>.
+
+=item reset
+
+  $iter->reset;
+
+Resets the iterator to its initial state.  The iterator's state is not
+changed.
+
+
+=item state
+
+  $state = $iter->state;
+
+Returns the state of the iterator. It is one of:
+
+=over
+
+=item Iterator::Constant::INACTIVE
+
+The iterator has never been advanced.  L<prev> and L<current> will
+return C<undef>. L<next> will retrieve the next (in this case,
+first) value and switch the iterator's state to I<active>
+
+=item Iterator::Constant::ACTIVE
+
+The iterator has been advanced at least once.  L<current> will return
+the value returned by the last call to L<next>. L<next> will advance
+the iterator.  An I<active> state does not indicate that there are
+further values available from the iterator, only that the iterator
+has been advanced.
+
+=item Iterator::Constant::EXHAUSTED
+
+There are no more values available.  L<current> and L<next> will
+return C<undef>.  L<prev> will return the last valid value returned by
+L<next>.
+
+The state changes from I<active> to I<exhausted> only after L<next>
+has been called I<after> the last valid value has been returned by a
+previous call to L<next>. In other words, if C<$iter->next> returns
+the last valid value, the state is still I<active>.  The next call to
+C<$iter->next> will switch the iterator state to I<exhausted>.
+
+=back
+
+=back
 
 
 =head1 SEE ALSO
