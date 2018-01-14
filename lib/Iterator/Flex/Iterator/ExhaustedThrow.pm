@@ -24,9 +24,10 @@ C<next> callback must set the iterator state to C<EXHAUSTED>.
 
 sub next {
     local $_ = $_[0];
-    $_->{state} = ACTIVE;
-    my $val = $_->{next}->();
 
+    $_->{state} = ACTIVE if $_->{state} == INACTIVE;
+
+    my $val = $_->{next}->();
     Iterator::Flex::Failure::Exhausted->throw
         if $_->{state} eq EXHAUSTED;
 

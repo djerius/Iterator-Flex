@@ -24,7 +24,8 @@ It changes the iterator state to C<EXHAUSTED> if it is exhausted.
 
 sub next {
     local $_ = $_[0];
-    $_->{state} = ACTIVE;
+
+    $_->{state} = ACTIVE if $_->{state} == INACTIVE;
     my $val = $_->{next}->();
     $_->{state} = EXHAUSTED unless defined $val;
     $val;
