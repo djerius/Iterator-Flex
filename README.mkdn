@@ -67,8 +67,7 @@ The returned iterator supports the following methods:
 
     $iterator = icache( $iterable );
 
-Returns a caching iterator.  The iterator will cache `$cache_size`
-values (defaults to 1) from `$iterable`.
+The iterator caches the current and previous values of the passed iterator,
 
 The returned iterator supports the following methods:
 
@@ -76,6 +75,8 @@ The returned iterator supports the following methods:
 - rewind
 - next
 - prev
+- current
+- freeze
 
 ## igrep
 

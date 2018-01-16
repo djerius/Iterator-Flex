@@ -10,7 +10,7 @@ our $VERSION = '0.02';
 use Exporter 'import';
 
 our @EXPORT_OK
-  = qw[ iterator iter iarray igrep imap iproduct iseq ifreeze thaw ];
+  = qw[ iterator iter iarray icache igrep imap iproduct iseq ifreeze thaw ];
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Carp;
@@ -197,8 +197,7 @@ sub _iarray {
 
   $iterator = icache( $iterable );
 
-Returns a caching iterator.  The iterator will cache C<$cache_size>
-values (defaults to 1) from C<$iterable>.
+The iterator caches the current and previous values of the passed iterator,
 
 The returned iterator supports the following methods:
 
@@ -212,6 +211,10 @@ The returned iterator supports the following methods:
 
 =item prev
 
+=item current
+
+=item freeze
+
 =back
 
 =cut
@@ -221,10 +224,8 @@ sub icache {
 }
 
 sub _icache_thaw {
-
-    my ( $state, $src ) = @_;
-
-    _icache( @$src, @$state );
+    my ( $src ) = @{ pop @_ };
+    _icache( $src, @_ );
 }
 
 sub _icache {
@@ -245,23 +246,20 @@ sub _icache {
         },
 
         current => sub {
-
-            # is this the first pull from the iterator, or is it
-            # exhausted?
-
-            # exhausted
-            return undef if $current == undef && defined $prev;
-
-            $current = $src->next;
             return $current;
         },
 
         next => sub {
-            # did we preload current on the first pull?
-            if ( defined $current && defined $prev ) {
-                $prev    = $current;
-                $current = $src->next;
-            }
+
+            return undef
+              if $_->is_exhausted;
+
+            $prev = $current;
+            $current = $src->next;
+
+            $_->set_exhausted
+              if $src->is_exhausted;
+
             return $current;
         },
 
