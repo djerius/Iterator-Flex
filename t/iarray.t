@@ -171,6 +171,18 @@ subtest "freeze" => sub {
         ok( $iter->is_exhausted, "iterator exhausted (officially)" );
     };
 
+    {
+        my $iter = iarray( [ 0, 10, 20 ] );
+
+        1 while <$iter>;
+
+        try_ok { $freeze = $iter->freeze } "freeze iterator";
+        try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+
+        ok( $iter->is_exhausted, "thawed, frozen, exhausted iterator is still exhausted" );
+
+    }
+
 };
 
 done_testing;
