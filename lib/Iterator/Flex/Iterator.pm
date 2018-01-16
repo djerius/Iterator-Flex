@@ -13,7 +13,7 @@ use Scalar::Util;
 use Role::Tiny ();
 use Import::Into;
 
-use Iterator::Flex::Constants qw[ :all ];
+use Iterator::Flex::Constants;
 use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next' );
@@ -144,7 +144,7 @@ sub new {
     $attr{name} = $composed_class unless exists $attr{name};
 
     my $obj = bless \%attr, $composed_class;
-    $obj->{state} = INACTIVE;
+    $obj->{state} = Iterator::Flex::Constants::INACTIVE;
 
     if ( defined $attr{init} ) {
         local $_ = $obj;
@@ -156,22 +156,65 @@ sub new {
 }
 
 
+=method set_exhausted
+
+  $iter->set_exhausted;
+
+Set the iterator's state to C<Iterator::Flex::Constants::EXHAUSTED>.
+
+=cut
+
+sub set_exhausted { $_[0]->_set_state( Iterator::Flex::Constants::EXHAUSTED )  }
+
+
 =method is_exhausted
 
   $bool = $iter->is_exhausted;
 
 Returns true if the iterator is exhausted
 
+=cut
+
+sub is_exhausted { $_[0]->state eq Iterator::Flex::Constants::EXHAUSTED }
+
+=method is_inactive
+
+  $bool = $iter->is_inactive;
+
+Returns true if the iterator is inactive
 
 =cut
 
-sub set_exhausted { $_[0]->_set_state( EXHAUSTED )  }
+sub is_inactive { $_[0]->state eq Iterator::Flex::Constants::INACTIVE }
 
-sub is_exhausted { $_[0]->state eq EXHAUSTED }
+=method is_active
 
-sub is_inactive { $_[0]->state eq INACTIVE }
+  $bool = $iter->is_active;
 
-sub is_active { $_[0]->state eq ACTIVE }
+Returns true if the iterator is active.
+
+=cut
+
+sub is_active { $_[0]->state eq Iterator::Flex::Constants::ACTIVE }
+
+
+=method state
+
+  $bool = $iter->state;
+
+Returns the state of the iterator.  It is one of
+
+=over
+
+=item Iterator::Flex::Constants::INACTIVE
+
+=item Iterator::Flex::Constants::ACTIVE
+
+=item Iterator::Flex::Constants::EXHAUSTED
+
+=back
+
+=cut
 
 sub state {  $_[0]->{state} };
 
