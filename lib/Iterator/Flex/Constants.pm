@@ -1,5 +1,12 @@
 package Iterator::Flex::Constants;
 
+use strict;
+use warnings;
+
+# ABSTRACT: Constants for Iterator::Flex
+
+our $VERSION = '0.02';
+
 use Exporter 'import';
 use constant { INACTIVE => 0, ACTIVE => 1, EXHAUSTED => 2 };
 
