@@ -11,6 +11,7 @@ use Exporter 'import';
 
 our @EXPORT_OK
   = qw[ iterator iter iarray igrep imap iproduct iseq ifreeze thaw ];
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Carp;
 use Scalar::Util qw[ blessed looks_like_number ];
