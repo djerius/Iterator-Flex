@@ -19,17 +19,20 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "Carp" => 0,
     "Exporter" => 0,
+    "Import::Into" => 0,
     "List::Util" => 0,
     "Module::Runtime" => 0,
     "Ref::Util" => 0,
     "Role::Tiny" => 0,
     "Scalar::Util" => 0,
     "constant" => 0,
+    "custom::failures" => 0,
     "overload" => 0,
     "strict" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
+    "Data::Dump" => 0,
     "ExtUtils::MakeMaker" => 0,
     "File::Spec" => 0,
     "IO::Handle" => 0,
@@ -39,18 +42,20 @@ my %WriteMakefileArgs = (
   },
   "VERSION" => "0.02",
   "test" => {
-    "TESTS" => "t/*.t"
+    "TESTS" => "t/*.t t/regressions/*.t"
   }
 );
 
 
 my %FallbackPrereqs = (
   "Carp" => 0,
+  "Data::Dump" => 0,
   "Exporter" => 0,
   "ExtUtils::MakeMaker" => 0,
   "File::Spec" => 0,
   "IO::Handle" => 0,
   "IPC::Open3" => 0,
+  "Import::Into" => 0,
   "List::Util" => 0,
   "Module::Runtime" => 0,
   "Ref::Util" => 0,
@@ -59,6 +64,7 @@ my %FallbackPrereqs = (
   "Test2::V0" => 0,
   "Test::More" => 0,
   "constant" => 0,
+  "custom::failures" => 0,
   "overload" => 0,
   "strict" => 0,
   "warnings" => 0
