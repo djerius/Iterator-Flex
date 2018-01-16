@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.02';
 
 use Role::Tiny;
-use Iterator::Flex::Constants qw[ :all ];
+use Iterator::Flex::Constants;
 
 =method next
 
@@ -25,11 +25,11 @@ C<next> callback must set the iterator state to C<EXHAUSTED>.
 sub next {
     local $_ = $_[0];
 
-    $_->{state} = ACTIVE if $_->{state} == INACTIVE;
+    $_->{state} = Iterator::Flex::Constants::ACTIVE if $_->{state} == Iterator::Flex::Constants::INACTIVE;
 
     my $val = $_->{next}->();
     Iterator::Flex::Failure::Exhausted->throw
-        if $_->{state} eq EXHAUSTED;
+        if $_->{state} eq Iterator::Flex::Constants::EXHAUSTED;
 
     $val;
 }
