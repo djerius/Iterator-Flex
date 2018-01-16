@@ -161,12 +161,12 @@ sub _iarray {
         },
 
         prev => sub {
-            return defined $prev && $prev < $len ? $arr->[$prev] : undef;
+            return defined $prev ? $arr->[$prev] : undef;
         },
 
         current => sub {
             return
-              defined $current && $current < $len ? $arr->[$current] : undef;
+              defined $current ? $arr->[$current] : undef;
         },
 
         next => sub {
@@ -174,7 +174,7 @@ sub _iarray {
                 # if first time through, set current/prev
                 if ( !$_->is_exhausted ) {
                     $prev    = $current;
-                    $current = $next;
+                    $current = undef;
                     $_->set_exhausted;
                 }
                 return undef;
