@@ -3,6 +3,7 @@
 use Test2::V0;
 
 use Iterator::Flex qw[ iproduct thaw ];
+use Data::Dump 'pp';
 
 sub _test_values {
 
@@ -25,7 +26,7 @@ sub _test_values {
     )[ $begin .. $end ];
 
     is( \@values, \@expected, "values are correct" )
-      or do { use Data::Dump 'pp'; diag pp( \@values ) };
+      or diag pp( \@values );
 }
 
 subtest "basic" => sub {

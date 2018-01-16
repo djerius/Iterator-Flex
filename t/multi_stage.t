@@ -1,6 +1,7 @@
 #! perl
 
 use Test2::V0;
+use Data::Dump 'pp';
 
 use Iterator::Flex qw[ igrep imap iarray ];
 
@@ -19,8 +20,9 @@ subtest "basic" => sub {
         my @values;
         push @values, <$iter>;
         push @values, <$iter>;
-        is( \@values, [ 12, 22 ], "values are correct" );
         is( $iter->next, undef, "iterator exhausted" );
+        is( \@values, [ 12, 22 ], "values are correct" )
+          or diag pp( \@values );
     };
 };
 
@@ -32,8 +34,9 @@ subtest "reset" => sub {
         my @values;
         push @values, <$iter>;
         push @values, <$iter>;
-        is( \@values, [ 12, 22 ], "values are correct" );
         is( $iter->next, undef, "iterator exhausted" );
+        is( \@values, [ 12, 22 ], "values are correct" )
+          or diag pp( \@values );
     };
 
     try_ok { $iter->reset } "reset";
@@ -42,8 +45,9 @@ subtest "reset" => sub {
         my @values;
         push @values, <$iter>;
         push @values, <$iter>;
-        is( \@values, [ 12, 22 ], "values are correct" );
         is( $iter->next, undef, "iterator exhausted" );
+        is( \@values, [ 12, 22 ], "values are correct" )
+                  or diag pp( \@values );
     };
 
 };

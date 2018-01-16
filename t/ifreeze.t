@@ -3,6 +3,7 @@
 use Test2::V0;
 
 use Iterator::Flex qw[ iseq ifreeze thaw ];
+use Data::Dump 'pp';
 
 sub _test_values {
 
@@ -32,7 +33,7 @@ sub _test_values {
     my @expected = ( @{ $p{expected} } )[ $p{begin} .. $p{end} ];
 
     is( \@values, \@expected, "values are correct" )
-      or do { use Data::Dump 'pp'; diag pp( \@values, \@expected ) };
+      or diag pp( \@values, \@expected );
 }
 
 

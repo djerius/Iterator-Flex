@@ -79,7 +79,8 @@ for my $test ( @tests ) {
                 is( $iter->next, undef, "iterator exhausted" );
                 ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
-                is( \@values, $expected, "values are correct" );
+                is( \@values, $expected, "values are correct" )
+                  or diag pp( \@values );
             };
 
             subtest "reset" => sub {
@@ -92,7 +93,8 @@ for my $test ( @tests ) {
                 is( $iter->next, undef, "iterator exhausted" );
                 ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
-                is( \@values, $expected, "values are correct" );
+                is( \@values, $expected, "values are correct" )
+                  or diag pp( \@values );
             };
 
             subtest "rewind" => sub {
@@ -126,7 +128,8 @@ for my $test ( @tests ) {
                 is( $iter->next, undef, "iterator exhausted" );
                 ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
-                is( \@values, \@expected, "values are correct" );
+                is( \@values, \@expected, "values are correct" )
+                  or diag pp( \@values );
             };
 
         };
@@ -146,7 +149,8 @@ for my $test ( @tests ) {
                     \@values,
                     [ @{$expected}[ 0 .. $split - 1 ] ],
                     "values are correct"
-                );
+                )
+                  or diag pp( \@values );
 
                 try_ok { $freeze = $iter->freeze } "freeze iterator";
             };
@@ -162,7 +166,8 @@ for my $test ( @tests ) {
                 is( $iter->next, undef, "iterator exhausted" );
                 ok( $iter->is_exhausted, "iterator exhausted (officially)" );
 
-                is( \@values, $expected, "values are correct" );
+                is( \@values, $expected, "values are correct" )
+                  or diag pp( \@values );
             };
 
         };
