@@ -2,6 +2,27 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.02      2018-01-16 13:27:23-05:00 America/New_York
+
+  [ ENHANCEMENTS ]
+
+    * new iterator functions: ifreeze, icache
+    * new ':all' export tag
+    * add support for current() method
+    * new spec on what prev/current/next return as function of iterator state
+
+
+  [ BUG FIXES ]
+
+
+    * iproduct needs dependent iterators to have memory of last and
+      current values when freezing.  rewind() is renamed to reset(),
+      and new rewind retains current/prev values.
+
+    * iterator states were always set to <active> when next was called.
+      now the state is updated to <active> only if it was <inactive>.
+
+
 0.01      2018-01-05 16:36:29-05:00 America/New_York
 
 * First release upon an unsuspecting world.
