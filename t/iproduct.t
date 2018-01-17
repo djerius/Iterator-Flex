@@ -74,7 +74,7 @@ subtest "basic" => sub {
                     [ undef, undef ],
                 ],
                 "values are correct"
-            ) or do { use Data::Dump 'pp'; diag pp( \@values ) };
+            ) or diag pp( \@values );
 
         };
 
