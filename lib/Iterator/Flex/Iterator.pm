@@ -5,7 +5,7 @@ package Iterator::Flex::Iterator;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Carp ();
 use Ref::Util;
@@ -18,9 +18,9 @@ use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next' );
 
-=method new
+=method construct
 
-  $iterator = Iterator::Flex::Iterator->new( %params );
+  $iterator = Iterator::Flex::Iterator->construct( %params );
 
 Construct an iterator object. The recommended manner of creating an
 iterator is to use the convenience functions provided by
@@ -84,7 +84,7 @@ Dependencies are passed to the thaw routine only if they are present.
 
 =cut
 
-sub new {
+sub construct {
 
     my $class = shift;
     my %attr = ( throw => 0, @_ );

@@ -5,7 +5,7 @@ package Iterator::Flex::Iterator::Role::Rewind;
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 use Carp       ();
 use List::Util ();

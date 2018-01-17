@@ -5,7 +5,7 @@ use warnings;
 
 # ABSTRACT: Constants for Iterator::Flex
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Exporter 'import';
 use constant { INACTIVE => 0, ACTIVE => 1, EXHAUSTED => 2 };

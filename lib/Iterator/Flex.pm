@@ -5,7 +5,7 @@ package Iterator::Flex;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Exporter 'import';
 
@@ -45,7 +45,7 @@ sub _can_meth {
 
 =cut
 sub iterator(&) {
-    ITERATOR_CLASS->new( next => $_[0] );
+    ITERATOR_CLASS->construct( next => $_[0] );
 }
 
 
@@ -78,12 +78,12 @@ sub iter {
             = overload::Method( $self, '<>' ) || $self->can( 'next' ) )
         {
 
-            return ITERATOR_CLASS->new( next => sub { $method->( $self ) } );
+            return ITERATOR_CLASS->construct( next => sub { $method->( $self ) } );
         }
 
         elsif ( $method = overload::Method( $self, '&{}' ) ) {
 
-            return ITERATOR_CLASS->new( next => $method->( $self ) );
+            return ITERATOR_CLASS->construct( next => $method->( $self ) );
         }
 
         elsif ( $method = overload::Method( $self, '@{}' ) ) {
@@ -99,11 +99,11 @@ sub iter {
 
     elsif ( is_coderef( $self ) ) {
 
-        return ITERATOR_CLASS->new( next => $self );
+        return ITERATOR_CLASS->construct( next => $self );
     }
 
     elsif ( is_globref( $self ) ) {
-        return ITERATOR_CLASS->new( next => sub { scalar <$self> } );
+        return ITERATOR_CLASS->construct( next => sub { scalar <$self> } );
     }
 
     croak sprintf "'%s' object is not iterable", ( ref( $self ) || 'SCALAR' );
@@ -151,7 +151,7 @@ sub _iarray {
 
     $next = 0 unless defined $next;
 
-    return ITERATOR_CLASS->new(
+    return ITERATOR_CLASS->construct(
         reset => sub {
             $prev = $current = undef;
             $next = 0;
@@ -232,7 +232,7 @@ sub _icache {
 
     my ( $src, $prev, $current ) = @_;
 
-    return ITERATOR_CLASS->new(
+    return ITERATOR_CLASS->construct(
 
         reset => sub {
             $prev = $current = undef;
@@ -315,7 +315,7 @@ sub igrep(&$) {
         depends => $src,
     );
 
-    ITERATOR_CLASS->new( %params );
+    ITERATOR_CLASS->construct( %params );
 }
 
 
@@ -344,7 +344,7 @@ sub imap(&$) {
 
     $src = iter( $src );
 
-    ITERATOR_CLASS->new(
+    ITERATOR_CLASS->construct(
         next => sub {
             my $value = $src->next;
             if ( $src->is_exhausted ) {
@@ -513,7 +513,7 @@ sub _iproduct {
           }
     }
 
-    ITERATOR_CLASS->new( %params );
+    ITERATOR_CLASS->construct( %params );
 }
 
 sub _iproduct_thaw {
@@ -661,7 +661,7 @@ sub _iseq {
         );
     }
 
-    ITERATOR_CLASS->new(
+    ITERATOR_CLASS->construct(
         %params,
         current => sub { $current },
         prev    => sub { $prev },
@@ -734,7 +734,7 @@ sub ifreeze (&$) {
           if defined $sub;
     }
 
-    ITERATOR_CLASS->new( %params );
+    ITERATOR_CLASS->construct( %params );
 }
 
 
