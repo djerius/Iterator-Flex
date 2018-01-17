@@ -113,8 +113,6 @@ subtest "freeze" => sub {
         try_ok { $freeze = $iter->freeze } "freeze iterator";
     };
 
-    use Data::Dump; dd $freeze;
-
     subtest "thaw" => sub {
         my $iter;
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";
