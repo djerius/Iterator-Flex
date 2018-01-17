@@ -1,11 +1,11 @@
-package Iterator::Flex::Iterator::Rewind;
+package Iterator::Flex::Iterator::Role::Rewind;
 
 # ABSTRACT: Role to add rewind capability to an Iterator::Flex::Iterator
 
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.02';
 
 use Carp       ();
 use List::Util ();

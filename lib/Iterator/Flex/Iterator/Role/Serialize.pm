@@ -1,4 +1,4 @@
-package Iterator::Flex::Iterator::Serialize;
+package Iterator::Flex::Iterator::Role::Serialize;
 
 # ABSTRACT: Role to add serialization capability to an Iterator::Flex::Iterator
 

@@ -1,11 +1,11 @@
-package Iterator::Flex::Iterator::ExhaustedThrow;
+package Iterator::Flex::Iterator::Role::ExhaustedThrow;
 
 # ABSTRACT: Role to add throw on exhaustion to an Iterator::Flex::Iterator
 
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.02';
 
 use Role::Tiny;
 use Iterator::Flex::Constants;

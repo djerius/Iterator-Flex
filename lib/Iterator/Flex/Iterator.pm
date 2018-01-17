@@ -129,7 +129,7 @@ sub new {
     push @roles, 'Serialize' if exists $attr{freeze};
 
     my $composed_class = Role::Tiny->create_class_with_roles( $class,
-        map { "$class::$_" } @roles );
+        map { join( '::', $class, 'Role', $_ ) } @roles );
 
     my $next = $composed_class->can( 'next' );
 

@@ -1,11 +1,11 @@
-package Iterator::Flex::Iterator::Reset;
+package Iterator::Flex::Iterator::Role::Reset;
 
 # ABSTRACT: Role to add reset capability to an Iterator::Flex::Iterator
 
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.02';
 
 use Carp       ();
 use List::Util ();

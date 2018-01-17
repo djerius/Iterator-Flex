@@ -1,4 +1,4 @@
-package Iterator::Flex::Iterator::Current;
+package Iterator::Flex::Iterator::Role::Current;
 
 # ABSTRACT: Role to add current method to an Iterator::Flex::Iterator
 
