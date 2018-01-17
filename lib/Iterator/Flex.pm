@@ -522,9 +522,11 @@ sub _iproduct_thaw {
     my @value = map { $_->current } @$iterators;
 
     if ( @$keys ) {
-        my %iterators;
-        @iterators{@$keys} = @$iterators;
-        $iterators = \%iterators;
+
+        @$keys == @$iterators
+          or croak( "iproduct thaw: number of keys not equal to number of iterators\n" );
+
+        $iterators = [ map { $keys->[$_], $iterators->[$_] } 0..@$keys-1 ];
     }
 
     _iproduct( $iterators, \@value );

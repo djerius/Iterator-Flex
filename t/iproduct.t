@@ -105,23 +105,72 @@ subtest "freeze" => sub {
 
     my $freeze;
 
-    subtest "setup iter and pull some values" => sub {
-        my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
+    subtest "unlabeled" => sub {
 
-        _test_values( $iter, 2, 0, 1 );
+        subtest "setup iter and pull some values" => sub {
+            my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
 
-        try_ok { $freeze = $iter->freeze } "freeze iterator";
+            _test_values( $iter, 2, 0, 1 );
+
+            try_ok { $freeze = $iter->freeze } "freeze iterator";
+        };
+
+        subtest "thaw" => sub {
+            my $iter;
+            try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+
+            _test_values( $iter, 4, 2, 5 );
+
+            is( $iter->next, undef, "iterator exhausted" );
+            ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+        };
+
     };
 
-    subtest "thaw" => sub {
-        my $iter;
-        try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+    subtest "labeled" => sub {
 
-        _test_values( $iter, 4, 2, 5 );
+        subtest "setup iter and pull some values" => sub {
+            my $iter = iproduct( a => [ 0, 1 ], b => [ 2, 3 ] );
 
-        is( $iter->next, undef, "iterator exhausted" );
-        ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+            my @values = map { [ $iter->current, $iter->next ] } 1 .. 2;
+
+            is(
+                \@values,
+                [
+                    [ undef, { a => 0, b => 2 } ],
+                    [ { a => 0, b => 2 }, { a => 0, b => 3 } ],
+                ],
+                "values are correct"
+            ) or diag pp( \@values );
+
+
+            try_ok { $freeze = $iter->freeze } "freeze iterator";
+        };
+
+        subtest "thaw" => sub {
+            my $iter;
+            try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+
+            my @values = map { [ $iter->current, $iter->next ] } 3 .. 6;
+
+            is(
+                \@values,
+                [
+                    [ { a => 0, b => 3 }, { a => 1, b => 2 } ],
+                    [ { a => 1, b => 2 }, { a => 1, b => 3 } ],
+                    [ { a => 1, b => 3 }, undef ],
+                    [ undef, undef ],
+                ],
+                "values are correct"
+            ) or diag pp( \@values );
+
+
+            is( $iter->next, undef, "iterator exhausted" );
+            ok( $iter->is_exhausted, "iterator exhausted (officially)" );
+        };
+
     };
+
 
 };
 
