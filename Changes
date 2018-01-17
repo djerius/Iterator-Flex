@@ -2,6 +2,13 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.03      2018-01-16 13:27:23-05:00 America/New_York
+
+  [ BUG FIX ]
+
+    * thawing an iproduct iterator with labeled iterator arguments was
+      borken.
+
 0.02      2018-01-16 13:27:23-05:00 America/New_York
 
   [ ENHANCEMENTS ]
