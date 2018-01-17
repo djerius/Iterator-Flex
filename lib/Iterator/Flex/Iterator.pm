@@ -138,7 +138,7 @@ sub construct {
         $composed_class,
         '&{}' => sub {
             my $self = shift;
-            sub { &$next( $self ) }
+            sub { $next->( $self ) }
         } );
 
     $attr{name} = $composed_class unless exists $attr{name};
@@ -148,7 +148,7 @@ sub construct {
 
     if ( defined $attr{init} ) {
         local $_ = $obj;
-        &{$attr{init}};
+        $attr{init}->();
         delete $attr{init};
     }
 
