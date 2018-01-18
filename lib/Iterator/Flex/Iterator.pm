@@ -134,6 +134,7 @@ sub construct {
     my $next = $composed_class->can( 'next' );
 
     # this slows down the class, even if the overload is never used.
+    # also, it generates a new sub every time the overload is invoked.
     overload->import::into(
         $composed_class,
         '&{}' => sub {
