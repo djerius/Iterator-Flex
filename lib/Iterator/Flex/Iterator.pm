@@ -12,6 +12,7 @@ use Ref::Util;
 use Scalar::Util;
 use Role::Tiny ();
 use Import::Into;
+use Module::Runtime;
 
 use Iterator::Flex::Failure;
 
@@ -86,7 +87,9 @@ Dependencies are passed to the thaw routine only if they are present.
 sub construct {
 
     my $class = shift;
-    my %attr = ( throw => 0, @_ );
+    my %attr = ( exhausted => 'undef' , @_ );
+
+    my @roles;
 
     for my $key ( keys %attr ) {
 
@@ -111,7 +114,13 @@ sub construct {
               if !defined $attr{$key}
               or Ref::Util::is_ref( $attr{$key} );
         }
-        elsif ( $key eq 'throw' ) {
+        elsif ( $key eq 'exhausted' ) {
+
+            my $role = 'Exhausted' . ucfirst( $attr{$key} );
+            my $module = $attr{$key} =~ /::/ ? $attr{$key} : join( '::', $class, 'Role', $role );
+            croak( "unknown means of handling exhausted iterators: $attr{$key}\n" )
+              unless Module::Runtime::require_module( $module );
+            push @roles, $role;
         }
         else {
             Carp::croak( "unknown attribute: $key\n" );
@@ -119,8 +128,6 @@ sub construct {
     }
 
 
-    my @roles;
-    push @roles, $attr{throw} ? 'ExhaustedThrow' : 'ExhaustedUndef';
     push @roles, 'Rewind'    if exists $attr{rewind};
     push @roles, 'Reset'     if exists $attr{reset};
     push @roles, 'Previous'  if exists $attr{prev};

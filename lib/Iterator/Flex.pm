@@ -188,6 +188,7 @@ sub _iarray {
             return [ __PACKAGE__, '_iarray', [ $arr, $prev, $current, $next ] ];
         },
 
+        exhausted => 'predicate',
     );
 }
 
@@ -267,6 +268,8 @@ sub _icache {
         },
 
         depends => $src,
+
+        exhausted => 'predicate',
     );
 
 
@@ -312,6 +315,7 @@ sub igrep(&$) {
         },
         reset   => sub { },
         depends => $src,
+        exhausted => 'predicate',
     );
 
     ITERATOR_CLASS->construct( %params );
@@ -355,6 +359,7 @@ sub imap(&$) {
         },
         reset   => sub { },
         depends => $src,
+        exhausted => 'predicate',
     );
 }
 
@@ -512,7 +517,7 @@ sub _iproduct {
           }
     }
 
-    ITERATOR_CLASS->construct( %params );
+    ITERATOR_CLASS->construct( %params, exhausted => 'predicate', );
 }
 
 sub _iproduct_thaw {
@@ -665,6 +670,7 @@ sub _iseq {
         current => sub { $current },
         prev    => sub { $prev },
         rewind  => sub {
+        exhausted => 'predicate',
             $next = $begin;
         },
         reset => sub {
