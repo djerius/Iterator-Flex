@@ -141,21 +141,18 @@ sub construct {
     my $composed_class = Role::Tiny->create_class_with_roles( $class,
         map { join( '::', $class, 'Role', $_ ) } @roles );
 
-    my $next = $composed_class->can( 'next' );
 
     # this slows down the class, even if the overload is never used.
-    # also, it generates a new sub every time the overload is invoked.
-    overload->import::into(
-        $composed_class,
-        '&{}' => sub {
-            my $self = shift;
-            sub { $next->( $self ) }
-        } );
+    overload->import::into( $composed_class,
+        '&{}' => sub { $_[0]->{_overload_next} } );
 
     $attr{name} = $composed_class unless exists $attr{name};
 
     my $obj = bless \%attr, $composed_class;
     $obj->{is_exhausted} = 0;
+
+    my $next = $composed_class->can( 'next' );
+    $obj->{_overload_next} = sub { $next->( $obj ) };
 
     if ( defined $attr{init} ) {
         local $_ = $obj;
@@ -164,6 +161,11 @@ sub construct {
     }
 
     return $obj;
+}
+
+sub DESTROY {
+    delete $_[0]->{_overload_next}
+      if defined $_[0];
 }
 
 
