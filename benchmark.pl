@@ -7,19 +7,9 @@ use lib 'lib';
 
 use Iterator::Flex   ();
 use Iterator::Simple ();
-use Iterator         ();
+use Iterator::Util   ();
 
 my $bench = Dumbbench->new;
-
-sub iarray {
-    my $arr = shift;
-    my $idx = 0;
-    Iterator->new(
-        sub {
-            Iterator::is_done if $idx == @$arr;
-            return $arr->[ $idx++ ];
-        } );
-}
 
 my $maxarr = 10000;
 
@@ -39,7 +29,7 @@ $bench->add_instances(
         }
     ),
     Dumbbench::Instance::PerlSub->new(
-        name => 'FlexO',
+        name => 'Flex: avoid method lookup',
         code => sub {
             my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
             my $next = $iter->can('next');
@@ -47,9 +37,16 @@ $bench->add_instances(
         }
     ),
     Dumbbench::Instance::PerlSub->new(
+        name => 'Flex: $iter->()',
+        code => sub {
+            my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
+            while ( defined $iter->() ) { }
+        }
+    ),
+    Dumbbench::Instance::PerlSub->new(
         name => 'Iterator',
         code => sub {
-            my $iter = iarray( [ 1 .. $maxarr ] );
+            my $iter = Iterator::Util::iarray( [ 1 .. $maxarr ] );
             eval {
                 while ( $iter->isnt_exhausted ) { $iter->value  }
             };
