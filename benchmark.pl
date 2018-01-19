@@ -39,6 +39,14 @@ $bench->add_instances(
         }
     ),
     Dumbbench::Instance::PerlSub->new(
+        name => 'FlexO',
+        code => sub {
+            my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
+            my $next = $iter->can('next');
+            while ( defined $next->($iter) ) { }
+        }
+    ),
+    Dumbbench::Instance::PerlSub->new(
         name => 'Iterator',
         code => sub {
             my $iter = iarray( [ 1 .. $maxarr ] );
