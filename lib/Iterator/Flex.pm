@@ -77,7 +77,8 @@ sub iter {
             = overload::Method( $self, '<>' ) || $self->can( 'next' ) )
         {
 
-            return ITERATOR_CLASS->construct( next => sub { $method->( $self ) } );
+            return ITERATOR_CLASS->construct( next => sub { $method->( $self ) }
+            );
         }
 
         elsif ( $method = overload::Method( $self, '&{}' ) ) {
@@ -165,8 +166,7 @@ sub _iarray {
         },
 
         current => sub {
-            return
-              defined $current ? $arr->[$current] : undef;
+            return defined $current ? $arr->[$current] : undef;
         },
 
         next => sub {
@@ -254,7 +254,7 @@ sub _icache {
             return undef
               if $_->is_exhausted;
 
-            $prev = $current;
+            $prev    = $current;
             $current = $src->next;
 
             $_->set_exhausted
@@ -313,9 +313,10 @@ sub igrep(&$) {
             $_->set_exhausted;
             return undef;
         },
-        reset   => sub { },
-        depends => $src,
+        reset     => sub { },
+        depends   => $src,
         exhausted => 'predicate',
+
     );
 
     ITERATOR_CLASS->construct( %params );
@@ -357,8 +358,8 @@ sub imap(&$) {
             local $_ = $value;
             return $code->();
         },
-        reset   => sub { },
-        depends => $src,
+        reset     => sub { },
+        depends   => $src,
         exhausted => 'predicate',
     );
 }
@@ -490,7 +491,7 @@ sub _iproduct {
         },
 
         current => sub {
-	    return undef if ! @value || $_->is_exhausted;
+            return undef if !@value || $_->is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -528,9 +529,11 @@ sub _iproduct_thaw {
     if ( @$keys ) {
 
         @$keys == @$iterators
-          or croak( "iproduct thaw: number of keys not equal to number of iterators\n" );
+          or croak(
+            "iproduct thaw: number of keys not equal to number of iterators\n"
+          );
 
-        $iterators = [ map { $keys->[$_], $iterators->[$_] } 0..@$keys-1 ];
+        $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }
 
     _iproduct( $iterators, \@value );
@@ -667,10 +670,10 @@ sub _iseq {
 
     ITERATOR_CLASS->construct(
         %params,
-        current => sub { $current },
-        prev    => sub { $prev },
-        rewind  => sub {
         exhausted => 'predicate',
+        current   => sub { $current },
+        prev      => sub { $prev },
+        rewind    => sub {
             $next = $begin;
         },
         reset => sub {
@@ -715,7 +718,7 @@ If C<$iterator> provides a C<prev> method.
 sub ifreeze (&$) {
 
     my $serialize = shift;
-    my $src      = iter( shift );
+    my $src       = iter( shift );
 
     croak( "ifreeze requires that the iterator provide a freeze method\n" )
       unless _can_meth( $src, 'freeze' );

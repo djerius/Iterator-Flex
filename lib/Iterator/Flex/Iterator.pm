@@ -87,7 +87,7 @@ Dependencies are passed to the thaw routine only if they are present.
 sub construct {
 
     my $class = shift;
-    my %attr = ( exhausted => 'undef' , @_ );
+    my %attr = ( exhausted => 'undef', @_ );
 
     my @roles;
 
@@ -117,8 +117,12 @@ sub construct {
         elsif ( $key eq 'exhausted' ) {
 
             my $role = 'Exhausted' . ucfirst( $attr{$key} );
-            my $module = $attr{$key} =~ /::/ ? $attr{$key} : join( '::', $class, 'Role', $role );
-            croak( "unknown means of handling exhausted iterators: $attr{$key}\n" )
+            my $module
+              = $attr{$key} =~ /::/
+              ? $attr{$key}
+              : join( '::', $class, 'Role', $role );
+            croak(
+                "unknown means of handling exhausted iterators: $attr{$key}\n" )
               unless Module::Runtime::require_module( $module );
             push @roles, $role;
         }
