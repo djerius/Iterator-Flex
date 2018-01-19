@@ -8,7 +8,6 @@ use warnings;
 our $VERSION = '0.04';
 
 use Role::Tiny;
-use Iterator::Flex::Constants;
 
 =method next
 
@@ -25,9 +24,8 @@ It changes the iterator state to C<EXHAUSTED> if it is exhausted.
 sub next {
     local $_ = $_[0];
 
-    $_->{state} = Iterator::Flex::Constants::ACTIVE if $_->{state} == Iterator::Flex::Constants::INACTIVE;
     my $val = $_->{next}->();
-    $_->{state} = Iterator::Flex::Constants::EXHAUSTED unless defined $val;
+    $_->{is_exhausted} = ! defined $val;
     $val;
 }
 

@@ -210,7 +210,7 @@ Not all iterators support all methods.
 
     Resets the iterator so that the next value returned is the very first
     value.  It should not affect the results of the [prev](https://metacpan.org/pod/prev) and [current](https://metacpan.org/pod/current)
-    methods.  The iterator's state is set to _active_.
+    methods.
 
 - reset
 
@@ -218,38 +218,6 @@ Not all iterators support all methods.
 
     Resets the iterator to its initial state.  The iterator's state is not
     changed.
-
-- state
-
-        $state = $iter->state;
-
-    Returns the state of the iterator. It is one of:
-
-    - Iterator::Constant::INACTIVE
-
-        The iterator has never been advanced.  [prev](https://metacpan.org/pod/prev) and [current](https://metacpan.org/pod/current) will
-        return `undef`. [next](https://metacpan.org/pod/next) will retrieve the next (in this case,
-        first) value and switch the iterator's state to _active_
-
-    - Iterator::Constant::ACTIVE
-
-        The iterator has been advanced at least once.  [current](https://metacpan.org/pod/current) will return
-        the value returned by the last call to [next](https://metacpan.org/pod/next). [next](https://metacpan.org/pod/next) will advance
-        the iterator.  An _active_ state does not indicate that there are
-        further values available from the iterator, only that the iterator
-        has been advanced.
-
-    - Iterator::Constant::EXHAUSTED
-
-        There are no more values available.  [current](https://metacpan.org/pod/current) and [next](https://metacpan.org/pod/next) will
-        return `undef`.  [prev](https://metacpan.org/pod/prev) will return the last valid value returned by
-        [next](https://metacpan.org/pod/next).
-
-        The state changes from _active_ to _exhausted_ only after [next](https://metacpan.org/pod/next)
-        has been called _after_ the last valid value has been returned by a
-        previous call to [next](https://metacpan.org/pod/next). In other words, if `$iter-`next> returns
-        the last valid value, the state is still _active_.  The next call to
-        `$iter-`next> will switch the iterator state to _exhausted_.
 
 # BUGS
 

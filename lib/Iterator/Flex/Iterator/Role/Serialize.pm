@@ -39,7 +39,7 @@ sub freeze {
     }
 
     local $_ = $self;
-    push @freeze, $self->{freeze}->(), $_->state;
+    push @freeze, $self->{freeze}->(), $_->{is_exhausted};
 
     return \@freeze;
 }

@@ -13,7 +13,6 @@ use Scalar::Util;
 use Role::Tiny ();
 use Import::Into;
 
-use Iterator::Flex::Constants;
 use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next' );
@@ -145,7 +144,7 @@ sub construct {
     $attr{name} = $composed_class unless exists $attr{name};
 
     my $obj = bless \%attr, $composed_class;
-    $obj->{state} = Iterator::Flex::Constants::INACTIVE;
+    $obj->{is_exhausted} = 0;
 
     if ( defined $attr{init} ) {
         local $_ = $obj;
@@ -161,69 +160,31 @@ sub construct {
 
   $iter->set_exhausted;
 
-Set the iterator's state to C<Iterator::Flex::Constants::EXHAUSTED>.
+Set the iterator's state to exhausted
 
 =cut
 
-sub set_exhausted { $_[0]->_set_state( Iterator::Flex::Constants::EXHAUSTED )  }
+sub set_exhausted { $_[0]->{is_exhausted} = defined $_[1] ? $_[1] : 1 }
 
 
 =method is_exhausted
 
   $bool = $iter->is_exhausted;
 
-Returns true if the iterator is exhausted
+Returns true if the iterator is exhausted and there are no more values
+available.  L<current> and L<next> will return C<undef>.  L<prev> will
+return the last valid value returned by L<next>.
+
+L<is_exhausted> is true only after L<next> has been called I<after>
+the last valid value has been returned by a previous call to
+L<next>. In other words, if C<$iter->next> returns the last valid
+value, the state is still I<active>.  The next call to C<$iter->next>
+will switch the iterator state to I<exhausted>.
+
 
 =cut
 
-sub is_exhausted { $_[0]->state eq Iterator::Flex::Constants::EXHAUSTED }
-
-=method is_inactive
-
-  $bool = $iter->is_inactive;
-
-Returns true if the iterator is inactive
-
-=cut
-
-sub is_inactive { $_[0]->state eq Iterator::Flex::Constants::INACTIVE }
-
-=method is_active
-
-  $bool = $iter->is_active;
-
-Returns true if the iterator is active.
-
-=cut
-
-sub is_active { $_[0]->state eq Iterator::Flex::Constants::ACTIVE }
-
-
-=method state
-
-  $bool = $iter->state;
-
-Returns the state of the iterator.  It is one of
-
-=over
-
-=item Iterator::Flex::Constants::INACTIVE
-
-=item Iterator::Flex::Constants::ACTIVE
-
-=item Iterator::Flex::Constants::EXHAUSTED
-
-=back
-
-=cut
-
-sub state {  $_[0]->{state} };
-
-sub _set_state {
-    my $self = shift;
-    $self->{state} = shift if @_;
-    return $self->{state};
-}
+sub is_exhausted { $_[0]->{is_exhausted} }
 
 =method __iter__
 

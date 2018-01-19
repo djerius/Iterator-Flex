@@ -22,7 +22,6 @@ use List::Util qw[ pairkeys pairvalues all first ];
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
 use Iterator::Flex::Iterator;
-use Iterator::Flex::Constants qw[ :all ];
 
 use constant ITERATOR_CLASS => __PACKAGE__ . '::Iterator';
 
@@ -486,7 +485,7 @@ sub _iproduct {
         },
 
         current => sub {
-            return undef unless $_->is_active;
+	    return undef if ! @value || $_->is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -781,7 +780,7 @@ sub thaw {
       if @depends;
 
     my $iter = &$func( @args );
-    $iter->_set_state( $state );
+    $iter->set_exhausted( $state );
     return $iter;
 }
 
@@ -867,7 +866,7 @@ Return the next value from the iterator.
 
 Resets the iterator so that the next value returned is the very first
 value.  It should not affect the results of the L<prev> and L<current>
-methods.  The iterator's state is set to I<active>.
+methods.
 
 =item reset
 
@@ -875,43 +874,6 @@ methods.  The iterator's state is set to I<active>.
 
 Resets the iterator to its initial state.  The iterator's state is not
 changed.
-
-
-=item state
-
-  $state = $iter->state;
-
-Returns the state of the iterator. It is one of:
-
-=over
-
-=item Iterator::Constant::INACTIVE
-
-The iterator has never been advanced.  L<prev> and L<current> will
-return C<undef>. L<next> will retrieve the next (in this case,
-first) value and switch the iterator's state to I<active>
-
-=item Iterator::Constant::ACTIVE
-
-The iterator has been advanced at least once.  L<current> will return
-the value returned by the last call to L<next>. L<next> will advance
-the iterator.  An I<active> state does not indicate that there are
-further values available from the iterator, only that the iterator
-has been advanced.
-
-=item Iterator::Constant::EXHAUSTED
-
-There are no more values available.  L<current> and L<next> will
-return C<undef>.  L<prev> will return the last valid value returned by
-L<next>.
-
-The state changes from I<active> to I<exhausted> only after L<next>
-has been called I<after> the last valid value has been returned by a
-previous call to L<next>. In other words, if C<$iter->next> returns
-the last valid value, the state is still I<active>.  The next call to
-C<$iter->next> will switch the iterator state to I<exhausted>.
-
-=back
 
 =back
 

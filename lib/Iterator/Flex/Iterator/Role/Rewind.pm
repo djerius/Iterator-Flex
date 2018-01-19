@@ -11,7 +11,6 @@ use Carp       ();
 use List::Util ();
 
 use Role::Tiny;
-use Iterator::Flex::Constants;
 
 =method rewind
 
@@ -41,7 +40,7 @@ sub rewind {
 
     local $_ = $self;
     $self->{rewind}->();
-    $self->_set_state( Iterator::Flex::Constants::INACTIVE );
+    $self->{is_exhausted} = 0;
 
     return;
 }

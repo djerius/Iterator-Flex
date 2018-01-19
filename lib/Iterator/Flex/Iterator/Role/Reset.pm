@@ -11,7 +11,6 @@ use Carp       ();
 use List::Util ();
 
 use Role::Tiny;
-use Iterator::Flex::Constants;
 
 =method reset
 
@@ -41,7 +40,7 @@ sub reset {
 
     local $_ = $self;
     $self->{reset}->();
-    $self->_set_state( Iterator::Flex::Constants::INACTIVE );
+    $self->{is_exhausted} = 0;
 
     return;
 }
