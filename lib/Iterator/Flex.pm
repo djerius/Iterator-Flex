@@ -726,10 +726,13 @@ sub ifreeze (&$) {
         depends => $src,
         next    => sub {
             my $value = $src->next;
+            $_->set_exhausted if $src->is_exhausted;
             local $_ = $src->freeze;
             &$serialize();
             $value;
-        } );
+        },
+        exhausted => 'predicate',
+    );
 
     for my $meth ( 'prev', 'current' ) {
 
