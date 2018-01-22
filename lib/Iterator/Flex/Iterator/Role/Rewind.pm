@@ -10,6 +10,7 @@ our $VERSION = '0.04';
 use Carp       ();
 use List::Util ();
 
+use Iterator::Flex;
 use Role::Tiny;
 
 =method rewind
@@ -24,7 +25,8 @@ Resets the iterator to its initial value.
 
 sub rewind {
 
-    my $self = shift;
+    my $obj = $_[0];
+    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
 
     if ( defined $self->{depends} ) {
 
@@ -38,8 +40,7 @@ sub rewind {
         $_->rewind foreach @{ $self->{depends} };
     }
 
-    local $_ = $self;
-    $self->{rewind}->();
+    $self->{rewind}->( $obj );
     $self->{is_exhausted} = 0;
 
     return;

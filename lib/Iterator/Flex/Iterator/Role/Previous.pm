@@ -19,7 +19,12 @@ Returns the previous value.
 
 =cut
 
-sub prev { local $_ = $_[0]; $_->{prev}->() }
+sub prev {
+
+    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $_[0] };
+
+    $self->{prev}->( $_[0] );
+}
 *__prev__ = \&prev;
 
 

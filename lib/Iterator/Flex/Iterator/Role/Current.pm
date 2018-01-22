@@ -19,7 +19,12 @@ Returns the current value.
 
 =cut
 
-sub current { local $_ = $_[0]; $_->{current}->() }
+sub current {
+
+    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $_[0] };
+
+    $self->{current}->( $_[0] );
+}
 *__current__ = \&current;
 
 

@@ -1,7 +1,7 @@
 requires "Carp" => "0";
 requires "Exporter" => "0";
 requires "Import::Into" => "0";
-requires "List::Util" => "0";
+requires "List::Util" => "1.33";
 requires "Module::Runtime" => "0";
 requires "Ref::Util" => "0";
 requires "Role::Tiny" => "0";
@@ -19,6 +19,7 @@ on 'test' => sub {
   requires "IO::Handle" => "0";
   requires "IPC::Open3" => "0";
   requires "Test2::V0" => "0";
+  requires "Test::LeakTrace" => "0";
   requires "Test::More" => "0";
   requires "perl" => "5.006";
 };

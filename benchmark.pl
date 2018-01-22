@@ -15,25 +15,17 @@ my $maxarr = 10000;
 
 $bench->add_instances(
     Dumbbench::Instance::PerlSub->new(
-        name => 'Simple',
+        name => 'Simple: $iter->()',
         code => sub {
             my $iter = Iterator::Simple::iarray( [ 1 .. $maxarr ] );
-            while ( defined $iter->() ) {}
+            while ( defined $iter->() ) { }
         }
     ),
     Dumbbench::Instance::PerlSub->new(
-        name => 'Flex',
+        name => 'Simple: $iter->next',
         code => sub {
-            my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
+            my $iter = Iterator::Simple::iarray( [ 1 .. $maxarr ] );
             while ( defined $iter->next ) { }
-        }
-    ),
-    Dumbbench::Instance::PerlSub->new(
-        name => 'Flex: avoid method lookup',
-        code => sub {
-            my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
-            my $next = $iter->can('next');
-            while ( defined $next->($iter) ) { }
         }
     ),
     Dumbbench::Instance::PerlSub->new(
@@ -44,11 +36,18 @@ $bench->add_instances(
         }
     ),
     Dumbbench::Instance::PerlSub->new(
+        name => 'Flex: $iter->next',
+        code => sub {
+            my $iter = Iterator::Flex::iarray( [ 1 .. $maxarr ] );
+            while ( defined $iter->next ) { }
+        }
+    ),
+    Dumbbench::Instance::PerlSub->new(
         name => 'Iterator',
         code => sub {
             my $iter = Iterator::Util::iarray( [ 1 .. $maxarr ] );
             eval {
-                while ( $iter->isnt_exhausted ) { $iter->value  }
+                while ( $iter->isnt_exhausted ) { $iter->value }
             };
         }
     ),

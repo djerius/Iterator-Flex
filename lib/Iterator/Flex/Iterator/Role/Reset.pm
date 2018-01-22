@@ -24,7 +24,9 @@ Resets the iterator to its initial value.
 
 sub reset {
 
-    my $self = shift;
+    my $obj = $_[0];
+
+    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
 
     if ( defined $self->{depends} ) {
 
@@ -38,8 +40,7 @@ sub reset {
         $_->reset foreach @{ $self->{depends} };
     }
 
-    local $_ = $self;
-    $self->{reset}->();
+    $self->{reset}->( $obj );
     $self->{is_exhausted} = 0;
 
     return;

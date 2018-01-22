@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.04';
 
+use Scalar::Util;
 use Role::Tiny;
 
 =method next
@@ -21,13 +22,22 @@ It changes the iterator state to C<EXHAUSTED> if it is exhausted.
 
 =cut
 
-sub next {
-    local $_ = $_[0];
+sub _construct_next {
 
-    my $val = $_->{next}->();
-    $_->{is_exhausted} = ! defined $val;
-    $val;
+    my $class = shift;
+    my $self = shift;
+
+    my $sub;
+    my $next = $self->{next};
+
+    $sub = sub {
+        my $val = $next->( $sub );
+        $self->{is_exhausted} = ! defined $val;
+        $val;
+    }
 }
+
+sub next { &{$_[0]} }
 
 *__next__ = \&next;
 

@@ -70,7 +70,7 @@ sub iter {
         my $method;
 
         if ( $method = $self->can( '__iter__' ) ) {
-            return $method->( $self );
+            return ITERATOR_CLASS->construct( next => $method->( $self ) );
         }
 
         elsif ( $method
@@ -152,6 +152,8 @@ sub _iarray {
     $next = 0 unless defined $next;
 
     return ITERATOR_CLASS->construct(
+                                     name => 'iarray',
+
         reset => sub {
             $prev = $current = undef;
             $next = 0;
@@ -172,10 +174,10 @@ sub _iarray {
         next => sub {
             if ( $next == $len ) {
                 # if first time through, set current/prev
-                if ( !$_->is_exhausted ) {
+                if ( !$_[0]->is_exhausted ) {
                     $prev    = $current;
                     $current = undef;
-                    $_->set_exhausted;
+                    $_[0]->set_exhausted;
                 }
                 return undef;
             }
@@ -252,12 +254,12 @@ sub _icache {
         next => sub {
 
             return undef
-              if $_->is_exhausted;
+              if $_[0]->is_exhausted;
 
             $prev    = $current;
-            $current = $src->next;
+            $current = $src->();
 
-            $_->set_exhausted
+            $_[0]->set_exhausted
               if $src->is_exhausted;
 
             return $current;
@@ -302,6 +304,7 @@ sub igrep(&$) {
     $src = iter( $src );
 
     my %params = (
+        name => 'igrep',
         next => sub {
 
             foreach ( ; ; ) {
@@ -310,7 +313,7 @@ sub igrep(&$) {
                 local $_ = $rv;
                 return $rv if $code->();
             }
-            $_->set_exhausted;
+            $_[0]->set_exhausted;
             return undef;
         },
         reset     => sub { },
@@ -350,9 +353,9 @@ sub imap(&$) {
 
     ITERATOR_CLASS->construct(
         next => sub {
-            my $value = $src->next;
+            my $value = $src->();
             if ( $src->is_exhausted ) {
-                $_->set_exhausted;
+                $_[0]->set_exhausted;
                 return undef;
             }
             local $_ = $value;
@@ -438,16 +441,16 @@ sub _iproduct {
 
     my %params = (
         next => sub {
-            return undef if $_->is_exhausted;
+            return undef if $_[0]->is_exhausted;
 
             # first time through
             if ( !@value ) {
 
                 for my $iter ( @iterator ) {
-                    push @value, $iter->next;
+                    push @value, $iter->();
 
                     if ( $iter->is_exhausted ) {
-                        $_->set_exhausted;
+                        $_[0]->set_exhausted;
                         return undef;
                     }
                 }
@@ -457,24 +460,24 @@ sub _iproduct {
 
             else {
 
-                $value[-1] = $iterator[-1]->next;
+                $value[-1] = $iterator[-1]->();
                 if ( $iterator[-1]->is_exhausted ) {
                     $set[-1] = 0;
                     my $idx = @iterator - 1;
                     while ( --$idx >= 0 ) {
-                        $value[$idx] = $iterator[$idx]->next;
+                        $value[$idx] = $iterator[$idx]->();
                         last unless $iterator[$idx]->is_exhausted;
                         $set[$idx] = 0;
                     }
 
                     if ( !$set[0] ) {
-                        $_->set_exhausted;
+                        $_[0]->set_exhausted;
                         return undef;
                     }
 
                     while ( ++$idx < @iterator ) {
                         $iterator[$idx]->rewind;
-                        $value[$idx] = $iterator[$idx]->next;
+                        $value[$idx] = $iterator[$idx]->();
                         $set[$idx]   = 1;
                     }
                 }
@@ -491,7 +494,7 @@ sub _iproduct {
         },
 
         current => sub {
-            return undef if !@value || $_->is_exhausted;
+            return undef if !@value || $_[0]->is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -599,10 +602,10 @@ sub _iseq {
         %params = (
             next => sub {
                 if ( $next > $end ) {
-                    if ( !$_->is_exhausted ) {
+                    if ( !$_[0]->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_->set_exhausted;
+                        $_[0]->set_exhausted;
                     }
                     return undef;
                 }
@@ -639,10 +642,10 @@ sub _iseq {
             next => $begin < $end
             ? sub {
                 if ( $next > $end ) {
-                    if ( !$_->is_exhausted ) {
+                    if ( !$_[0]->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_->set_exhausted;
+                        $_[0]->set_exhausted;
                     }
                     return undef;
                 }
@@ -653,10 +656,10 @@ sub _iseq {
             }
             : sub {
                 if ( $next < $end ) {
-                    if ( !$_->is_exhausted ) {
+                    if ( !$_[0]->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_->set_exhausted;
+                        $_[0]->set_exhausted;
                     }
                     return undef;
                 }
@@ -728,8 +731,8 @@ sub ifreeze (&$) {
         reset   => sub { },
         depends => $src,
         next    => sub {
-            my $value = $src->next;
-            $_->set_exhausted if $src->is_exhausted;
+            my $value = $src->();
+            $_[0]->set_exhausted if $src->is_exhausted;
             local $_ = $src->freeze;
             &$serialize();
             $value;

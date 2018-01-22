@@ -10,6 +10,7 @@ our $VERSION = '0.04';
 use Carp ();
 use List::Util ();
 
+use Iterator::Flex;
 use Role::Tiny;
 
 =method freeze
@@ -23,7 +24,8 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 
 sub freeze {
 
-    my $self = shift;
+    my $obj = $_[0];
+    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
 
     my @freeze;
 
@@ -38,8 +40,7 @@ sub freeze {
         @freeze = map $_->freeze, @{$self->{depends} };
     }
 
-    local $_ = $self;
-    push @freeze, $self->{freeze}->(), $_->{is_exhausted};
+    push @freeze, $self->{freeze}->( $obj ), $self->{is_exhausted};
 
     return \@freeze;
 }

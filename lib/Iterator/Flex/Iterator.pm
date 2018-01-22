@@ -16,7 +16,9 @@ use Module::Runtime;
 
 use Iterator::Flex::Failure;
 
-use overload ( '<>' => 'next' );
+our %REGISTRY;
+
+use overload ( '<>' => 'next', fallback => 1 );
 
 =method construct
 
@@ -131,7 +133,6 @@ sub construct {
         }
     }
 
-
     push @roles, 'Rewind'    if exists $attr{rewind};
     push @roles, 'Reset'     if exists $attr{reset};
     push @roles, 'Previous'  if exists $attr{prev};
@@ -142,21 +143,21 @@ sub construct {
         map { join( '::', $class, 'Role', $_ ) } @roles );
 
 
-    # this slows down the class, even if the overload is never used.
-    overload->import::into( $composed_class,
-        '&{}' => sub { $_[0]->{_overload_next} } );
+    # # this slows down the class, even if the overload is never used.
+    # overload->import::into( $composed_class,
+    #     '&{}' => sub { $_[0]->{_overload_next} } );
 
     $attr{name} = $composed_class unless exists $attr{name};
+    $attr{is_exhausted} = 0;
 
-    my $obj = bless \%attr, $composed_class;
-    $obj->{is_exhausted} = 0;
+    my $obj = bless $composed_class->_construct_next( \%attr ), $composed_class;
 
-    my $next = $composed_class->can( 'next' );
-    $obj->{_overload_next} = sub { $next->( $obj ) };
+    $REGISTRY{ Scalar::Util::refaddr $obj } = \%attr;
+    # my $next = $composed_class->can( 'next' );
+    # $attr{_overload_next} = sub { $next->( $obj ) };
 
     if ( defined $attr{init} ) {
-        local $_ = $obj;
-        $attr{init}->();
+        $attr{init}->( $obj );
         delete $attr{init};
     }
 
@@ -164,8 +165,12 @@ sub construct {
 }
 
 sub DESTROY {
-    delete $_[0]->{_overload_next}
-      if defined $_[0];
+
+    if ( defined $_[0] ) {
+        my $self = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
+        delete $self->{_overload_next}
+    }
+
 }
 
 
@@ -177,7 +182,10 @@ Set the iterator's state to exhausted
 
 =cut
 
-sub set_exhausted { $_[0]->{is_exhausted} = defined $_[1] ? $_[1] : 1 }
+sub set_exhausted {
+    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $self->{is_exhausted} = defined $_[1] ? $_[1] : 1
+}
 
 
 =method is_exhausted
@@ -197,7 +205,10 @@ will switch the iterator state to I<exhausted>.
 
 =cut
 
-sub is_exhausted { $_[0]->{is_exhausted} }
+sub is_exhausted {
+    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $self->{is_exhausted};
+}
 
 =method __iter__
 
@@ -207,7 +218,10 @@ Returns the subroutine which returns the next value from the iterator.
 
 =cut
 
-sub __iter__ { $_[0]->{next} }
+sub __iter__ {
+    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $self->{next};
+}
 
 1;
 

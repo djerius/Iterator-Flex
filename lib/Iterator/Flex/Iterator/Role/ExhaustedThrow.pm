@@ -7,7 +7,24 @@ use warnings;
 
 our $VERSION = '0.04';
 
+use Scalar::Util;
 use Role::Tiny;
+
+sub _construct_next {
+
+    my $class = shift;
+    my $self = shift;
+
+    my $sub;
+    my $next = $self->{next};
+
+    $sub = sub {
+        my $val = $next->( $sub );
+        Iterator::Flex::Failure::Exhausted->throw
+            if $self->{is_exhausted};
+        $val;
+    }
+}
 
 =method next
 
@@ -21,16 +38,7 @@ C<next> callback must set the iterator state to C<EXHAUSTED>.
 
 =cut
 
-sub next {
-    local $_ = $_[0];
-
-    my $val = $_->{next}->();
-    Iterator::Flex::Failure::Exhausted->throw
-        if $_->{is_exhausted};
-
-    $val;
-}
-
+sub next { &{$_[0]} }
 *__next__ = \&next;
 
 
