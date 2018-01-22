@@ -64,7 +64,7 @@ for my $test ( @tests ) {
                 my @methods = ( 'rewind', 'freeze', 'prev', 'current' );
                 isa_ok(
                     $iter,
-                    ['Iterator::Flex::Iterator'],
+                    ['Iterator::Flex::Base'],
                     "correct parent class"
                 );
                 can_ok( $iter, \@methods, join( ' ', "has", @methods ) );

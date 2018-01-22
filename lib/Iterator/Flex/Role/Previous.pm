@@ -1,6 +1,6 @@
-package Iterator::Flex::Iterator::Role::Previous;
+package Iterator::Flex::Role::Previous;
 
-# ABSTRACT: Role to add prev method to an Iterator::Flex::Iterator
+# ABSTRACT: Role to add prev method to an Iterator::Flex::Base
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ Returns the previous value.
 
 sub prev {
 
-    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
 
     $self->{prev}->( $_[0] );
 }

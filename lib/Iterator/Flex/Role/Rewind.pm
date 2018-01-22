@@ -1,6 +1,6 @@
-package Iterator::Flex::Iterator::Role::Rewind;
+package Iterator::Flex::Role::Rewind;
 
-# ABSTRACT: Role to add rewind capability to an Iterator::Flex::Iterator
+# ABSTRACT: Role to add rewind capability to an Iterator::Flex::Base
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ Resets the iterator to its initial value.
 sub rewind {
 
     my $obj = $_[0];
-    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
     if ( defined $self->{depends} ) {
 

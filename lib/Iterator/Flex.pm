@@ -21,9 +21,9 @@ use List::Util qw[ pairkeys pairvalues all first ];
 
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
-use Iterator::Flex::Iterator;
+use Iterator::Flex::Base;
 
-our $ITERATOR_CLASS = __PACKAGE__ . '::Iterator';
+our $ITERATOR_CLASS = __PACKAGE__ . '::Base';
 
 
 =sub iterator
@@ -32,7 +32,7 @@ our $ITERATOR_CLASS = __PACKAGE__ . '::Iterator';
 
 Construct an iterator from code. The code will have access to the
 iterator object through C<$_[0]>.  The optional parameters are any of
-the parameters recognized by L<Iterator::Flex::Iterator/construct>.
+the parameters recognized by L<Iterator::Flex::Base/construct>.
 
  By default the code is expected to return C<undef> upon exhaustion.
 

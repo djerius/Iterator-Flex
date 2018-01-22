@@ -1,4 +1,4 @@
-package Iterator::Flex::Iterator;
+package Iterator::Flex::Base;
 
 # ABSTRACT: Iterator object
 
@@ -22,7 +22,7 @@ use overload ( '<>' => 'next', fallback => 1 );
 
 =method construct
 
-  $iterator = Iterator::Flex::Iterator->construct( %params );
+  $iterator = Iterator::Flex::Base->construct( %params );
 
 Construct an iterator object. The recommended manner of creating an
 iterator is to use the convenience functions provided by
@@ -122,10 +122,7 @@ sub construct {
         elsif ( $key eq 'exhausted' ) {
 
             my $role = 'Exhausted' . ucfirst( $attr{$key} );
-            my $module
-              = $attr{$key} =~ /::/
-              ? $attr{$key}
-              : join( '::', $class, 'Role', $role );
+            my $module = $class->_module_name( Role => $role );
             croak(
                 "unknown means of handling exhausted iterators: $attr{$key}\n" )
               unless Module::Runtime::require_module( $module );
@@ -139,7 +136,7 @@ sub construct {
     my $composed_class;
 
     if ( defined $attr{class} ) {
-        $composed_class = $attr{class} =~ /::/ ? $attr{class} : join( '::', $class, $attr{class} );
+        $composed_class = $class->_module_name( $attr{class} );
         Module::Runtime::require_module( $composed_class );
     }
 
@@ -151,8 +148,7 @@ sub construct {
         push @roles, 'Current'   if exists $attr{current};
         push @roles, 'Serialize' if exists $attr{freeze};
 
-        $composed_class = Role::Tiny->create_class_with_roles( $class,
-                                                               map { join( '::', $class, 'Role', $_ ) } @roles );
+        $composed_class = Role::Tiny->create_class_with_roles( $class, map { $class->_module_name( 'Role' => $_ ) } @roles );
     }
 
 
@@ -173,16 +169,30 @@ sub construct {
     return $obj;
 }
 
+sub _module_name {
+
+    my $class = shift;
+    my $module = pop;
+    my @hierarchy = @_;
+
+    return $module if $module  =~ /::/;
+
+    $class = 'Iterator::Flex' if $class eq __PACKAGE__;
+
+    return join( '::', $class, @hierarchy, $module );
+}
+
+
 sub _add_roles {
 
     my $class = shift;
 
-    Role::Tiny->apply_roles_to_package( $class, map { "Iterator::Flex::Iterator::Role::$_" } @_ );
+    Role::Tiny->apply_roles_to_package( $class, map { "Iterator::Flex::Role::$_" } @_ );
 }
 
 =method construct_from_iterable
 
-  $iter = Iterator::Flex::Iterator->construct_from_iterable( $iterable );
+  $iter = Iterator::Flex::Base->construct_from_iterable( $iterable );
 
 Construct an iterator from an iterable thing.  The returned iterator will
 return C<undef> upon exhaustion.
@@ -244,7 +254,7 @@ sub construct_from_iterable {
 
 =method construct_from_object
 
-  $iter = Iterator::Flex::Iterator->construct_from_object( $iterable );
+  $iter = Iterator::Flex::Base->construct_from_object( $iterable );
 
 Construct an iterator from an object.  Normal use is to call L<construct_from_iterable> or
 simply use L<Iterator::Flex/iter>.  The returned iterator will return C<undef> upon exhaustion.

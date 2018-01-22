@@ -1,6 +1,6 @@
-package Iterator::Flex::Iterator::Role::Current;
+package Iterator::Flex::Role::Current;
 
-# ABSTRACT: Role to add current method to an Iterator::Flex::Iterator
+# ABSTRACT: Role to add current method to an Iterator::Flex::Base
 
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ Returns the current value.
 
 sub current {
 
-    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
 
     $self->{current}->( $_[0] );
 }

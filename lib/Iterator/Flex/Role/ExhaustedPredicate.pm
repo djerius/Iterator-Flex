@@ -1,4 +1,4 @@
-package Iterator::Flex::Iterator::Role::ExhaustedPredicate;
+package Iterator::Flex::Role::ExhaustedPredicate;
 
 # ABSTRACT: Role for iterator which sets the is_exhausted predicate
 

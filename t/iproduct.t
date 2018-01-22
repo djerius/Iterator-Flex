@@ -39,7 +39,7 @@ subtest "basic" => sub {
             my @methods = ( 'rewind', 'freeze' );
             isa_ok(
                 $iter,
-                ['Iterator::Flex::Iterator'],
+                ['Iterator::Flex::Base'],
                 "correct parent class"
             );
             can_ok( $iter, \@methods, join( ' ', "has", @methods ) );

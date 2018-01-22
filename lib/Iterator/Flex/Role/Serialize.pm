@@ -1,6 +1,6 @@
-package Iterator::Flex::Iterator::Role::Serialize;
+package Iterator::Flex::Role::Serialize;
 
-# ABSTRACT: Role to add serialization capability to an Iterator::Flex::Iterator
+# ABSTRACT: Role to add serialization capability to an Iterator::Flex::Base
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 sub freeze {
 
     my $obj = $_[0];
-    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
     my @freeze;
 

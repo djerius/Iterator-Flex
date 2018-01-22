@@ -1,6 +1,6 @@
-package Iterator::Flex::Iterator::Role::Reset;
+package Iterator::Flex::Role::Reset;
 
-# ABSTRACT: Role to add reset capability to an Iterator::Flex::Iterator
+# ABSTRACT: Role to add reset capability to an Iterator::Flex::Base
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ sub reset {
 
     my $obj = $_[0];
 
-    my $self = $Iterator::Flex::Iterator::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
     if ( defined $self->{depends} ) {
 

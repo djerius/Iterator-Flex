@@ -10,7 +10,7 @@ subtest "basic" => sub {
 
     subtest "object properties" => sub {
 
-        isa_ok( $iter, ['Iterator::Flex::Iterator'], "correct parent class" );
+        isa_ok( $iter, ['Iterator::Flex::Base'], "correct parent class" );
         can_ok( $iter, [ 'reset', ], "has reset" );
         is( $iter->can( 'freeze'), undef, "can't freeze" );
     };
