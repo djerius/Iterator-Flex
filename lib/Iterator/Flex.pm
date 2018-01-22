@@ -15,7 +15,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Carp;
 use Scalar::Util qw[ blessed looks_like_number ];
-use Ref::Util qw[ is_coderef is_arrayref is_hashref is_ref ];
+use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
 use List::Util qw[ pairkeys pairvalues all first ];
 
@@ -23,36 +23,83 @@ use List::Util qw[ pairkeys pairvalues all first ];
 
 use Iterator::Flex::Iterator;
 
-use constant ITERATOR_CLASS => __PACKAGE__ . '::Iterator';
+our $ITERATOR_CLASS = __PACKAGE__ . '::Iterator';
 
-
-sub _can_meth {
-
-    my ( $obj, $meth ) = @_;
-
-    my $sub;
-    foreach ( "__${meth}__", $meth ) {
-
-        last if defined( $sub = $obj->can( $_ ) );
-    }
-
-    return $sub;
-}
 
 =sub iterator
 
+  $iter = iterator { CODE }, ?%params;
+
+Construct an iterator from code. The code will have access to the
+iterator object through C<$_[0]>.  The optional parameters are any of
+the parameters recognized by L<Iterator::Flex::Iterator/construct>.
+
+ By default the code is expected to return C<undef> upon exhaustion.
+
 
 =cut
-sub iterator(&) {
-    ITERATOR_CLASS->construct( next => $_[0] );
+
+sub iterator(&%) {
+    $ITERATOR_CLASS->construct( next => $_[0], @_ );
 }
 
 
 =sub iter
 
-  $iter = iter( $object );
+  $iter = iter( $iterable );
 
-Transform C<$object> into an iterator.  It accepts
+Construct an iterator from an iterable thing. The iterator will
+return C<undef> upon exhaustion.
+
+ An iterable thing is
+
+=over
+
+=item an object
+
+An iterable object has one or more of the following methods
+
+=over
+
+=item C<__iter__> or C<iter>
+
+=item C<__next__> or C<next>
+
+=item an overloaded C<< <> >> operator
+
+This should return the next item.
+
+=item an overloaded C<< &{} >> operator
+
+This should return a subroutine which returns the next item.
+
+=back
+
+Additionally, if the object has the following methods, they are used
+by the constructed iterator:
+
+=over
+
+=item C<__prev__> or C<prev>
+
+=item C<__current__> or C<current>
+
+=back
+
+See L</construct_from_object>
+
+=item an arrayref
+
+The returned iterator will be an L<Iterator::Flex/iarray> iterator.
+
+=item a coderef
+
+The coderef must return the next element in the iteration.
+
+=item a globref
+
+=back
+
 
 =cut
 
@@ -61,52 +108,7 @@ sub iter {
     return iterator { return }
     unless @_;
 
-    my ( $self ) = @_;
-
-    if ( blessed $self) {
-
-        return $self if $self->isa( ITERATOR_CLASS );
-
-        my $method;
-
-        if ( $method = $self->can( '__iter__' ) ) {
-            return ITERATOR_CLASS->construct( next => $method->( $self ) );
-        }
-
-        elsif ( $method
-            = overload::Method( $self, '<>' ) || $self->can( 'next' ) )
-        {
-
-            return ITERATOR_CLASS->construct( next => sub { $method->( $self ) }
-            );
-        }
-
-        elsif ( $method = overload::Method( $self, '&{}' ) ) {
-
-            return ITERATOR_CLASS->construct( next => $method->( $self ) );
-        }
-
-        elsif ( $method = overload::Method( $self, '@{}' ) ) {
-
-            return iarray( $method->( $self ) );
-        }
-    }
-
-    elsif ( is_arrayref( $self ) ) {
-
-        return iarray( $self );
-    }
-
-    elsif ( is_coderef( $self ) ) {
-
-        return ITERATOR_CLASS->construct( next => $self );
-    }
-
-    elsif ( is_globref( $self ) ) {
-        return ITERATOR_CLASS->construct( next => sub { scalar <$self> } );
-    }
-
-    croak sprintf "'%s' object is not iterable", ( ref( $self ) || 'SCALAR' );
+    $ITERATOR_CLASS->construct_from_iterable( @_ );
 }
 
 
@@ -151,7 +153,7 @@ sub _iarray {
 
     $next = 0 unless defined $next;
 
-    return ITERATOR_CLASS->construct(
+    return $ITERATOR_CLASS->construct(
                                      name => 'iarray',
 
         reset => sub {
@@ -234,7 +236,7 @@ sub _icache {
 
     my ( $src, $prev, $current ) = @_;
 
-    return ITERATOR_CLASS->construct(
+    return $ITERATOR_CLASS->construct(
 
         reset => sub {
             $prev = $current = undef;
@@ -322,7 +324,7 @@ sub igrep(&$) {
 
     );
 
-    ITERATOR_CLASS->construct( %params );
+    $ITERATOR_CLASS->construct( %params );
 }
 
 
@@ -351,7 +353,7 @@ sub imap(&$) {
 
     $src = iter( $src );
 
-    ITERATOR_CLASS->construct(
+    $ITERATOR_CLASS->construct(
         next => sub {
             my $value = $src->();
             if ( $src->is_exhausted ) {
@@ -434,7 +436,7 @@ sub _iproduct {
     # can only work if the iterators support a rwind method
     croak( "iproduct requires that all iteratables provide a rewind method\n" )
       unless @iterator == grep { defined }
-      map { _can_meth( $_, 'rewind' ) } @iterator;
+      map { $ITERATOR_CLASS->_can_meth( $_, 'rewind' ) } @iterator;
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
@@ -512,7 +514,7 @@ sub _iproduct {
     # can only freeze if the iterators support a prev method
     if (
         @iterator == grep { defined }
-        map { _can_meth( $_, 'current' ) } @iterator
+        map { $ITERATOR_CLASS->_can_meth( $_, 'current' ) } @iterator
       )
     {
 
@@ -521,7 +523,7 @@ sub _iproduct {
           }
     }
 
-    ITERATOR_CLASS->construct( %params, exhausted => 'predicate', );
+    $ITERATOR_CLASS->construct( %params, exhausted => 'predicate', );
 }
 
 sub _iproduct_thaw {
@@ -671,7 +673,7 @@ sub _iseq {
         );
     }
 
-    ITERATOR_CLASS->construct(
+    $ITERATOR_CLASS->construct(
         %params,
         exhausted => 'predicate',
         current   => sub { $current },
@@ -724,7 +726,7 @@ sub ifreeze (&$) {
     my $src       = iter( shift );
 
     croak( "ifreeze requires that the iterator provide a freeze method\n" )
-      unless _can_meth( $src, 'freeze' );
+      unless $ITERATOR_CLASS->_can_meth( $src, 'freeze' );
 
     my %params = (
         rewind  => sub { },
@@ -742,13 +744,13 @@ sub ifreeze (&$) {
 
     for my $meth ( 'prev', 'current' ) {
 
-        my $sub = _can_meth( $src, $meth );
+        my $sub = $ITERATOR_CLASS->_can_meth( $src, $meth );
 
         $params{$meth} = sub { $src->$sub() }
           if defined $sub;
     }
 
-    ITERATOR_CLASS->construct( %params );
+    $ITERATOR_CLASS->construct( %params );
 }
 
 

@@ -89,6 +89,9 @@ Dependencies are passed to the thaw routine only if they are present.
 sub construct {
 
     my $class = shift;
+    Carp::croak( "construct is a class method\n" )
+        if Scalar::Util::blessed $class;
+
     my %attr = ( exhausted => 'undef', @_ );
 
     my @roles;
@@ -164,6 +167,154 @@ sub construct {
     return $obj;
 }
 
+=method construct_from_iterable
+
+  $iter = Iterator::Flex::Iterator->construct_from_iterable( $iterable );
+
+Construct an iterator from an iterable thing.  The returned iterator will
+return C<undef> upon exhaustion.
+
+An iterable thing is
+
+=over
+
+=item an object with certain methods
+
+See L</construct_from_object>
+
+=item an arrayref
+
+The returned iterator will be an L<Iterator::Flex/iarray> iterator.
+
+=item a coderef
+
+The coderef must return the next element in the iteration.
+
+=item a globref
+
+=back
+
+=cut
+
+
+sub construct_from_iterable {
+
+    my $class = shift;
+
+    Carp::croak( "construct_from_iterable is a class method\n" )
+        if Scalar::Util::blessed $class;
+
+    my ( $obj ) = @_;
+
+    if ( Scalar::Util::blessed $obj) {
+
+        return $class->construct_from_object( $obj );
+    }
+
+    elsif ( Ref::Util::is_arrayref( $obj ) ) {
+
+        return Iterator::Flex::iarray( $obj );
+    }
+
+    elsif ( Ref::Util::is_coderef( $obj ) ) {
+
+        return $class->construct( next => $obj );
+    }
+
+    elsif ( is_globref( $obj ) ) {
+        return $class->construct( next => sub { scalar <$obj> } );
+    }
+
+    Carp::croak sprintf "'%s' object is not iterable", ( ref( $obj ) || 'SCALAR' );
+
+}
+
+=method construct_from_object
+
+  $iter = Iterator::Flex::Iterator->construct_from_object( $iterable );
+
+Construct an iterator from an object.  Normal use is to call L<construct_from_iterable> or
+simply use L<Iterator::Flex/iter>.  The returned iterator will return C<undef> upon exhaustion.
+
+
+An iterable object has one or more of the following methods
+
+=over
+
+=item C<__iter__> or C<iter>
+
+=item C<__next__> or C<next>
+
+=item an overloaded C<< <> >> operator
+
+This should return the next item.
+
+=item an overloaded C<< &{} >> operator
+
+This should return a subroutine which returns the next item.
+
+=back
+
+Additionally, if the object has the following methods, they are used
+by the constructed iterator:
+
+=over
+
+=item C<__prev__> or C<prev>
+
+=item C<__current__> or C<current>
+
+=back
+
+=cut
+
+
+sub construct_from_object {
+
+    my $class = shift;
+
+    Carp::croak( "construct_from_object is a class method\n" )
+        if Scalar::Util::blessed $class;
+
+
+    my $obj   = shift;
+
+    return $obj if $obj->isa( $class );
+
+
+    my %param;
+    my $code;
+
+    # assume the iterator returns undef on exhausted
+    $param{exhausted} = 'undef';
+
+    if ( $code = $class->_can_meth( $obj, 'iter' ) ) {
+        $param{next} = $code->( $obj );
+    }
+    elsif ( $code = $class->_can_meth( $obj, 'next' ) || overload::Method( $obj, '<>' ) ) {
+        $param{next} = sub { $code->( $obj ) };
+    }
+
+    elsif ( $code = overload::Method( $obj, '&{}' ) ) {
+          $param{next} = $code->( $obj );
+    }
+
+    elsif ( $code = overload::Method( $obj, '@{}' ) ) {
+
+          return Iterator::Flex::iarray( $code->( $obj ) );
+    }
+
+    for my $method ( 'prev', 'current' ) {
+        $code = $class->_can_meth( $obj, $method );
+
+        $param{$method} = sub { $code->( $obj ) }
+          if $code;
+    }
+
+    return $class->construct( %param );
+}
+
+
 sub DESTROY {
 
     if ( defined $_[0] ) {
@@ -171,6 +322,20 @@ sub DESTROY {
         delete $self->{_overload_next}
     }
 
+}
+
+sub _can_meth {
+
+    my $class = shift;
+    my ( $obj, $meth ) = @_;
+
+    my $sub;
+    foreach ( "__${meth}__", $meth ) {
+
+        last if defined( $sub = $obj->can( $_ ) );
+    }
+
+    return $sub;
 }
 
 
@@ -224,4 +389,3 @@ sub __iter__ {
 }
 
 1;
-
