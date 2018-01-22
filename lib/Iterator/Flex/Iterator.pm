@@ -114,7 +114,7 @@ sub construct {
                     && $depends->[$_]->isa( $class ) )
               } 0 .. $#{$depends};
         }
-        elsif ( $key eq 'name' ) {
+        elsif ( $key =~ /name|class/ ) {
             Carp::croak( "$_ must be a string\n" )
               if !defined $attr{$key}
               or Ref::Util::is_ref( $attr{$key} );
@@ -136,15 +136,24 @@ sub construct {
         }
     }
 
-    push @roles, 'Rewind'    if exists $attr{rewind};
-    push @roles, 'Reset'     if exists $attr{reset};
-    push @roles, 'Previous'  if exists $attr{prev};
-    push @roles, 'Current'   if exists $attr{current};
-    push @roles, 'Serialize' if exists $attr{freeze};
+    my $composed_class;
 
-    my $composed_class = Role::Tiny->create_class_with_roles( $class,
-        map { join( '::', $class, 'Role', $_ ) } @roles );
+    if ( defined $attr{class} ) {
+        $composed_class = $attr{class} =~ /::/ ? $attr{class} : join( '::', $class, $attr{class} );
+        Module::Runtime::require_module( $composed_class );
+    }
 
+    else {
+
+        push @roles, 'Rewind'    if exists $attr{rewind};
+        push @roles, 'Reset'     if exists $attr{reset};
+        push @roles, 'Previous'  if exists $attr{prev};
+        push @roles, 'Current'   if exists $attr{current};
+        push @roles, 'Serialize' if exists $attr{freeze};
+
+        $composed_class = Role::Tiny->create_class_with_roles( $class,
+                                                               map { join( '::', $class, 'Role', $_ ) } @roles );
+    }
 
 
     $attr{name} = $composed_class unless exists $attr{name};
@@ -162,6 +171,13 @@ sub construct {
     }
 
     return $obj;
+}
+
+sub _add_roles {
+
+    my $class = shift;
+
+    Role::Tiny->apply_roles_to_package( $class, map { "Iterator::Flex::Iterator::Role::$_" } @_ );
 }
 
 =method construct_from_iterable

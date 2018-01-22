@@ -155,6 +155,7 @@ sub _iarray {
 
     return $ITERATOR_CLASS->construct(
         name => 'iarray',
+        class => 'Array',
 
         reset => sub {
             $prev = $current = undef;
