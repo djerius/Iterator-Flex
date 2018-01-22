@@ -154,7 +154,7 @@ sub _iarray {
     $next = 0 unless defined $next;
 
     return $ITERATOR_CLASS->construct(
-                                     name => 'iarray',
+        name => 'iarray',
 
         reset => sub {
             $prev = $current = undef;
@@ -237,6 +237,8 @@ sub _icache {
     my ( $src, $prev, $current ) = @_;
 
     return $ITERATOR_CLASS->construct(
+
+        name => 'icache',
 
         reset => sub {
             $prev = $current = undef;
@@ -354,6 +356,7 @@ sub imap(&$) {
     $src = iter( $src );
 
     $ITERATOR_CLASS->construct(
+        name => 'imap',
         next => sub {
             my $value = $src->();
             if ( $src->is_exhausted ) {
@@ -523,7 +526,11 @@ sub _iproduct {
           }
     }
 
-    $ITERATOR_CLASS->construct( %params, exhausted => 'predicate', );
+    $ITERATOR_CLASS->construct(
+        %params,
+        exhausted => 'predicate',
+        name      => 'iproduct'
+    );
 }
 
 sub _iproduct_thaw {
@@ -675,6 +682,7 @@ sub _iseq {
 
     $ITERATOR_CLASS->construct(
         %params,
+        name      => 'iseq',
         exhausted => 'predicate',
         current   => sub { $current },
         prev      => sub { $prev },
@@ -729,6 +737,7 @@ sub ifreeze (&$) {
       unless $ITERATOR_CLASS->_can_meth( $src, 'freeze' );
 
     my %params = (
+        name    => 'ifreeze',
         rewind  => sub { },
         reset   => sub { },
         depends => $src,
@@ -837,7 +846,7 @@ Iterators may optionally return their previous value.
 
 Iterators return their current value.
 
-=item I<freeze>
+=Item I<freeze>
 
 Iterators may optionally provide a C<freeze> method for serialization.
 Iterators may be chained, and an iterator's dependencies are frozen automatically.
