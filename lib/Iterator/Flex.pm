@@ -846,7 +846,7 @@ Iterators may optionally return their previous value.
 
 Iterators return their current value.
 
-=Item I<freeze>
+=item I<freeze>
 
 Iterators may optionally provide a C<freeze> method for serialization.
 Iterators may be chained, and an iterator's dependencies are frozen automatically.
