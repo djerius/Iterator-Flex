@@ -146,9 +146,6 @@ sub construct {
         map { join( '::', $class, 'Role', $_ ) } @roles );
 
 
-    # # this slows down the class, even if the overload is never used.
-    # overload->import::into( $composed_class,
-    #     '&{}' => sub { $_[0]->{_overload_next} } );
 
     $attr{name} = $composed_class unless exists $attr{name};
     $attr{is_exhausted} = 0;
