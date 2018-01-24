@@ -42,11 +42,54 @@ version 0.04
 
 ## iterator
 
+    $iter = iterator { CODE }, ?%params;
+
+Construct an iterator from code. The code will have access to the
+iterator object through `$_[0]`.  The optional parameters are any of
+the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator::Flex::Base#construct).
+
+    By default the code is expected to return C<undef> upon exhaustion.
+
 ## iter
 
-    $iter = iter( $object );
+    $iter = iter( $iterable );
 
-Transform `$object` into an iterator.  It accepts
+Construct an iterator from an iterable thing. The iterator will
+return `undef` upon exhaustion.
+
+    An iterable thing is
+
+- an object
+
+    An iterable object has one or more of the following methods
+
+    - `__iter__` or `iter`
+    - `__next__` or `next`
+    - an overloaded `<>` operator
+
+        This should return the next item.
+
+    - an overloaded `&{}` operator
+
+        This should return a subroutine which returns the next item.
+
+    Additionally, if the object has the following methods, they are used
+    by the constructed iterator:
+
+    - `__prev__` or `prev`
+    - `__current__` or `current`
+
+    See ["construct\_from\_object"](#construct_from_object)
+
+- an arrayref
+
+    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator::Flex#iarray) iterator.
+
+- a coderef
+
+    The coderef must return the next element in the iteration.
+
+- a globref
 
 ## iarray
 

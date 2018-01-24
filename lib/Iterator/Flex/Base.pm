@@ -11,14 +11,20 @@ use Carp ();
 use Ref::Util;
 use Scalar::Util;
 use Role::Tiny ();
+use Role::Tiny::With ();
 use Import::Into;
 use Module::Runtime;
+
+use Iterator::Flex ();
+Role::Tiny::With::with 'Iterator::Flex::Role';
 
 use Iterator::Flex::Failure;
 
 our %REGISTRY;
 
 use overload ( '<>' => 'next', fallback => 1 );
+
+sub _ITERATOR_BASE { goto \&Iterator::Flex::_ITERATOR_BASE };
 
 =method construct
 

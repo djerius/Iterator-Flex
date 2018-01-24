@@ -14,16 +14,17 @@ our @EXPORT_OK
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Carp;
-use Scalar::Util qw[ blessed looks_like_number ];
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
-use List::Util qw[ pairkeys pairvalues all first ];
+use List::Util qw[ pairkeys pairvalues all ];
 
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
 use Iterator::Flex::Base;
 
-our $ITERATOR_CLASS = __PACKAGE__ . '::Base';
+our $ITERATOR_BASE_CLASS = __PACKAGE__ . '::Base';
+
+sub _ITERATOR_BASE { $ITERATOR_BASE_CLASS };
 
 
 =sub iterator
@@ -40,7 +41,7 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 =cut
 
 sub iterator(&%) {
-    $ITERATOR_CLASS->construct( next => $_[0], @_ );
+    $ITERATOR_BASE_CLASS->construct( next => $_[0], @_ );
 }
 
 
@@ -108,7 +109,7 @@ sub iter {
     return iterator { return }
     unless @_;
 
-    $ITERATOR_CLASS->construct_from_iterable( @_ );
+    $ITERATOR_BASE_CLASS->construct_from_iterable( @_ );
 }
 
 
@@ -139,64 +140,9 @@ The returned iterator supports the following methods:
 =cut
 
 sub iarray {
-    return _iarray( $_[0] );
+    require Iterator::Flex::Array;
+    return Iterator::Flex::Array->new( @_ );
 }
-
-sub _iarray {
-
-    my ( $arr, $prev, $current, $next ) = @_;
-
-    croak 'Argument to iarray must be ARRAY reference'
-      unless is_arrayref( $arr );
-
-    my $len = @$arr;
-
-    $next = 0 unless defined $next;
-
-    return $ITERATOR_CLASS->construct(
-        name => 'iarray',
-        class => 'Array',
-
-        reset => sub {
-            $prev = $current = undef;
-            $next = 0;
-        },
-
-        rewind => sub {
-            $next = 0;
-        },
-
-        prev => sub {
-            return defined $prev ? $arr->[$prev] : undef;
-        },
-
-        current => sub {
-            return defined $current ? $arr->[$current] : undef;
-        },
-
-        next => sub {
-            if ( $next == $len ) {
-                # if first time through, set current/prev
-                if ( !$_[0]->is_exhausted ) {
-                    $prev    = $current;
-                    $current = undef;
-                    $_[0]->set_exhausted;
-                }
-                return undef;
-            }
-            $prev    = $current;
-            $current = $next++;
-            return $arr->[$current];
-        },
-
-        freeze => sub {
-            return [ __PACKAGE__, '_iarray', [ $arr, $prev, $current, $next ] ];
-        },
-
-        exhausted => 'predicate',
-    );
-}
-
 
 =sub icache
 
@@ -225,63 +171,9 @@ The returned iterator supports the following methods:
 =cut
 
 sub icache {
-    _icache( iter( shift ), undef, undef );
+    require Iterator::Flex::Cache;
+    Iterator::Flex::Cache->new( iter( shift ), undef, undef );
 }
-
-sub _icache_thaw {
-    my ( $src ) = @{ pop @_ };
-    _icache( $src, @_ );
-}
-
-sub _icache {
-
-    my ( $src, $prev, $current ) = @_;
-
-    return $ITERATOR_CLASS->construct(
-
-        name => 'icache',
-
-        reset => sub {
-            $prev = $current = undef;
-        },
-
-        rewind => sub {
-        },
-
-        prev => sub {
-            return $prev;
-        },
-
-        current => sub {
-            return $current;
-        },
-
-        next => sub {
-
-            return undef
-              if $_[0]->is_exhausted;
-
-            $prev    = $current;
-            $current = $src->();
-
-            $_[0]->set_exhausted
-              if $src->is_exhausted;
-
-            return $current;
-        },
-
-        freeze => sub {
-            return [ __PACKAGE__, '_icache_thaw', [ $prev, $current ] ];
-        },
-
-        depends => $src,
-
-        exhausted => 'predicate',
-    );
-
-
-}
-
 
 
 =sub igrep
@@ -327,7 +219,7 @@ sub igrep(&$) {
 
     );
 
-    $ITERATOR_CLASS->construct( %params );
+    $ITERATOR_BASE_CLASS->construct( %params );
 }
 
 
@@ -356,7 +248,7 @@ sub imap(&$) {
 
     $src = iter( $src );
 
-    $ITERATOR_CLASS->construct(
+    $ITERATOR_BASE_CLASS->construct(
         name => 'imap',
         next => sub {
             my $value = $src->();
@@ -440,7 +332,7 @@ sub _iproduct {
     # can only work if the iterators support a rwind method
     croak( "iproduct requires that all iteratables provide a rewind method\n" )
       unless @iterator == grep { defined }
-      map { $ITERATOR_CLASS->_can_meth( $_, 'rewind' ) } @iterator;
+      map { $ITERATOR_BASE_CLASS->_can_meth( $_, 'rewind' ) } @iterator;
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
@@ -518,7 +410,7 @@ sub _iproduct {
     # can only freeze if the iterators support a prev method
     if (
         @iterator == grep { defined }
-        map { $ITERATOR_CLASS->_can_meth( $_, 'current' ) } @iterator
+        map { $ITERATOR_BASE_CLASS->_can_meth( $_, 'current' ) } @iterator
       )
     {
 
@@ -527,7 +419,7 @@ sub _iproduct {
           }
     }
 
-    $ITERATOR_CLASS->construct(
+    $ITERATOR_BASE_CLASS->construct(
         %params,
         exhausted => 'predicate',
         name      => 'iproduct'
@@ -584,119 +476,10 @@ The iterator supports the following methods:
 
 
 sub iseq {
-    splice( @_, 3 );
-    push @_, ( undef ) x 3;
-    goto \&_iseq;
+    require Iterator::Flex::Sequence;
+    Iterator::Flex::Sequence->new ( @_ );
 }
 
-sub _iseq {
-
-    # these get pushed on as $prev, $current, $next, so pop in opposite
-    # order
-    my ( $next, $current, $prev ) = ( pop, pop, pop );
-
-    croak( "iseq: arguments must be numbers\n" )
-      if first { !looks_like_number( $_ ) } @_;
-
-    my ( $begin, $end, $step );
-    my %params;
-
-    if ( @_ < 3 ) {
-
-        $end   = pop;
-        $begin = shift;
-
-        $begin = 0      unless defined $begin;
-        $next  = $begin unless defined $next;
-
-        %params = (
-            next => sub {
-                if ( $next > $end ) {
-                    if ( !$_[0]->is_exhausted ) {
-                        $prev    = $current;
-                        $current = undef;
-                        $_[0]->set_exhausted;
-                    }
-                    return undef;
-                }
-                $prev    = $current;
-                $current = $next++;
-                return $current;
-            },
-            freeze => sub {
-                [
-                    __PACKAGE__, '_iseq',
-                    [ $begin, $end, $prev, $current, $next ] ];
-            },
-        );
-    }
-
-    else {
-
-        ( $begin, $end, $step ) = @_;
-
-        croak(
-            "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
-          )
-          if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
-
-        $next = $begin unless defined $next;
-
-        %params = (
-            freeze => sub {
-                [
-                    __PACKAGE__, '_iseq',
-                    [ $begin, $end, $step, $prev, $current, $next ] ];
-            },
-
-            next => $begin < $end
-            ? sub {
-                if ( $next > $end ) {
-                    if ( !$_[0]->is_exhausted ) {
-                        $prev    = $current;
-                        $current = undef;
-                        $_[0]->set_exhausted;
-                    }
-                    return undef;
-                }
-                $prev    = $current;
-                $current = $next;
-                $next += $step;
-                return $current;
-            }
-            : sub {
-                if ( $next < $end ) {
-                    if ( !$_[0]->is_exhausted ) {
-                        $prev    = $current;
-                        $current = undef;
-                        $_[0]->set_exhausted;
-                    }
-                    return undef;
-                }
-                $prev    = $current;
-                $current = $next;
-                $next += $step;
-                return $current;
-            },
-        );
-    }
-
-    $ITERATOR_CLASS->construct(
-        %params,
-        name      => 'iseq',
-        exhausted => 'predicate',
-        current   => sub { $current },
-        prev      => sub { $prev },
-        rewind    => sub {
-            $next = $begin;
-        },
-        reset => sub {
-            $prev = $current = undef;
-            $next = $begin;
-        },
-    );
-
-}
 
 =sub ifreeze
 
@@ -735,7 +518,7 @@ sub ifreeze (&$) {
     my $src       = iter( shift );
 
     croak( "ifreeze requires that the iterator provide a freeze method\n" )
-      unless $ITERATOR_CLASS->_can_meth( $src, 'freeze' );
+      unless $ITERATOR_BASE_CLASS->_can_meth( $src, 'freeze' );
 
     my %params = (
         name    => 'ifreeze',
@@ -754,13 +537,13 @@ sub ifreeze (&$) {
 
     for my $meth ( 'prev', 'current' ) {
 
-        my $sub = $ITERATOR_CLASS->_can_meth( $src, $meth );
+        my $sub = $ITERATOR_BASE_CLASS->_can_meth( $src, $meth );
 
         $params{$meth} = sub { $src->$sub() }
           if defined $sub;
     }
 
-    $ITERATOR_CLASS->construct( %params );
+    $ITERATOR_BASE_CLASS->construct( %params );
 }
 
 
