@@ -1,6 +1,6 @@
 package Iterator::Flex::Role::ExhaustedUndef;
 
-# ABSTRACT: Role to add throw on exhaustion to an Iterator::Flex::Base
+# ABSTRACT: Role to wrap next() to set is_exhausted flag when next() returns undef
 
 use strict;
 use warnings;
@@ -18,7 +18,7 @@ use Role::Tiny;
 
 Wrapper for iterator next callback optimized for the case where
 iterator exhaustion is signalled by returning an C<undef> value.
-It changes the iterator state to C<EXHAUSTED> if it is exhausted.
+This sets the iterator object's C<is_exhausted> predicate.
 
 =cut
 
