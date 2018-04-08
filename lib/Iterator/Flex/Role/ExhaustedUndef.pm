@@ -27,14 +27,23 @@ sub _construct_next {
     my $class = shift;
     my $self = shift;
 
-    my $sub;
+    # ensure we don't hold any strong references in the subroutine
     my $next = $self->{next};
+    Scalar::Util::weaken $next;
 
+    my $sub;
     $sub = sub {
         my $val = $next->( $sub );
         $self->{is_exhausted} = ! defined $val;
         $val;
-    }
+    };
+
+    # create a second reference to the subroutine before we weaken $sub,
+    # otherwise $sub will lose its contents, as it would be the only
+    # reference.
+    my $rsub = $sub;
+    Scalar::Util::weaken( $sub );
+    return $rsub;
 }
 
 sub next { &{$_[0]} }

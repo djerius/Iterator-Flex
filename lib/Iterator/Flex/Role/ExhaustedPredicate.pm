@@ -27,7 +27,6 @@ sub _construct_next {
     my $self = shift;
 
     # ensure we don't hold any strong references in the subroutine
-
     my $next = $self->{next};
     Scalar::Util::weaken $next;
 
