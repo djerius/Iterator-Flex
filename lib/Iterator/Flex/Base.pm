@@ -26,6 +26,73 @@ use overload ( '<>' => 'next', fallback => 1 );
 
 sub _ITERATOR_BASE { goto \&Iterator::Flex::_ITERATOR_BASE };
 
+=method to_iterator
+
+  $iter = $class->to_iterator( $iterable );
+
+Construct an iterator from an iterable thing. The iterator will
+return C<undef> upon exhaustion.
+
+ An iterable thing is
+
+=over
+
+=item an object
+
+An iterable object has one or more of the following methods
+
+=over
+
+=item C<__iter__> or C<iter>
+
+=item C<__next__> or C<next>
+
+=item an overloaded C<< <> >> operator
+
+This should return the next item.
+
+=item an overloaded C<< &{} >> operator
+
+This should return a subroutine which returns the next item.
+
+=back
+
+Additionally, if the object has the following methods, they are used
+by the constructed iterator:
+
+=over
+
+=item C<__prev__> or C<prev>
+
+=item C<__current__> or C<current>
+
+=back
+
+See L</construct_from_object>
+
+=item an arrayref
+
+The returned iterator will be an L<Iterator::Flex/iarray> iterator.
+
+=item a coderef
+
+The coderef must return the next element in the iteration.
+
+=item a globref
+
+=back
+
+=cut
+
+sub to_iterator {
+
+    my $class = shift;
+
+    return $class->_ITERATOR_BASE->construct( next => sub { return } ) unless @_;
+
+    $class->_ITERATOR_BASE->construct_from_iterable( @_ );
+}
+
 =method construct
 
   $iterator = Iterator::Flex::Base->construct( %params );

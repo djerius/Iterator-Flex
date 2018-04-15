@@ -71,12 +71,12 @@ sub _construct {
     # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
-        @iterator = map { Iterator::Flex::iter( $_ ) } @$iterators;
+        @iterator = map { $class->to_iterator( $_ ) } @$iterators;
     }
 
     else {
         @keys = List::Util::pairkeys @$iterators;
-        @iterator = map { Iterator::Flex::iter( $_ ) } List::Util::pairvalues @$iterators;
+        @iterator = map { $class->to_iterator( $_ ) } List::Util::pairvalues @$iterators;
     }
 
     # can only work if the iterators support a rwind method

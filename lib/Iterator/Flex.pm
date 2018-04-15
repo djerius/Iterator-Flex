@@ -104,11 +104,7 @@ The coderef must return the next element in the iteration.
 =cut
 
 sub iter {
-
-    return iterator { return }
-    unless @_;
-
-    $ITERATOR_BASE_CLASS->construct_from_iterable( @_ );
+    $ITERATOR_BASE_CLASS->to_iterator( @_ );
 }
 
 
