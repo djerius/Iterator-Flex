@@ -41,10 +41,8 @@ The returned iterator supports the following methods:
 sub new {
 
     my $class = shift;
-
     $class->_construct( $_[0], undef, undef, undef );
-
-};
+}
 
 sub _construct {
 
