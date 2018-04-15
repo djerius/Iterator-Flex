@@ -16,7 +16,6 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 use Carp;
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
-use List::Util qw[ pairkeys pairvalues all ];
 
 ## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
 
@@ -299,149 +298,12 @@ C<prev> or C<__prev__> method.
 
 =back
 
-
 =cut
-
 
 sub iproduct {
 
-    @_ = ( [@_] );
-    goto \&_iproduct;
-}
-
-sub _iproduct {
-
-    my ( $iterators, $value ) = @_;
-
-    $value = [] unless defined $value;
-
-    my @keys;
-    my @iterator;
-
-# distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
-    if ( is_ref( $iterators->[0] ) ) {
-
-        @iterator = map { iter( $_ ) } @$iterators;
-    }
-
-    else {
-        @keys = pairkeys @$iterators;
-        @iterator = map { iter( $_ ) } pairvalues @$iterators;
-    }
-
-    # can only work if the iterators support a rwind method
-    croak( "iproduct requires that all iteratables provide a rewind method\n" )
-      unless @iterator == grep { defined }
-      map { $ITERATOR_BASE_CLASS->_can_meth( $_, 'rewind' ) } @iterator;
-
-    my @value = @$value;
-    my @set   = ( 1 ) x @value;
-
-    my %params = (
-        next => sub {
-            return undef if $_[0]->is_exhausted;
-
-            # first time through
-            if ( !@value ) {
-
-                for my $iter ( @iterator ) {
-                    push @value, $iter->();
-
-                    if ( $iter->is_exhausted ) {
-                        $_[0]->set_exhausted;
-                        return undef;
-                    }
-                }
-
-                @set = ( 1 ) x @value;
-            }
-
-            else {
-
-                $value[-1] = $iterator[-1]->();
-                if ( $iterator[-1]->is_exhausted ) {
-                    $set[-1] = 0;
-                    my $idx = @iterator - 1;
-                    while ( --$idx >= 0 ) {
-                        $value[$idx] = $iterator[$idx]->();
-                        last unless $iterator[$idx]->is_exhausted;
-                        $set[$idx] = 0;
-                    }
-
-                    if ( !$set[0] ) {
-                        $_[0]->set_exhausted;
-                        return undef;
-                    }
-
-                    while ( ++$idx < @iterator ) {
-                        $iterator[$idx]->rewind;
-                        $value[$idx] = $iterator[$idx]->();
-                        $set[$idx]   = 1;
-                    }
-                }
-
-            }
-            if ( @keys ) {
-                my %value;
-                @value{@keys} = @value;
-                return \%value;
-            }
-            else {
-                return [@value];
-            }
-        },
-
-        current => sub {
-            return undef if !@value || $_[0]->is_exhausted;
-            if ( @keys ) {
-                my %value;
-                @value{@keys} = @value;
-                return \%value;
-            }
-            else {
-                return [@value];
-            }
-        },
-        reset  => sub { @value = () },
-        rewind => sub { @value = () },
-        depends => \@iterator,
-    );
-
-    # can only freeze if the iterators support a prev method
-    if (
-        @iterator == grep { defined }
-        map { $ITERATOR_BASE_CLASS->_can_meth( $_, 'current' ) } @iterator
-      )
-    {
-
-        $params{freeze} = sub {
-            return [ __PACKAGE__, '_iproduct_thaw', [ \@keys ] ];
-          }
-    }
-
-    $ITERATOR_BASE_CLASS->construct(
-        %params,
-        exhausted => 'predicate',
-        name      => 'iproduct'
-    );
-}
-
-sub _iproduct_thaw {
-
-    my ( $keys, $iterators ) = @_;
-    my @value = map { $_->current } @$iterators;
-
-    if ( @$keys ) {
-
-        @$keys == @$iterators
-          or croak(
-            "iproduct thaw: number of keys not equal to number of iterators\n"
-          );
-
-        $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
-    }
-
-    _iproduct( $iterators, \@value );
+    require Iterator::Flex::Product;
+    return Iterator::Flex::Product->new( @_ );
 }
 
 =sub iseq
