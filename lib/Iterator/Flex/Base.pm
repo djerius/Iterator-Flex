@@ -490,4 +490,57 @@ sub __iter__ {
     $self->{next};
 }
 
+=method may
+
+  $bool = $iter->may( $method );
+
+Similar to L<can|UNIVERSAL/can>, except it checks to ensure that the
+method can be called on the iterators which C<$iter> depends on.  For
+example, it's possible that C<$iter> implements a C<rewind> method,
+but that it's dependencies do not.  In that case C<can|UNIVESAL/can>
+will return true, but C<may> will return false.
+
+=cut
+
+sub may {
+    return undef;
+}
+
+sub _may_meth {
+
+    my $obj  = shift;
+    my $meth = shift;
+
+    my $self = shift
+      // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+
+    my $pred = "_may_$meth";
+
+    $self->{$pred} //=
+      defined $self->{depends}
+      ? !List::Util::first { !$_->may( $meth ) } @{ $self->{depends} }
+      : 1;
+
+    return $self->{$pred};
+}
+
+sub _wrap_may {
+
+    my $class  = shift;
+    my $meth = shift;
+
+    return sub {
+
+        my $orig = shift;
+        my ( $obj, $what ) = @_;
+
+        return $obj->_may_meth( $meth )
+          if $what eq $meth;
+
+        &$orig;
+
+    };
+
+}
+
 1;

@@ -10,7 +10,7 @@ our $VERSION = '0.04';
 use Carp       ();
 use List::Util ();
 
-use Iterator::Flex;
+use Iterator::Flex::Base ();
 use Role::Tiny;
 
 =method rewind
@@ -30,11 +30,8 @@ sub rewind {
 
     if ( defined $self->{depends} ) {
 
-        # first check if dependencies can rewind.
-        my $cant
-          = List::Util::first { !$_->can( 'rewind' ) } @{ $self->{depends} };
-        Carp::croak( "dependency: @{[ $cant->{name} ]} is not rewindable\n" )
-          if $cant;
+        Carp::croak( "a dependency is not rewindable\n" )
+          unless $obj->_may_meth( 'rewind', $self );
 
         # now rewind them
         $_->rewind foreach @{ $self->{depends} };
@@ -47,6 +44,6 @@ sub rewind {
 }
 *__rewind__ = \&rewind;
 
-
+around may => Iterator::Flex::Base->_wrap_may( 'rewind' );
 
 1;

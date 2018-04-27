@@ -10,6 +10,7 @@ our $VERSION = '0.04';
 use Carp       ();
 use List::Util ();
 
+use Iterator::Flex::Base ();
 use Role::Tiny;
 
 =method reset
@@ -47,6 +48,6 @@ sub reset {
 }
 *__reset__ = \&reset;
 
-
+around may => Iterator::Flex::Base->_wrap_may( 'reset' );
 
 1;
