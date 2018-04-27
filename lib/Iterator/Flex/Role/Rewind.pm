@@ -25,7 +25,7 @@ Resets the iterator to its initial value.
 
 sub rewind {
 
-    my $obj = $_[0];
+    my $obj  = $_[0];
     my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
     if ( defined $self->{depends} ) {

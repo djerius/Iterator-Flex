@@ -10,7 +10,7 @@ our $VERSION = '0.04';
 use Carp ();
 use Ref::Util;
 use Scalar::Util;
-use Role::Tiny ();
+use Role::Tiny       ();
 use Role::Tiny::With ();
 use Import::Into;
 use Module::Runtime;
@@ -24,7 +24,7 @@ our %REGISTRY;
 
 use overload ( '<>' => 'next', fallback => 1 );
 
-sub _ITERATOR_BASE { goto \&Iterator::Flex::_ITERATOR_BASE };
+sub _ITERATOR_BASE { goto \&Iterator::Flex::_ITERATOR_BASE }
 
 =method to_iterator
 
@@ -88,7 +88,8 @@ sub to_iterator {
 
     my $class = shift;
 
-    return $class->_ITERATOR_BASE->construct( next => sub { return } ) unless @_;
+    return $class->_ITERATOR_BASE->construct( next => sub { return } )
+      unless @_;
 
     $class->_ITERATOR_BASE->construct_from_iterable( @_ );
 }
@@ -163,7 +164,7 @@ sub construct {
 
     my $class = shift;
     Carp::croak( "construct is a class method\n" )
-        if Scalar::Util::blessed $class;
+      if Scalar::Util::blessed $class;
 
     my %attr = ( exhausted => 'undef', @_ );
 
@@ -221,7 +222,8 @@ sub construct {
         push @roles, 'Current'   if exists $attr{current};
         push @roles, 'Serialize' if exists $attr{freeze};
 
-        $composed_class = Role::Tiny->create_class_with_roles( $class, map { $class->_module_name( 'Role' => $_ ) } @roles );
+        $composed_class = Role::Tiny->create_class_with_roles( $class,
+            map { $class->_module_name( 'Role' => $_ ) } @roles );
     }
 
 
@@ -244,11 +246,11 @@ sub construct {
 
 sub _module_name {
 
-    my $class = shift;
-    my $module = pop;
+    my $class     = shift;
+    my $module    = pop;
     my @hierarchy = @_;
 
-    return $module if $module  =~ /::/;
+    return $module if $module =~ /::/;
 
     $class = 'Iterator::Flex' if $class eq __PACKAGE__;
 
@@ -260,7 +262,8 @@ sub _add_roles {
 
     my $class = shift;
 
-    Role::Tiny->apply_roles_to_package( $class, map { "Iterator::Flex::Role::$_" } @_ );
+    Role::Tiny->apply_roles_to_package( $class,
+        map { "Iterator::Flex::Role::$_" } @_ );
 }
 
 =method construct_from_iterable
@@ -298,7 +301,7 @@ sub construct_from_iterable {
     my $class = shift;
 
     Carp::croak( "construct_from_iterable is a class method\n" )
-        if Scalar::Util::blessed $class;
+      if Scalar::Util::blessed $class;
 
     my ( $obj ) = @_;
 
@@ -321,7 +324,8 @@ sub construct_from_iterable {
         return $class->construct( next => sub { scalar <$obj> } );
     }
 
-    Carp::croak sprintf "'%s' object is not iterable", ( ref( $obj ) || 'SCALAR' );
+    Carp::croak sprintf "'%s' object is not iterable",
+      ( ref( $obj ) || 'SCALAR' );
 
 }
 
@@ -370,10 +374,10 @@ sub construct_from_object {
     my $class = shift;
 
     Carp::croak( "construct_from_object is a class method\n" )
-        if Scalar::Util::blessed $class;
+      if Scalar::Util::blessed $class;
 
 
-    my $obj   = shift;
+    my $obj = shift;
 
     return $obj if $obj->isa( $class );
 
@@ -387,17 +391,19 @@ sub construct_from_object {
     if ( $code = $class->_can_meth( $obj, 'iter' ) ) {
         $param{next} = $code->( $obj );
     }
-    elsif ( $code = $class->_can_meth( $obj, 'next' ) || overload::Method( $obj, '<>' ) ) {
+    elsif ( $code
+        = $class->_can_meth( $obj, 'next' ) || overload::Method( $obj, '<>' ) )
+    {
         $param{next} = sub { $code->( $obj ) };
     }
 
     elsif ( $code = overload::Method( $obj, '&{}' ) ) {
-          $param{next} = $code->( $obj );
+        $param{next} = $code->( $obj );
     }
 
     elsif ( $code = overload::Method( $obj, '@{}' ) ) {
 
-          return Iterator::Flex::iarray( $code->( $obj ) );
+        return Iterator::Flex::iarray( $code->( $obj ) );
     }
 
     for my $method ( 'prev', 'current' ) {
@@ -415,7 +421,7 @@ sub DESTROY {
 
     if ( defined $_[0] ) {
         my $self = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
-        delete $self->{_overload_next}
+        delete $self->{_overload_next};
     }
 
 }
@@ -445,7 +451,7 @@ Set the iterator's state to exhausted
 
 sub set_exhausted {
     my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $self->{is_exhausted} = defined $_[1] ? $_[1] : 1
+    $self->{is_exhausted} = defined $_[1] ? $_[1] : 1;
 }
 
 
