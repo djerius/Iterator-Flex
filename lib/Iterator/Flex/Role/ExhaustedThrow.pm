@@ -23,7 +23,7 @@ sub _construct_next {
     $sub = sub {
         my $val = $next->( $sub );
         Iterator::Flex::Failure::Exhausted->throw
-            if $self->{is_exhausted};
+            if ! defined $val && $self->{is_exhausted};
         $val;
     };
 
