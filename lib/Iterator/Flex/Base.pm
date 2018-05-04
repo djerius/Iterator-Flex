@@ -194,7 +194,7 @@ One of the following values:
 =item C<predicate>
 
 The iterator will signal its exhaustion by calling the C<L/set_prediate>
-method.  This state is queriable via the L</is_exhausted> predicate.
+method.  This state is queryable via the L</is_exhausted> predicate.
 
 =item C<throw>
 

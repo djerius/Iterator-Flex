@@ -1,5 +1,7 @@
 package Iterator::Flex::Array;
 
+# ABSTRACT: Array Iterator Class
+
 use strict;
 use warnings;
 

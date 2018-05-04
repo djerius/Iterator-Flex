@@ -1,5 +1,7 @@
 package Iterator::Flex::Role;
 
+# ABSTRACT: Iterator Methods to add Iterator::Flex Iterator modifiers
+
 use strict;
 use warnings;
 

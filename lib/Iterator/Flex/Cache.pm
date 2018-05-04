@@ -1,5 +1,7 @@
 package Iterator::Flex::Cache;
 
+# ABSTRACT: Cache Iterator Class
+
 use strict;
 use warnings;
 

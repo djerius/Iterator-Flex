@@ -1,5 +1,7 @@
 package Iterator::Flex::Sequence;
 
+# ABSTRACT: Numeric Sequence Iterator Class
+
 use strict;
 use warnings;
 
