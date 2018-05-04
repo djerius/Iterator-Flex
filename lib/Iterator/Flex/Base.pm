@@ -106,19 +106,49 @@ The following parameters are accepted:
 
 =over
 
+=item name I<optional>
+
+An optional name to be output during error messages
+
+=item class I<optional>
+
+If specified, the iterator will be blessed into this class.  Dynamic
+role assignments will not be performed; they should be performed
+statically by the class.
+
 =item next I<required>
 
-A subroutine which returns the next value.  It should return undefined
-if the iterator is exhausted.
+A subroutine which returns the next value.  When the iterator is
+exhausted, it should
+
+=over
+
+=item 1
+
+Call the L</set_exhausted> method
+
+=item 2
+
+return undefined
+
+=back
 
 =item prev I<optional>
 
 A subroutine which returns the previous value.  It should return undefined
 if the iterator is at the beginning.
 
+=item reset I<optional>
+
+A subroutine which resets the iterator such that
+L</next>, L</prev>, and L</current> return the values they would have
+if the iterator were initially started.
+
 =item rewind I<optional>
 
-A subroutine which resets the iterator to its initial value.
+A subroutine which rewinds the iterator such that the next element returned
+will be the first element from the iterator.  It does not alter the values
+returned by L</prev> or L</current>
 
 =item freeze I<optional>
 
@@ -153,6 +183,27 @@ for any other type of data.
 
 Dependencies are passed to the thaw routine only if they are present.
 
+=back
+
+=item exhausted I<optional>
+
+One of the following values:
+
+=over
+
+=item C<predicate>
+
+The iterator will signal its exhaustion by calling the C<L/set_prediate>
+method.  This state is queriable via the L</is_exhausted> predicate.
+
+=item C<throw>
+
+The iterator will signal its exhaustion by throwing an
+C<Iterator::Flex::Failure::Exhausted> exception.
+
+=item C<undef>
+
+The iterator will signal its exhaustion by returning the undefined value.
 
 =back
 
