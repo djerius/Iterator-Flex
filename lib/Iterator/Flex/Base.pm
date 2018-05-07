@@ -479,7 +479,8 @@ sub DESTROY {
 
 sub _can_meth {
 
-    my $class = shift;
+    # my $class = shift;
+    shift;
     my ( $obj, $meth ) = @_;
 
     my $sub;
@@ -577,7 +578,8 @@ sub _may_meth {
 
 sub _wrap_may {
 
-    my $class  = shift;
+    # my $class  = shift;
+    shift;
     my $meth = shift;
 
     return sub {

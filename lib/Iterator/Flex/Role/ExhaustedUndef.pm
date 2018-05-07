@@ -24,7 +24,8 @@ This sets the iterator object's C<is_exhausted> predicate.
 
 sub _construct_next {
 
-    my $class = shift;
+    # my $class = shift;
+    shift;
     my $self = shift;
 
     # ensure we don't hold any strong references in the subroutine

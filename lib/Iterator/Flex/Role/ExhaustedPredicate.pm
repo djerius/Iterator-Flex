@@ -23,7 +23,8 @@ the iterator itself indicates it is exhausted by calling the C<set_exhausted> me
 
 sub _construct_next {
 
-    my $class = shift;
+    # my $class = shift;
+    shift;
     my $self = shift;
 
     # ensure we don't hold any strong references in the subroutine
