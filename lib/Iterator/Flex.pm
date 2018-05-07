@@ -217,25 +217,8 @@ The iterator supports the following methods:
 
 sub imap(&$) {
 
-    my ( $code, $src ) = @_;
-
-    $src = iter( $src );
-
-    $ITERATOR_BASE_CLASS->construct(
-        name => 'imap',
-        next => sub {
-            my $value = $src->();
-            if ( $src->is_exhausted ) {
-                $_[0]->set_exhausted;
-                return undef;
-            }
-            local $_ = $value;
-            return $code->();
-        },
-        reset     => sub { },
-        depends   => $src,
-        exhausted => 'predicate',
-    );
+    require Iterator::Flex::Map;
+    Iterator::Flex::Map->new( @_ );
 }
 
 
