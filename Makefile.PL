@@ -24,10 +24,11 @@ my %WriteMakefileArgs = (
     "Module::Runtime" => 0,
     "Ref::Util" => 0,
     "Role::Tiny" => 0,
+    "Role::Tiny::With" => 0,
     "Scalar::Util" => 0,
-    "constant" => 0,
     "custom::failures" => 0,
     "overload" => 0,
+    "parent" => 0,
     "strict" => 0,
     "warnings" => 0
   },
@@ -60,12 +61,13 @@ my %FallbackPrereqs = (
   "Module::Runtime" => 0,
   "Ref::Util" => 0,
   "Role::Tiny" => 0,
+  "Role::Tiny::With" => 0,
   "Scalar::Util" => 0,
   "Test2::V0" => 0,
   "Test::More" => 0,
-  "constant" => 0,
   "custom::failures" => 0,
   "overload" => 0,
+  "parent" => 0,
   "strict" => 0,
   "warnings" => 0
 );
