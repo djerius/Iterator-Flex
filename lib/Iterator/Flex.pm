@@ -191,30 +191,8 @@ The iterator supports the following methods:
 =cut
 
 sub igrep(&$) {
-
-    my ( $code, $src ) = @_;
-    $src = iter( $src );
-
-    my %params = (
-        name => 'igrep',
-        next => sub {
-
-            foreach ( ; ; ) {
-                my $rv = $src->();
-                last if $src->is_exhausted;
-                local $_ = $rv;
-                return $rv if $code->();
-            }
-            $_[0]->set_exhausted;
-            return undef;
-        },
-        reset     => sub { },
-        depends   => $src,
-        exhausted => 'predicate',
-
-    );
-
-    $ITERATOR_BASE_CLASS->construct( %params );
+    require Iterator::Flex::Grep;
+    Iterator::Flex::Grep->new( @_ );
 }
 
 
