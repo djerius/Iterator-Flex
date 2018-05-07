@@ -5,7 +5,7 @@ package Iterator::Flex::Failure;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use custom::failures qw/Exhausted/;
 

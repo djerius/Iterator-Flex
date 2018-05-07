@@ -5,7 +5,7 @@ package Iterator::Flex::Product;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp ();
 use parent 'Iterator::Flex::Base';
