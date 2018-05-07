@@ -17,7 +17,10 @@ use Ref::Util;
 
   $iterator = Iterator::Flex::Cache->new( $iterable );
 
-The iterator caches the current and previous values of the passed iterator,
+The iterator caches the current and previous values of C<$iterable>,
+C<$iteratable> is converted into an iterator (if it is not already
+one) via C<$class->to_iterator>, which defaults to
+L<Iterator::Flex::Base/to_iterable>).
 
 The returned iterator supports the following methods:
 
@@ -53,6 +56,8 @@ sub _construct {
     my $class = shift;
 
     my ( $src, $prev, $current ) = @_;
+
+    $src = $class->to_iterator( $src );
 
     return $class->_ITERATOR_BASE->construct(
 

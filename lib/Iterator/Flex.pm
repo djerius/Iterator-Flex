@@ -167,7 +167,7 @@ The returned iterator supports the following methods:
 
 sub icache {
     require Iterator::Flex::Cache;
-    Iterator::Flex::Cache->new( iter( shift ), undef, undef );
+    Iterator::Flex::Cache->new( shift, undef, undef );
 }
 
 
