@@ -2,6 +2,26 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.04      2018-05-04 17:21:15-04:00 America/New_York
+
+  [BUG FIXES]
+
+    * ifreeze properly handles exhausted predicates
+
+  [ENHANCEMENT]
+
+    * new iterator method "may", indicates if it and it's dependencies
+      support a method.
+
+    * more optimization; should make things faster (by some unknown amount)
+
+  [INTERNAL CHANGES]
+
+    * move implementation of iterators out of Flex and into
+      separate classes.
+
+
+
 0.03      2018-01-16 13:27:23-05:00 America/New_York
 
   [ BUG FIX ]
