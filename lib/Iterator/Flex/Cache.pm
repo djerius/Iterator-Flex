@@ -11,8 +11,6 @@ use Carp ();
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 
-## no critic ( ProhibitExplicitReturnUndef )
-
 =method new
 
   $iterator = Iterator::Flex::Cache->new( $iterable );

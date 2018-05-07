@@ -12,8 +12,6 @@ use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util ();
 
-## no critic ( ProhibitExplicitReturnUndef )
-
 =method new
 
   $iterator = Iterator::Flex::Product->new( $iterable1, $iterable2, ... );

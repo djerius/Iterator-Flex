@@ -13,8 +13,6 @@ use List::Util;
 
 use parent 'Iterator::Flex::Base';
 
-## no critic ( ProhibitExplicitReturnUndef )
-
 =method new
 
   # integer sequence starting at 0, incrementing by 1, ending at $end

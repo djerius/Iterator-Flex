@@ -44,8 +44,6 @@ sub new {
     $class->_construct( @_ );
 }
 
-## no critic ( ProhibitExplicitReturnUndef )
-
 sub _construct {
 
     my $class = shift;

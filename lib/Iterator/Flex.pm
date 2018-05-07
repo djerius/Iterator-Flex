@@ -17,8 +17,6 @@ use Carp;
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
 
-## no critic ( ProhibitExplicitReturnUndef ProhibitSubroutinePrototypes)
-
 use Iterator::Flex::Base;
 
 our $ITERATOR_BASE_CLASS = __PACKAGE__ . '::Base';
