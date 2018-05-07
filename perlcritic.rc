@@ -1,0 +1,6 @@
+verbose = 9
+exclude = Subroutines::ProhibitSubroutinePrototypes Subroutines::ProhibitExplicitReturnUndef ValuesAndExpressions::ProhibitAccessOfPrivateData
+
+[TestingAndDebugging::RequireUseStrict]
+equivalent_modules = App::WolterPlay::Base
+
