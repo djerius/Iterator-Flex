@@ -15,7 +15,6 @@ use Role::Tiny::With ();
 use Import::Into;
 use Module::Runtime;
 
-use Iterator::Flex ();
 Role::Tiny::With::with 'Iterator::Flex::Role';
 
 use Iterator::Flex::Failure;
@@ -24,7 +23,10 @@ our %REGISTRY;
 
 use overload ( '<>' => 'next', fallback => 1 );
 
-sub _ITERATOR_BASE { goto \&Iterator::Flex::_ITERATOR_BASE }
+sub _ITERATOR_BASE {
+    require Iterator::Flex;
+    goto \&Iterator::Flex::_ITERATOR_BASE;
+}
 
 =method to_iterator
 
@@ -72,7 +74,7 @@ See L</construct_from_object>
 
 =item an arrayref
 
-The returned iterator will be an L<Iterator::Flex/iarray> iterator.
+The returned iterator will be an L<Iterator::Flex::Array> iterator.
 
 =item a coderef
 
@@ -334,7 +336,7 @@ See L</construct_from_object>
 
 =item an arrayref
 
-The returned iterator will be an L<Iterator::Flex/iarray> iterator.
+The returned iterator will be an L<Iterator::Flex::Array> iterator.
 
 =item a coderef
 
@@ -363,7 +365,8 @@ sub construct_from_iterable {
 
     elsif ( Ref::Util::is_arrayref( $obj ) ) {
 
-        return Iterator::Flex::iarray( $obj );
+        require Iterator::Flex::Array;
+        return Iterator::Flex::Array->new( $obj );
     }
 
     elsif ( Ref::Util::is_coderef( $obj ) ) {
@@ -454,7 +457,8 @@ sub construct_from_object {
 
     elsif ( $code = overload::Method( $obj, '@{}' ) ) {
 
-        return Iterator::Flex::iarray( $code->( $obj ) );
+        require Iterator::Flex::Array;
+        return Iterator::Flex::Array->new( $code->( $obj ) );
     }
 
     for my $method ( 'prev', 'current' ) {
