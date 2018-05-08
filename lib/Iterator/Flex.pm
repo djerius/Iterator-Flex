@@ -26,7 +26,7 @@ sub _ITERATOR_BASE { $ITERATOR_BASE_CLASS };
 
 =sub iterator
 
-  $iter = iterator { CODE }, ?%params;
+  $iter = iterator { CODE } ?%params;
 
 Construct an iterator from code. The code will have access to the
 iterator object through C<$_[0]>.  The optional parameters are any of
@@ -37,8 +37,8 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 
 =cut
 
-sub iterator(&%) {
-    $ITERATOR_BASE_CLASS->construct( next => $_[0], @_ );
+sub iterator(&@) {
+    $ITERATOR_BASE_CLASS->construct( next => shift, @_ );
 }
 
 
