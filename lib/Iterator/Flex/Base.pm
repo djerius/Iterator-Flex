@@ -140,6 +140,11 @@ return undefined
 A subroutine which returns the previous value.  It should return undefined
 if the iterator is at the beginning.
 
+=item current I<optional>
+
+A subroutine which returns the current value without fetching.  It should return undefined
+if the iterator is at the beginning.
+
 =item reset I<optional>
 
 A subroutine which resets the iterator such that
