@@ -2,6 +2,13 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.05      2018-05-07 12:21:27-04:00 America/New_York
+
+  [ENHANCEMENT]
+
+    * arbitrary methods may be added to iterator classes
+
+
 0.04      2018-05-04 17:21:15-04:00 America/New_York
 
   [BUG FIXES]
