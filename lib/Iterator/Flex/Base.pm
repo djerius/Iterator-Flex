@@ -19,6 +19,7 @@ use Safe::Isa;
 Role::Tiny::With::with 'Iterator::Flex::Role';
 
 use Iterator::Flex::Failure;
+use Iterator::Flex::Role::Method;
 
 our %REGISTRY;
 
@@ -294,9 +295,6 @@ sub construct {
         push @roles, 'Serialize' if exists $attr{freeze};
 
         if ( exists $attr{methods} ) {
-
-            require Iterator::Flex::Role::Method;
-            Iterator::Flex::Role::Method->import;
 
             for my $name ( keys %{ $attr{methods} } ) {
 

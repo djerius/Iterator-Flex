@@ -21,5 +21,9 @@ my $iter = iterator {
 is ( $iter->next, 10, "first value" );
 is ( $iter->now, 9, "method call" );
 
+# creating another now method should succeed
+my $error;
+ok( lives { iterator( sub {}, methods => { now => sub {} } );  },
+    'reuse method name' ) or note $@;
 
 done_testing;
