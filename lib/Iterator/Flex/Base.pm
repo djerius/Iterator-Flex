@@ -14,6 +14,7 @@ use Role::Tiny       ();
 use Role::Tiny::With ();
 use Import::Into;
 use Module::Runtime;
+use Safe::Isa;
 
 Role::Tiny::With::with 'Iterator::Flex::Role';
 
@@ -117,6 +118,11 @@ An optional name to be output during error messages
 If specified, the iterator will be blessed into this class.  Dynamic
 role assignments will not be performed; they should be performed
 statically by the class.
+
+=item methods I<optional>
+
+A hash whose keys are method names and whose values are coderefs.  These will
+be added as methods to the iterator class with the given name.
 
 =item next I<required>
 
@@ -260,6 +266,13 @@ sub construct {
               unless Module::Runtime::require_module( $module );
             push @roles, $role;
         }
+        elsif ( $key eq 'methods' ) {
+            Carp::croak( "value for methods attribute must be a hash reference\n" )
+              unless Ref::Util::is_hashref( $attr{$key} );
+
+            Carp::croak( "methods attribute hash values must be code references\n" )
+                if grep { ! Ref::Util::is_coderef( $_ ) } values %{ $attr{methods} };
+        }
         else {
             Carp::croak( "unknown attribute: $key\n" );
         }
@@ -280,8 +293,30 @@ sub construct {
         push @roles, 'Current'   if exists $attr{current};
         push @roles, 'Serialize' if exists $attr{freeze};
 
+        if ( exists $attr{methods} ) {
+
+            require Iterator::Flex::Role::Method;
+            Iterator::Flex::Role::Method->import;
+
+            for my $name ( keys %{ $attr{methods} } ) {
+
+                my $cap_name = ucfirst( $name );
+
+                eval {
+                    print Method( $cap_name,  name => $name ), "\n";
+                    push @roles, [ Method => $cap_name ];
+                };
+
+                my $error = $@;
+
+                die $error
+                  if $error
+                  && !$error->$_isa( 'Iterator::Flex::Failure::RoleExists' );
+            }
+        }
+
         $composed_class = Role::Tiny->create_class_with_roles( $class,
-            map { $class->_module_name( 'Role' => $_ ) } @roles );
+            map { $class->_module_name( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
     }
 
 

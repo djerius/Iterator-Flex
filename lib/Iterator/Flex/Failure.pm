@@ -7,6 +7,6 @@ use warnings;
 
 our $VERSION = '0.05';
 
-use custom::failures qw/Exhausted/;
+use custom::failures qw/Exhausted RoleExists/;
 
 1;
