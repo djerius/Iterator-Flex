@@ -27,22 +27,22 @@ sub reset {
 
     my $obj = $_[0];
 
-    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
-    if ( defined $self->{depends} ) {
+    if ( defined $attributes->{depends} ) {
 
         # first check if dependencies can reset.
         my $cant
-          = List::Util::first { !$_->can( 'reset' ) } @{ $self->{depends} };
+          = List::Util::first { !$_->can( 'reset' ) } @{ $attributes->{depends} };
         Carp::croak( "dependency: @{[ $cant->{name} ]} is not resetable\n" )
           if $cant;
 
         # now reset them
-        $_->reset foreach @{ $self->{depends} };
+        $_->reset foreach @{ $attributes->{depends} };
     }
 
-    $self->{reset}->( $obj );
-    $self->{is_exhausted} = 0;
+    $attributes->{reset}->( $obj );
+    $attributes->{is_exhausted} = 0;
 
     return;
 }

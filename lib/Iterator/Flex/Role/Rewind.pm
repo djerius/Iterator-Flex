@@ -26,19 +26,19 @@ Resets the iterator to its initial value.
 sub rewind {
 
     my $obj  = $_[0];
-    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
-    if ( defined $self->{depends} ) {
+    if ( defined $attributes->{depends} ) {
 
         Carp::croak( "a dependency is not rewindable\n" )
-          unless $obj->_may_meth( 'rewind', $self );
+          unless $obj->_may_meth( 'rewind', $attributes );
 
         # now rewind them
-        $_->rewind foreach @{ $self->{depends} };
+        $_->rewind foreach @{ $attributes->{depends} };
     }
 
-    $self->{rewind}->( $obj );
-    $self->{is_exhausted} = 0;
+    $attributes->{rewind}->( $obj );
+    $attributes->{is_exhausted} = 0;
 
     return;
 }

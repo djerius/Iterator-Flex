@@ -21,9 +21,9 @@ Returns the current value.
 
 sub current {
 
-    my $self = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
 
-    $self->{current}->( $_[0] );
+    $attributes->{current}->( $_[0] );
 }
 *__current__ = \&current;
 

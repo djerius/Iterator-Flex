@@ -14,17 +14,17 @@ sub _construct_next {
 
     # my $class = shift;
     shift;
-    my $self = shift;
+    my $attributes = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $next = $self->{next};
+    my $next = $attributes->{next};
     Scalar::Util::weaken $next;
 
     my $sub;
     $sub = sub {
         my $val = $next->( $sub );
         Iterator::Flex::Failure::Exhausted->throw
-            if ! defined $val && $self->{is_exhausted};
+            if ! defined $val && $attributes->{is_exhausted};
         $val;
     };
 

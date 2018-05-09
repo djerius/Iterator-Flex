@@ -480,8 +480,8 @@ sub construct_from_object {
 sub DESTROY {
 
     if ( defined $_[0] ) {
-        my $self = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
-        delete $self->{_overload_next};
+        my $attributes = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
+        delete $attributes->{_overload_next};
     }
 
 }
@@ -511,8 +511,8 @@ Set the iterator's state to exhausted
 =cut
 
 sub set_exhausted {
-    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $self->{is_exhausted} = defined $_[1] ? $_[1] : 1;
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{is_exhausted} = defined $_[1] ? $_[1] : 1;
 }
 
 
@@ -534,8 +534,8 @@ will switch the iterator state to I<exhausted>.
 =cut
 
 sub is_exhausted {
-    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $self->{is_exhausted};
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{is_exhausted};
 }
 
 =method __iter__
@@ -547,8 +547,8 @@ Returns the subroutine which returns the next value from the iterator.
 =cut
 
 sub __iter__ {
-    my $self = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $self->{next};
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{next};
 }
 
 =method may
@@ -572,17 +572,17 @@ sub _may_meth {
     my $obj  = shift;
     my $meth = shift;
 
-    my $self = shift
+    my $attributes = shift
       // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
 
     my $pred = "_may_$meth";
 
-    $self->{$pred} //=
-      defined $self->{depends}
-      ? !List::Util::first { !$_->may( $meth ) } @{ $self->{depends} }
+    $attributes->{$pred} //=
+      defined $attributes->{depends}
+      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{depends} }
       : 1;
 
-    return $self->{$pred};
+    return $attributes->{$pred};
 }
 
 sub _wrap_may {
