@@ -11,7 +11,7 @@ use Iterator::Flex::Failure 'RoleExists';
 use Module::Runtime 'module_notional_filename';
 
 sub make_variant_package_name {
-  my ($class, $package, %arg) = @_;
+  my ($class, $package ) = @_;
 
   $package = "Iterator::Flex::Role::Method::$package";
 
