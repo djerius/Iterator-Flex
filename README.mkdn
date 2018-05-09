@@ -42,7 +42,7 @@ version 0.05
 
 ## iterator
 
-    $iter = iterator { CODE }, ?%params;
+    $iter = iterator { CODE } ?%params;
 
 Construct an iterator from code. The code will have access to the
 iterator object through `$_[0]`.  The optional parameters are any of
