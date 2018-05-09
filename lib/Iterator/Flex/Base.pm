@@ -319,7 +319,6 @@ sub construct {
             map { $class->_module_name( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
     }
 
-
     $attr{name} = $composed_class unless exists $attr{name};
     $attr{is_exhausted} = 0;
 
@@ -485,8 +484,8 @@ sub construct_from_object {
     if ( $code = $class->_can_meth( $obj, 'iter' ) ) {
         $param{next} = $code->( $obj );
     }
-    elsif ( $code
-        = $class->_can_meth( $obj, 'next' ) || overload::Method( $obj, '<>' ) )
+    elsif ( $code = $class->_can_meth( $obj, 'next' )
+        || overload::Method( $obj, '<>' ) )
     {
         $param{next} = sub { $code->( $obj ) };
     }
