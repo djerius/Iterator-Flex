@@ -5,7 +5,7 @@ package Iterator::Flex::Sequence;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Carp ();
 use Scalar::Util;
