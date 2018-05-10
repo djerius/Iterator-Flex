@@ -302,7 +302,6 @@ sub construct {
 
                 eval {
                     Iterator::Flex::Utils::create_method( $cap_name,  name => $name );
-                    push @roles, [ Method => $cap_name ];
                 };
 
                 my $error = $@;
@@ -310,6 +309,8 @@ sub construct {
                 die $error
                   if $error
                   && !$error->$_isa( 'Iterator::Flex::Failure::RoleExists' );
+
+                push @roles, [ Method => $cap_name ];
             }
         }
 

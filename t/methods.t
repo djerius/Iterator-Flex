@@ -23,7 +23,9 @@ is ( $iter->now, 9, "method call" );
 
 # creating another now method should succeed
 my $error;
-ok( lives { iterator( sub {}, methods => { now => sub {} } );  },
+ok( lives { $iter = iterator( sub {}, methods => { now => sub {} } );  },
     'reuse method name' ) or note $@;
+
+can_ok( $iter, [ 'now' ], "method created for second iterator" );
 
 done_testing;
