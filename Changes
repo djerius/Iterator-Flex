@@ -2,6 +2,14 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.06      2018-05-07 12:21:27-04:00 America/New_York
+
+
+  [BUG FIX]
+
+    * method for detecting existing method roles was broken
+
+
 0.05      2018-05-07 12:21:27-04:00 America/New_York
 
   [ENHANCEMENT]
