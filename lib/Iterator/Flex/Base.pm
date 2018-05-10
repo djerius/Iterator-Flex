@@ -19,7 +19,7 @@ use Safe::Isa;
 Role::Tiny::With::with 'Iterator::Flex::Role';
 
 use Iterator::Flex::Failure;
-use Iterator::Flex::Role::Method;
+use Iterator::Flex::Utils;
 
 our %REGISTRY;
 
@@ -301,7 +301,7 @@ sub construct {
                 my $cap_name = ucfirst( $name );
 
                 eval {
-                    print Method( $cap_name,  name => $name ), "\n";
+                    Iterator::Flex::Utils::create_method( $cap_name,  name => $name );
                     push @roles, [ Method => $cap_name ];
                 };
 
