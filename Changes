@@ -2,6 +2,11 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+  [BUG FIX]
+
+    * subsequent creation of iterators with a method
+      did not incorporate the method
+
 0.06      2018-05-07 12:21:27-04:00 America/New_York
 
 
