@@ -122,8 +122,16 @@ statically by the class.
 
 =item methods I<optional>
 
-A hash whose keys are method names and whose values are coderefs.  These will
-be added as methods to the iterator class with the given name.
+A hash whose keys are method names and whose values are coderefs.
+These will be added as methods to the iterator class.  The coderef
+will be called as
+
+  $coderef->( $attributes, @args );
+
+where C<$attributes> is the hash containing the iterator's attributes
+(recall that the actual iterator object is a coderef, so iterator
+attributes are not stored in the object), and @args are the arguments
+the method was originally called with.
 
 =item next I<required>
 
