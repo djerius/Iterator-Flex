@@ -10,7 +10,7 @@ our $VERSION = '0.08';
 use Exporter 'import';
 
 our @EXPORT_OK
-  = qw[ iterator iter iarray icache igrep imap iproduct iseq ifreeze thaw ];
+  = qw[ iterator iter iarray icycle icache igrep imap iproduct iseq ifreeze thaw ];
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Carp;
@@ -166,6 +166,35 @@ The returned iterator supports the following methods:
 sub icache {
     require Iterator::Flex::Cache;
     Iterator::Flex::Cache->new( shift, undef, undef );
+}
+
+=sub icycle
+
+  $iterator = icycle( $array_ref );
+
+Wrap an array in an iterator.  The iterator will continuously cycle through the array's values.
+
+=over
+
+=item current
+
+=item next
+
+=item prev
+
+=item rewind
+
+=item reset
+
+=item freeze
+
+=back
+
+=cut
+
+sub icycle {
+    require Iterator::Flex::Cycle;
+    return Iterator::Flex::Cycle->new( $_[0] );
 }
 
 

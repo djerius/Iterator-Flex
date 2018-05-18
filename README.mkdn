@@ -121,6 +121,19 @@ The returned iterator supports the following methods:
 - current
 - freeze
 
+## icycle
+
+    $iterator = icycle( $array_ref );
+
+Wrap an array in an iterator.  The iterator will continuously cycle through the array's values.
+
+- current
+- next
+- prev
+- rewind
+- reset
+- freeze
+
 ## igrep
 
     $iterator = igrep { CODE } $iterable;
