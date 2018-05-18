@@ -2,6 +2,13 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.08      2018-05-18 15:12:15-04:00 America/New_York
+
+  [ENHANCEMENT]
+
+    * new iterator, Cycle/icycle, cycles through an array.
+
+
 0.07      2018-05-14 10:49:43-04:00 America/New_York
 
   [BUG FIX]
