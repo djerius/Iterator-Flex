@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Serialize;
 use strict;
 use warnings;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp ();
 use List::Util ();
