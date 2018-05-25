@@ -239,53 +239,63 @@ sub construct {
     Carp::croak( "construct is a class method\n" )
       if Scalar::Util::blessed $class;
 
-    my %attr = ( exhausted => 'undef', @_ );
+    my %iattr = ( exhausted => 'undef', @_ );
+    my %attr;
 
     my @roles;
 
-    for my $key ( keys %attr ) {
+    my $attr;
+
+    if ( defined( $attr = delete $iattr{depends} ) ) {
+
+        $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
+        $attr{depends} = $attr;
+
+        Carp::croak( "dependency #$_ is not an iterator object\n" )
+          for grep {
+            !( Scalar::Util::blessed( $attr->[$_] )
+                && $attr->[$_]->isa( $class ) )
+          } 0 .. $#{$attr};
+    }
+
+    if ( defined( $attr = delete $iattr{exhausted} ) ) {
+        my $role = 'Exhausted' . ucfirst( $attr );
+        my $module = $class->_module_name( Role => $role );
+        croak( "unknown means of handling exhausted iterators: $attr\n" )
+          unless Module::Runtime::require_module( $module );
+        push @roles, $role;
+    }
+
+    if ( defined( $attr = delete $iattr{methods} ) ) {
+        Carp::croak( "value for methods attribute must be a hash reference\n" )
+          unless Ref::Util::is_hashref( $attr );
+
+        Carp::croak( "methods attribute hash values must be code references\n" )
+          if grep { !Ref::Util::is_coderef( $_ ) } values %{$attr};
+
+        $attr{methods} = $attr;
+    }
+
+
+    for my $key ( keys %iattr ) {
 
         if ( $key =~ /^(init|next|prev|rewind|reset|freeze|current)$/ ) {
-            Carp::croak( "value for $_ attribute must be a code reference\n" )
+            $attr{$key} = delete $iattr{$key};
+
+            Carp::croak( "'$key' attribute value must be a code reference\n" )
               unless Ref::Util::is_coderef $attr{$key};
         }
-        elsif ( $key eq 'depends' ) {
 
-            $attr{$key} = [ $attr{$key} ]
-              unless Ref::Util::is_arrayref( $attr{$key} );
-            my $depends = $attr{$key};
-
-            Carp::croak( "dependency #$_ is not an iterator object\n" )
-              for grep {
-                !( Scalar::Util::blessed( $depends->[$_] )
-                    && $depends->[$_]->isa( $class ) )
-              } 0 .. $#{$depends};
-        }
         elsif ( $key =~ /name|class/ ) {
-            Carp::croak( "$_ must be a string\n" )
+            $attr{$key} = delete $iattr{$key};
+            Carp::croak( "'$key' attribute value must be a string\n" )
               if !defined $attr{$key}
               or Ref::Util::is_ref( $attr{$key} );
         }
-        elsif ( $key eq 'exhausted' ) {
-
-            my $role = 'Exhausted' . ucfirst( $attr{$key} );
-            my $module = $class->_module_name( Role => $role );
-            croak(
-                "unknown means of handling exhausted iterators: $attr{$key}\n" )
-              unless Module::Runtime::require_module( $module );
-            push @roles, $role;
-        }
-        elsif ( $key eq 'methods' ) {
-            Carp::croak( "value for methods attribute must be a hash reference\n" )
-              unless Ref::Util::is_hashref( $attr{$key} );
-
-            Carp::croak( "methods attribute hash values must be code references\n" )
-                if grep { ! Ref::Util::is_coderef( $_ ) } values %{ $attr{methods} };
-        }
-        else {
-            Carp::croak( "unknown attribute: $key\n" );
-        }
     }
+
+    Carp::croak( "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" )
+        if keys %iattr;
 
     my $composed_class;
 
