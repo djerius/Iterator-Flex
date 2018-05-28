@@ -279,7 +279,7 @@ sub construct {
 
     for my $key ( keys %iattr ) {
 
-        if ( $key =~ /^(init|next|prev|rewind|reset|freeze|current)$/ ) {
+        if ( $key =~ /^(next|prev|rewind|reset|freeze|current)$/ ) {
             $attr{$key} = delete $iattr{$key};
 
             Carp::croak( "'$key' attribute value must be a code reference\n" )
@@ -342,13 +342,6 @@ sub construct {
     my $obj = bless $composed_class->_construct_next( \%attr ), $composed_class;
 
     $REGISTRY{ Scalar::Util::refaddr $obj } = \%attr;
-    # my $next = $composed_class->can( 'next' );
-    # $attr{_overload_next} = sub { $next->( $obj ) };
-
-    if ( defined $attr{init} ) {
-        $attr{init}->( $obj );
-        delete $attr{init};
-    }
 
     return $obj;
 }
