@@ -5,7 +5,7 @@ package Iterator::Flex::Failure;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use custom::failures qw/Exhausted RoleExists/;
 
