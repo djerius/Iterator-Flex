@@ -68,7 +68,7 @@ sub _construct {
     Carp::croak( "$class: arguments must be numbers\n" )
       if List::Util::first { ! Scalar::Util::looks_like_number( $_ ) } @_;
 
-    my ( $begin, $end, $step );
+    my ( $begin, $end, $step, $iter );
     my %params;
 
     if ( @_ < 3 ) {
@@ -103,7 +103,7 @@ sub _construct {
 
     else {
 
-        ( $begin, $end, $step ) = @_;
+        ( $begin, $end, $step, $iter ) = @_;
 
         croak(
             "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
@@ -111,12 +111,13 @@ sub _construct {
           if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
 
         $next = $begin unless defined $next;
+        $iter = 0 unless defined $iter;
 
         %params = (
             freeze => sub {
                 [
                     $class, '_construct',
-                    [ $class, $begin, $end, $step, $prev, $current, $next ] ];
+                    [ $class, $begin, $end, $step, $iter, $prev, $current, $next ] ];
             },
 
             next => $begin < $end
@@ -131,7 +132,7 @@ sub _construct {
                 }
                 $prev    = $current;
                 $current = $next;
-                $next += $step;
+                $next    = $begin + ++$iter * $step;
                 return $current;
             }
             : sub {
@@ -145,7 +146,7 @@ sub _construct {
                 }
                 $prev    = $current;
                 $current = $next;
-                $next += $step;
+                $next    = $begin + ++$iter * $step;
                 return $current;
             },
         );
@@ -159,10 +160,12 @@ sub _construct {
         prev      => sub { $prev },
         rewind    => sub {
             $next = $begin;
+            $iter = 0;
         },
         reset => sub {
             $prev = $current = undef;
             $next = $begin;
+            $iter = 0;
         },
     );
 
