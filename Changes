@@ -2,6 +2,14 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.09      2018-06-01 13:10:56-04:00 America/New_York
+
+  [BUG FIX]
+
+    * sequence iterator was not numerically stable for
+      real number sequences, as it used repeated sums
+      instead of a multiply.
+
 0.08      2018-05-18 15:12:15-04:00 America/New_York
 
   [ENHANCEMENT]
