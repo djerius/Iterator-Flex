@@ -25,7 +25,6 @@ sub _test_values {
         @_
     );
 
-
     my @values
       = map { [ $iter->prev, $iter->current, $iter->next ] }
       $p{pull_begin} .. $p{pull_end};
