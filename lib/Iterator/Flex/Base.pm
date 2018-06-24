@@ -297,11 +297,11 @@ sub construct {
     Carp::croak( "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" )
         if keys %iattr;
 
-    my $composed_class;
+    my $object_class;
 
     if ( defined $attr{class} ) {
-        $composed_class = $class->_module_name( $attr{class} );
-        Module::Runtime::require_module( $composed_class );
+        $object_class = $class->_module_name( $attr{class} );
+        Module::Runtime::require_module( $object_class );
     }
 
     else {
@@ -332,14 +332,14 @@ sub construct {
             }
         }
 
-        $composed_class = Role::Tiny->create_class_with_roles( $class,
+        $object_class = Role::Tiny->create_class_with_roles( $class,
             map { $class->_module_name( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
     }
 
-    $attr{name} = $composed_class unless exists $attr{name};
+    $attr{name} = $object_class unless exists $attr{name};
     $attr{is_exhausted} = 0;
 
-    my $obj = bless $composed_class->_construct_next( \%attr ), $composed_class;
+    my $obj = bless $object_class->_construct_next( \%attr ), $object_class;
 
     $REGISTRY{ Scalar::Util::refaddr $obj } = \%attr;
 

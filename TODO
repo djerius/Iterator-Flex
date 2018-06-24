@@ -5,3 +5,5 @@ add iterator which provides access to the next-in-line iterator
 add tests for throwing, as it looks like some classes don't include the Failure class
 choose throw/flag exhaustion behavior at iterator construction time
 current roles such as Throw add functionality. need versions that define interface, so that iterators which inherently throw can declare the interface
+
+add role for boolean overload if iterator can detect if it will produce additional values.
