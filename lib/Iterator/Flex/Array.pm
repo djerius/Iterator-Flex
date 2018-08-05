@@ -11,9 +11,9 @@ use Carp ();
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 
-=method new
+=method attr
 
-  $iterator = Iterator::Flex::Array->new( $array_ref );
+  $iterator = Iterator::Flex::Array->attr( $array_ref );
 
 Wrap an array in an iterator.
 
@@ -37,15 +37,12 @@ The returned iterator supports the following methods:
 
 =cut
 
-
-sub new {
-
+sub construct {
     my $class = shift;
-    $class->_construct( $_[0], undef, undef, undef );
+    $class->construct_from_state( $_[0] );
 }
 
-sub _construct {
-
+sub construct_from_state {
     my $class = shift;
     my ( $arr, $prev, $current, $next ) = @_;
 
@@ -56,9 +53,14 @@ sub _construct {
 
     $next = 0 unless defined $next;
 
-    return $class->_ITERATOR_BASE->construct(
+    my $self;
 
-        class => $class,
+    return {
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
 
         reset => sub {
             $prev = $current = undef;
@@ -80,10 +82,10 @@ sub _construct {
         next => sub {
             if ( $next == $len ) {
                 # if first time through, set current/prev
-                if ( !$_[0]->is_exhausted ) {
+                if ( !$self->is_exhausted ) {
                     $prev    = $current;
                     $current = undef;
-                    $_[0]->set_exhausted;
+                    $self->set_exhausted;
                 }
                 return undef;
             }
@@ -93,22 +95,21 @@ sub _construct {
         },
 
         freeze => sub {
-            return [ $class, '_construct', [ $class, $arr, $prev, $current, $next ] ];
+            return [
+		    $class, [ $arr, $prev, $current, $next ],
+		  ];
         },
-
-        exhausted => 'predicate',
-    );
+    };
 }
 
 
-__PACKAGE__->_add_roles(
-    qw[ ExhaustedPredicate
+__PACKAGE__->_add_roles( qw[
+      ExhaustedPredicate
       Rewind
       Reset
-      Previous
+      Prev
       Current
-      Serialize
-      ] );
-
+      Freeze
+] );
 
 1;

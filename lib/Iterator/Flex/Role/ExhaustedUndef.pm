@@ -32,19 +32,20 @@ sub _construct_next {
     my $next = $attributes->{next};
     Scalar::Util::weaken $next;
 
-    my $sub;
-    $sub = sub {
-        my $val = $next->( $sub );
+    my $wsub;
+    $wsub = sub {
+        my $val = $next->( $wsub );
         $attributes->{is_exhausted} = ! defined $val;
         $val;
     };
 
-    # create a second reference to the subroutine before we weaken $sub,
-    # otherwise $sub will lose its contents, as it would be the only
+    # create a second reference to $wsub, before we weaken it,
+    # otherwise it will lose its contents, as it would be the only
     # reference.
-    my $rsub = $sub;
-    Scalar::Util::weaken( $sub );
-    return $rsub;
+
+    my $sub = $wsub;
+    Scalar::Util::weaken( $wsub );
+    return $sub;
 }
 
 sub next { &{$_[0]} }

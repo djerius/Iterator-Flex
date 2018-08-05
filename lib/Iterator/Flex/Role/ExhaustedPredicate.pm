@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
+use Ref::Util qw[ is_coderef ];
 use Scalar::Util;
 use Role::Tiny;
 
@@ -27,19 +28,32 @@ sub _construct_next {
     shift;
     my $attributes = shift;
 
-    # ensure we don't hold any strong references in the subroutine
     my $next = $attributes->{next};
-    Scalar::Util::weaken $next;
 
     my $sub;
-    $sub = sub { $next->( $sub)  };
 
-    # create a second reference to the subroutine before we weaken $sub,
-    # otherwise $sub will lose its contents, as it would be the only
-    # reference.
-    my $rsub = $sub;
-    Scalar::Util::weaken( $sub );
-    return $rsub;
+    # if we can store self directly, let's do that
+    if ( is_coderef( $attributes->{ set_self } ) ) {
+	$attributes->{set_self}->( $next );
+	$sub = $next;
+    }
+
+    # otherwise, need to wrap and pass $self
+    else {
+	Scalar::Util::weaken $next;
+
+	my $wsub;
+	$wsub = sub { $next->( $wsub)  };
+
+	# create a second reference to $wsub, before we weaken it,
+	# otherwise it will lose its contents, as it would be the only
+	# reference.
+
+	$sub = $wsub;
+	Scalar::Util::weaken( $wsub );
+    }
+
+    return $sub;
 }
 
 sub next { &{$_[0]} }

@@ -359,37 +359,8 @@ If C<$iterator> provides a C<prev> method.
 =cut
 
 sub ifreeze (&$) {
-
-    my $serialize = shift;
-    my $src       = iter( shift );
-
-    croak( "ifreeze requires that the iterator provide a freeze method\n" )
-      unless $ITERATOR_BASE_CLASS->_can_meth( $src, 'freeze' );
-
-    my %params = (
-        name    => 'ifreeze',
-        rewind  => sub { },
-        reset   => sub { },
-        depends => $src,
-        next    => sub {
-            my $value = $src->();
-            $_[0]->set_exhausted if $src->is_exhausted;
-            local $_ = $src->freeze;
-            &$serialize();
-            $value;
-        },
-        exhausted => 'predicate',
-    );
-
-    for my $meth ( 'prev', 'current' ) {
-
-        my $sub = $ITERATOR_BASE_CLASS->_can_meth( $src, $meth );
-
-        $params{$meth} = sub { $src->$sub() }
-          if defined $sub;
-    }
-
-    $ITERATOR_BASE_CLASS->construct( %params );
+    require Iterator::Flex::Freeze;
+    Iterator::Flex::Freeze->new(@_);
 }
 
 
@@ -414,16 +385,16 @@ sub thaw {
     my @steps = @$step;
 
     # parent data and iterator state is last
-    my $state  = pop @steps;
+    my $exhausted  = pop @steps;
     my $parent = pop @steps;
 
     my @depends = map { thaw( $_ ) } @steps;
 
-    my ( $package, $funcname, $args ) = @$parent;
+    my ( $package, $args ) = @$parent;
 
     require_module( $package );
-    my $func = $package->can( $funcname )
-      or croak( "unable to thaw: can't find $funcname in $package\n" );
+    my $new_from_state = $package->can( 'new_from_state' )
+      or croak( "unable to thaw: $package doesn't provide 'new_from_state' method\n" );
 
     my @args
       = is_arrayref( $args ) ? @$args
@@ -435,8 +406,8 @@ sub thaw {
       : ( \@depends )
       if @depends;
 
-    my $iter = &$func( @args );
-    $iter->set_exhausted( $state );
+    my $iter = $package->$new_from_state( @args );
+    $iter->set_exhausted( $exhausted );
     return $iter;
 }
 
@@ -483,6 +454,46 @@ Iterators may be chained, and an iterator's dependencies are frozen automaticall
 
 =back
 
+=head2 Serialiation of Iterators
+
+=over
+
+=item freeze I<optional>
+
+A subroutine which returns an array reference with the following elements, in the specified order :
+
+=over
+
+=item 1
+
+The name of the package containing the thaw subroutine.
+
+=item 2
+
+The name of the thaw subroutine.
+
+=item 3
+
+The data to be passed to the thaw routine.  The routine will be called
+as:
+
+  thaw( @{$data}, ?$depends );
+
+if C<$data> is an arrayref,
+
+  thaw( %{$data}, ?( depends => $depends )  );
+
+if C<$data> is a hashref, or
+
+  thaw( $data, ?$depends );
+
+for any other type of data.
+
+Dependencies are passed to the thaw routine only if they are present.
+
+=back
+
+=back
 
 =head1 SUBROUTINES
 

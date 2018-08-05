@@ -37,15 +37,7 @@ The iterator supports the following methods:
 
 =cut
 
-
-sub new {
-
-    my $class = shift;
-
-    $class->_construct( @_ );
-}
-
-sub _construct {
+sub construct {
 
     my $class = shift;
 
@@ -53,7 +45,7 @@ sub _construct {
 
     $src = $class->to_iterator( $src );
 
-    $class->_ITERATOR_BASE->construct(
+    return {
         name => 'imap',
         next => sub {
             my $value = $src->();
@@ -67,7 +59,7 @@ sub _construct {
         reset     => sub { },
         depends   => $src,
         exhausted => 'predicate',
-    );
+    };
 }
 
 

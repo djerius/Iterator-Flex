@@ -39,16 +39,17 @@ The returned iterator supports the following methods:
 =cut
 
 
-sub new {
+sub construct {
 
     my $class  = shift;
 
-    $class->_construct( $_[0], undef, undef, undef );
+    $class->construct_from_state( $_[0] );
 }
 
-sub _construct {
+sub construct_from_state {
 
     my $class = shift;
+
     my ( $arr, $prev, $current, $next ) = @_;
 
     Carp::croak "$class: argument must be an ARRAY reference"
@@ -58,9 +59,7 @@ sub _construct {
 
     $next = 0 unless defined $next;
 
-    return $class->_ITERATOR_BASE->construct(
-
-        class => $class,
+    return {
 
         reset => sub {
             $prev = $current = undef;
@@ -79,7 +78,7 @@ sub _construct {
             return defined $current ? $arr->[$current] : undef;
         },
 
-        next =>sub {
+        next => sub {
             $next    = 0 if $next == $len;
             $prev    = $current;
             $current = $next++;
@@ -88,10 +87,9 @@ sub _construct {
 
         freeze => sub {
             return [
-                $class, '_construct',
-                [ $class, $arr, $prev, $current, $next ] ];
+                $class, [ $arr, $prev, $current, $next ] ];
         },
-    );
+    };
 }
 
 
@@ -99,9 +97,9 @@ __PACKAGE__->_add_roles(
     qw[ ExhaustedUndef
       Rewind
       Reset
-      Previous
+      Prev
       Current
-      Serialize
+      Freeze
       ] );
 
 

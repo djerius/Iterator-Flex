@@ -41,15 +41,15 @@ The returned iterator supports the following methods:
 =cut
 
 
-sub new {
+sub construct {
 
     my $class = shift;
 
-    $class->_construct( $_[0], undef, undef );
+    $class->construct_from_state( $_[0] );
+}
 
-};
 
-sub _construct {
+sub construct_from_state {
 
     my $class = shift;
 
@@ -57,9 +57,14 @@ sub _construct {
 
     $src = $class->to_iterator( $src );
 
-    return $class->_ITERATOR_BASE->construct(
+    my $self;
 
-        class => $class,
+    return {
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
 
         reset => sub {
             $prev = $current = undef;
@@ -79,36 +84,34 @@ sub _construct {
         next => sub {
 
             return undef
-              if $_[0]->is_exhausted;
+              if $self->is_exhausted;
 
             $prev    = $current;
             $current = $src->();
 
-            $_[0]->set_exhausted
+            $self->set_exhausted
               if $src->is_exhausted;
 
             return $current;
         },
 
         freeze => sub {
-            return [ $class, '_thaw', [ $class, $prev, $current ] ];
+            return [ $class, [ $prev, $current ] ];
         },
 
         depends => $src,
 
         exhausted => 'predicate',
-    );
-
-
+    };
 }
 
-sub _thaw {
+sub new_from_state {
 
     my $class = shift;
 
     my ( $src ) = @{ pop @_ };
 
-    $class->_construct( $src, @_ );
+    $class->new_from_attrs( $class->construct_from_state( $src, @_ ) );
 }
 
 
@@ -116,9 +119,9 @@ __PACKAGE__->_add_roles(
     qw[ ExhaustedPredicate
       Rewind
       Reset
-      Previous
+      Prev
       Current
-      Serialize
+      Freeze
       ] );
 
 

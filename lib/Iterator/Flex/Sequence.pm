@@ -43,7 +43,7 @@ The iterator supports the following methods:
 
 =cut
 
-sub new {
+sub construct {
 
     my $class = shift;
 
@@ -53,11 +53,13 @@ sub new {
     # add history
     push @_, ( undef ) x 3;
 
-    $class->_construct( @_ );
-};
+    $class->construct_from_state( @_ );
+}
 
 
-sub _construct {
+# must be called with ( $next, $current, $prev) as last
+# three arguments.
+sub construct_from_state {
 
     my $class = shift;
 
@@ -66,9 +68,10 @@ sub _construct {
     my ( $next, $current, $prev ) = ( pop, pop, pop );
 
     Carp::croak( "$class: arguments must be numbers\n" )
-      if List::Util::first { ! Scalar::Util::looks_like_number( $_ ) } @_;
+      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) } @_;
 
-    my ( $begin, $end, $step, $iter );
+    my ( $self, $begin, $end, $step, $iter );
+
     my %params;
 
     if ( @_ < 3 ) {
@@ -82,10 +85,10 @@ sub _construct {
         %params = (
             next => sub {
                 if ( $next > $end ) {
-                    if ( !$_[0]->is_exhausted ) {
+                    if ( !$self->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_[0]->set_exhausted;
+                        $self->set_exhausted;
                     }
                     return undef;
                 }
@@ -94,9 +97,7 @@ sub _construct {
                 return $current;
             },
             freeze => sub {
-                [
-                    $class, '_construct',
-                    [ $class, $begin, $end, $prev, $current, $next ] ];
+                [ $class, [ $begin, $end, $prev, $current, $next ] ];
             },
         );
     }
@@ -111,22 +112,22 @@ sub _construct {
           if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
 
         $next = $begin unless defined $next;
-        $iter = 0 unless defined $iter;
+        $iter = 0      unless defined $iter;
 
         %params = (
             freeze => sub {
                 [
-                    $class, '_construct',
-                    [ $class, $begin, $end, $step, $iter, $prev, $current, $next ] ];
+                    $class,
+                    [ $begin, $end, $step, $iter, $prev, $current, $next ] ];
             },
 
             next => $begin < $end
             ? sub {
                 if ( $next > $end ) {
-                    if ( !$_[0]->is_exhausted ) {
+                    if ( !$self->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_[0]->set_exhausted;
+                        $self->set_exhausted;
                     }
                     return undef;
                 }
@@ -137,10 +138,10 @@ sub _construct {
             }
             : sub {
                 if ( $next < $end ) {
-                    if ( !$_[0]->is_exhausted ) {
+                    if ( !$self->is_exhausted ) {
                         $prev    = $current;
                         $current = undef;
-                        $_[0]->set_exhausted;
+                        $self->set_exhausted;
                     }
                     return undef;
                 }
@@ -152,13 +153,11 @@ sub _construct {
         );
     }
 
-    return $class->_ITERATOR_BASE->construct(
+    return {
         %params,
-        class     => $class,
-        exhausted => 'predicate',
-        current   => sub { $current },
-        prev      => sub { $prev },
-        rewind    => sub {
+        current => sub { $current },
+        prev    => sub { $prev },
+        rewind  => sub {
             $next = $begin;
             $iter = 0;
         },
@@ -167,18 +166,23 @@ sub _construct {
             $next = $begin;
             $iter = 0;
         },
-    );
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
+    };
 
 }
 
-__PACKAGE__->_add_roles(
-    qw[ ExhaustedPredicate
+__PACKAGE__->_add_roles( qw[
+      ExhaustedPredicate
       Rewind
       Reset
-      Previous
+      Prev
       Current
-      Serialize
-      ] );
+      Freeze
+] );
 
 
 1;

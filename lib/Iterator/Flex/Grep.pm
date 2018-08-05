@@ -37,21 +37,14 @@ The iterator supports the following methods:
 =cut
 
 
-sub new {
-
-    my $class = shift;
-
-    $class->_construct( @_ );
-}
-
-sub _construct {
+sub construct {
 
     my $class = shift;
 
     my ( $code, $src ) = @_;
     $src = $class->to_iterator( $src );
 
-    my %params = (
+    return {
         name => 'igrep',
         next => sub {
 
@@ -67,10 +60,7 @@ sub _construct {
         reset     => sub { },
         depends   => $src,
         exhausted => 'predicate',
-
-    );
-
-    $class->_ITERATOR_BASE->construct( %params );
+    };
 }
 
 __PACKAGE__->_add_roles(

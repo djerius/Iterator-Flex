@@ -8,18 +8,14 @@ use warnings;
 our $VERSION = '0.10';
 
 use Carp ();
-use Ref::Util;
 use Scalar::Util;
+use Ref::Util;
 use Role::Tiny       ();
 use Role::Tiny::With ();
-use Import::Into;
-use Module::Runtime;
-use Safe::Isa;
 
 Role::Tiny::With::with 'Iterator::Flex::Role';
 
 use Iterator::Flex::Failure;
-use Iterator::Flex::Utils;
 
 our %REGISTRY;
 
@@ -28,6 +24,211 @@ use overload ( '<>' => 'next', fallback => 1 );
 sub _ITERATOR_BASE {
     require Iterator::Flex;
     goto \&Iterator::Flex::_ITERATOR_BASE;
+}
+
+sub new {
+
+    my $class = shift;
+
+    return $class->new_from_attrs( $class->construct( @_ ) );
+}
+
+sub new_from_state {
+
+    my $class = shift;
+
+    return $class->new_from_attrs( $class->construct_from_state( @_ ) );
+
+}
+
+sub new_from_attrs {
+
+    my ( $class, $attrs ) = ( shift, shift );
+
+    # copy attrs as we may change it
+    my %attrs = ( _roles => [], %$attrs );
+    $class->_validate_attrs( \%$attrs );
+
+    # add roles if necessary
+    if ( @{ $attrs{_roles} } ) {
+
+	Carp::croak( "_roles must be an arrayref" )
+	    unless Ref::Util::is_arrayref( $attrs{_roles} );
+
+	$class = Role::Tiny->create_class_with_roles( $class,
+						      map { "Iterator::Flex::Role::$_" }
+						      @{ $attrs{_roles} } );
+    }
+
+    my $self = bless $class->_construct_next( $attrs ), $class;
+
+    $REGISTRY{ Scalar::Util::refaddr $self } = $attrs;
+
+    $self->set_exhausted(0);
+
+    return $self;
+}
+
+sub _validate_attrs {
+
+    my $class = shift;
+    my $attrs = shift;
+
+    my %iattr = %$attrs;
+
+    my $attr;
+
+    if ( defined( $attr = delete $iattr{depends} ) ) {
+
+        $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
+        $attrs->{depends} = $attr;
+
+        Carp::croak( "dependency #$_ is not an iterator object\n" )
+          for grep {
+            !( Scalar::Util::blessed( $attr->[$_] )
+                && $attr->[$_]->isa( $class->_ITERATOR_BASE ) )
+          } 0 .. $#{$attr};
+    }
+
+    return;
+}
+
+sub DESTROY {
+
+    if ( defined $_[0] ) {
+        my $attributes = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
+        delete $attributes->{_overload_next};
+    }
+}
+
+sub _can_meth {
+
+    # my $class = shift;
+    shift;
+    my ( $obj, $meth ) = @_;
+
+    my $sub;
+    foreach ( "__${meth}__", $meth ) {
+
+        last if defined( $sub = $obj->can( $_ ) );
+    }
+
+    return $sub;
+}
+
+
+=method set_exhausted
+
+  $iter->set_exhausted;
+
+Set the iterator's state to exhausted
+
+=cut
+
+sub set_exhausted {
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{is_exhausted} = @_ > 1 ? $_[1] : 1;
+}
+
+
+=method is_exhausted
+
+  $bool = $iter->is_exhausted;
+
+Returns true if the iterator is exhausted and there are no more values
+available.  L<current> and L<next> will return C<undef>.  L<prev> will
+return the last valid value returned by L<next>.
+
+L<is_exhausted> is true only after L<next> has been called I<after>
+the last valid value has been returned by a previous call to
+L<next>. In other words, if C<$iter->next> returns the last valid
+value, the state is still I<active>.  The next call to C<$iter->next>
+will switch the iterator state to I<exhausted>.
+
+
+=cut
+
+sub is_exhausted {
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    !! $attributes->{is_exhausted};
+}
+
+=method __iter__
+
+   $sub = $iter->__iter__;
+
+Returns the subroutine which returns the next value from the iterator.
+
+=cut
+
+sub __iter__ {
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{next};
+}
+
+=method may
+
+  $bool = $iter->may( $method );
+
+Similar to L<can|UNIVERSAL/can>, except it checks to ensure that the
+method can be called on the iterators which C<$iter> depends on.  For
+example, it's possible that C<$iter> implements a C<rewind> method,
+but that it's dependencies do not.  In that case C<can|UNIVESAL/can>
+will return true, but C<may> will return false.
+
+=cut
+
+sub may {
+    return undef;
+}
+
+sub _may_meth {
+
+    my $obj  = shift;
+    my $meth = shift;
+
+    my $attributes = shift
+      // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+
+    my $pred = "_may_$meth";
+
+    $attributes->{$pred} //=
+      defined $attributes->{depends}
+      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{depends} }
+      : 1;
+
+    return $attributes->{$pred};
+}
+
+sub _wrap_may {
+
+    # my $class  = shift;
+    shift;
+    my $meth = shift;
+
+    return sub {
+        my $orig = shift;
+        my ( $obj, $what ) = @_;
+
+        return $obj->_may_meth( $meth )
+          if $what eq $meth;
+
+        &$orig;
+    };
+
+}
+
+# return the role name for a given method
+sub _method_to_role {
+    # ( $class, $method )
+    return ucfirst $_[1];
+}
+
+sub _add_roles {
+    my $class = shift;
+
+    Role::Tiny->apply_roles_to_package( $class,
+        map { "Iterator::Flex::Role::$_" } @_ );
 }
 
 =method to_iterator
@@ -98,276 +299,6 @@ sub to_iterator {
     $class->_ITERATOR_BASE->construct_from_iterable( @_ );
 }
 
-=method construct
-
-  $iterator = Iterator::Flex::Base->construct( %params );
-
-Construct an iterator object. The recommended manner of creating an
-iterator is to use the convenience functions provided by
-L<Iterator::Flex>.
-
-The following parameters are accepted:
-
-=over
-
-=item name I<optional>
-
-An optional name to be output during error messages
-
-=item class I<optional>
-
-If specified, the iterator will be blessed into this class.  Dynamic
-role assignments will not be performed; they should be performed
-statically by the class.
-
-=item methods I<optional>
-
-A hash whose keys are method names and whose values are coderefs.
-These will be added as methods to the iterator class.  The coderef
-will be called as
-
-  $coderef->( $attributes, @args );
-
-where C<$attributes> is the hash containing the iterator's attributes
-(recall that the actual iterator object is a coderef, so iterator
-attributes are not stored in the object), and @args are the arguments
-the method was originally called with.
-
-=item next I<required>
-
-A subroutine which returns the next value.  When the iterator is
-exhausted, it should
-
-=over
-
-=item 1
-
-Call the L</set_exhausted> method
-
-=item 2
-
-return undefined
-
-=back
-
-=item prev I<optional>
-
-A subroutine which returns the previous value.  It should return undefined
-if the iterator is at the beginning.
-
-=item current I<optional>
-
-A subroutine which returns the current value without fetching.  It should return undefined
-if the iterator is at the beginning.
-
-=item reset I<optional>
-
-A subroutine which resets the iterator such that
-L</next>, L</prev>, and L</current> return the values they would have
-if the iterator were initially started.
-
-=item rewind I<optional>
-
-A subroutine which rewinds the iterator such that the next element returned
-will be the first element from the iterator.  It does not alter the values
-returned by L</prev> or L</current>
-
-=item freeze I<optional>
-
-A subroutine which returns an array reference with the following elements, in the specified order :
-
-=over
-
-=item 1
-
-The name of the package containing the thaw subroutine.
-
-=item 2
-
-The name of the thaw subroutine.
-
-=item 3
-
-The data to be passed to the thaw routine.  The routine will be called
-as:
-
-  thaw( @{$data}, ?$depends );
-
-if C<$data> is an arrayref,
-
-  thaw( %{$data}, ?( depends => $depends )  );
-
-if C<$data> is a hashref, or
-
-  thaw( $data, ?$depends );
-
-for any other type of data.
-
-Dependencies are passed to the thaw routine only if they are present.
-
-=back
-
-=item exhausted I<optional>
-
-One of the following values:
-
-=over
-
-=item C<predicate>
-
-The iterator will signal its exhaustion by calling the C<L/set_prediate>
-method.  This state is queryable via the L</is_exhausted> predicate.
-
-=item C<throw>
-
-The iterator will signal its exhaustion by throwing an
-C<Iterator::Flex::Failure::Exhausted> exception.
-
-=item C<undef>
-
-The iterator will signal its exhaustion by returning the undefined value.
-
-=back
-
-=back
-
-=cut
-
-sub construct {
-
-    my $class = shift;
-    Carp::croak( "construct is a class method\n" )
-      if Scalar::Util::blessed $class;
-
-    my %iattr = ( exhausted => 'undef', @_ );
-    my %attr;
-
-    my @roles;
-
-    my $attr;
-
-    if ( defined( $attr = delete $iattr{depends} ) ) {
-
-        $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
-        $attr{depends} = $attr;
-
-        Carp::croak( "dependency #$_ is not an iterator object\n" )
-          for grep {
-            !( Scalar::Util::blessed( $attr->[$_] )
-                && $attr->[$_]->isa( $class ) )
-          } 0 .. $#{$attr};
-    }
-
-    if ( defined( $attr = delete $iattr{exhausted} ) ) {
-        my $role = 'Exhausted' . ucfirst( $attr );
-        my $module = $class->_module_name( Role => $role );
-        croak( "unknown means of handling exhausted iterators: $attr\n" )
-          unless Module::Runtime::require_module( $module );
-        push @roles, $role;
-    }
-
-    if ( defined( $attr = delete $iattr{methods} ) ) {
-        Carp::croak( "value for methods attribute must be a hash reference\n" )
-          unless Ref::Util::is_hashref( $attr );
-
-        Carp::croak( "methods attribute hash values must be code references\n" )
-          if grep { !Ref::Util::is_coderef( $_ ) } values %{$attr};
-
-        $attr{methods} = $attr;
-    }
-
-
-    for my $key ( keys %iattr ) {
-
-        if ( $key =~ /^(next|prev|rewind|reset|freeze|current)$/ ) {
-            $attr{$key} = delete $iattr{$key};
-
-            Carp::croak( "'$key' attribute value must be a code reference\n" )
-              unless Ref::Util::is_coderef $attr{$key};
-        }
-
-        elsif ( $key =~ /name|class/ ) {
-            $attr{$key} = delete $iattr{$key};
-            Carp::croak( "'$key' attribute value must be a string\n" )
-              if !defined $attr{$key}
-              or Ref::Util::is_ref( $attr{$key} );
-        }
-    }
-
-    Carp::croak( "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" )
-        if keys %iattr;
-
-    my $object_class;
-
-    if ( defined $attr{class} ) {
-        $object_class = $class->_module_name( $attr{class} );
-        Module::Runtime::require_module( $object_class );
-    }
-
-    else {
-
-        push @roles, 'Rewind'    if exists $attr{rewind};
-        push @roles, 'Reset'     if exists $attr{reset};
-        push @roles, 'Previous'  if exists $attr{prev};
-        push @roles, 'Current'   if exists $attr{current};
-        push @roles, 'Serialize' if exists $attr{freeze};
-
-        if ( exists $attr{methods} ) {
-
-            for my $name ( keys %{ $attr{methods} } ) {
-
-                my $cap_name = ucfirst( $name );
-
-                eval {
-                    Iterator::Flex::Utils::create_method( $cap_name,  name => $name );
-                };
-
-                my $error = $@;
-
-                die $error
-                  if $error
-                  && !$error->$_isa( 'Iterator::Flex::Failure::RoleExists' );
-
-                push @roles, [ Method => $cap_name ];
-            }
-        }
-
-        $object_class = Role::Tiny->create_class_with_roles( $class,
-            map { $class->_module_name( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
-    }
-
-    $attr{name} = $object_class unless exists $attr{name};
-    $attr{is_exhausted} = 0;
-
-    my $obj = bless $object_class->_construct_next( \%attr ), $object_class;
-
-    $REGISTRY{ Scalar::Util::refaddr $obj } = \%attr;
-
-    return $obj;
-}
-
-sub _module_name {
-
-    my $class     = shift;
-    my $module    = pop;
-    my @hierarchy = @_;
-
-    return $module if $module =~ /::/;
-
-    $class = 'Iterator::Flex' if $class eq __PACKAGE__;
-
-    return join( '::', $class, @hierarchy, $module );
-}
-
-
-sub _add_roles {
-
-    my $class = shift;
-
-    Role::Tiny->apply_roles_to_package( $class,
-        map { "Iterator::Flex::Role::$_" } @_ );
-}
-
 =method construct_from_iterable
 
   $iter = Iterator::Flex::Base->construct_from_iterable( $iterable );
@@ -423,7 +354,7 @@ sub construct_from_iterable {
         return $class->construct( next => $obj );
     }
 
-    elsif ( is_globref( $obj ) ) {
+    elsif ( Ref::Util::is_globref( $obj ) ) {
         return $class->construct( next => sub { scalar <$obj> } );
     }
 
@@ -520,133 +451,5 @@ sub construct_from_object {
     return $class->construct( %param );
 }
 
-
-sub DESTROY {
-
-    if ( defined $_[0] ) {
-        my $attributes = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
-        delete $attributes->{_overload_next};
-    }
-
-}
-
-sub _can_meth {
-
-    # my $class = shift;
-    shift;
-    my ( $obj, $meth ) = @_;
-
-    my $sub;
-    foreach ( "__${meth}__", $meth ) {
-
-        last if defined( $sub = $obj->can( $_ ) );
-    }
-
-    return $sub;
-}
-
-
-=method set_exhausted
-
-  $iter->set_exhausted;
-
-Set the iterator's state to exhausted
-
-=cut
-
-sub set_exhausted {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $attributes->{is_exhausted} = defined $_[1] ? $_[1] : 1;
-}
-
-
-=method is_exhausted
-
-  $bool = $iter->is_exhausted;
-
-Returns true if the iterator is exhausted and there are no more values
-available.  L<current> and L<next> will return C<undef>.  L<prev> will
-return the last valid value returned by L<next>.
-
-L<is_exhausted> is true only after L<next> has been called I<after>
-the last valid value has been returned by a previous call to
-L<next>. In other words, if C<$iter->next> returns the last valid
-value, the state is still I<active>.  The next call to C<$iter->next>
-will switch the iterator state to I<exhausted>.
-
-
-=cut
-
-sub is_exhausted {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $attributes->{is_exhausted};
-}
-
-=method __iter__
-
-   $sub = $iter->__iter__;
-
-Returns the subroutine which returns the next value from the iterator.
-
-=cut
-
-sub __iter__ {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $attributes->{next};
-}
-
-=method may
-
-  $bool = $iter->may( $method );
-
-Similar to L<can|UNIVERSAL/can>, except it checks to ensure that the
-method can be called on the iterators which C<$iter> depends on.  For
-example, it's possible that C<$iter> implements a C<rewind> method,
-but that it's dependencies do not.  In that case C<can|UNIVESAL/can>
-will return true, but C<may> will return false.
-
-=cut
-
-sub may {
-    return undef;
-}
-
-sub _may_meth {
-
-    my $obj  = shift;
-    my $meth = shift;
-
-    my $attributes = shift
-      // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
-
-    my $pred = "_may_$meth";
-
-    $attributes->{$pred} //=
-      defined $attributes->{depends}
-      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{depends} }
-      : 1;
-
-    return $attributes->{$pred};
-}
-
-sub _wrap_may {
-
-    # my $class  = shift;
-    shift;
-    my $meth = shift;
-
-    return sub {
-
-        my $orig = shift;
-        my ( $obj, $what ) = @_;
-
-        return $obj->_may_meth( $meth )
-          if $what eq $meth;
-
-        &$orig;
-
-    };
-
-}
 
 1;

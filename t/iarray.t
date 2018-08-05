@@ -165,6 +165,7 @@ subtest "freeze" => sub {
     {
         my $iter;
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+        ok( ! $iter->is_exhausted, "iterator is not exhausted" );
 
         _test_values( $iter, npull => 4, begin => 1, end => 4 );
         is( $iter->next, undef, "iterator exhausted" );

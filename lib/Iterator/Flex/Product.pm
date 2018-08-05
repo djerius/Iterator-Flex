@@ -49,14 +49,14 @@ C<prev> or C<__prev__> method.
 =cut
 
 
-sub new {
+sub construct {
 
     my $class = shift;
 
-    $class->_construct( [@_] );
+    $class->construct_from_state( [@_] );
 }
 
-sub _construct {
+sub construct_from_state {
 
     my $class = shift;
     my ( $iterators, $value ) = @_;
@@ -85,9 +85,16 @@ sub _construct {
     my @value = @$value;
     my @set   = ( 1 ) x @value;
 
+    my $self;
     my %params = (
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
+
         next => sub {
-            return undef if $_[0]->is_exhausted;
+            return undef if $self->is_exhausted;
 
             # first time through
             if ( !@value ) {
@@ -96,7 +103,7 @@ sub _construct {
                     push @value, $iter->();
 
                     if ( $iter->is_exhausted ) {
-                        $_[0]->set_exhausted;
+                        $self->set_exhausted;
                         return undef;
                     }
                 }
@@ -117,7 +124,7 @@ sub _construct {
                     }
 
                     if ( !$set[0] ) {
-                        $_[0]->set_exhausted;
+                        $self->set_exhausted;
                         return undef;
                     }
 
@@ -140,7 +147,7 @@ sub _construct {
         },
 
         current => sub {
-            return undef if !@value || $_[0]->is_exhausted;
+            return undef if !@value || $self->is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -163,18 +170,19 @@ sub _construct {
     {
 
         $params{freeze} = sub {
-            return [ $class, '_thaw', [ $class, \@keys ] ];
-          }
+            return [ $class, [  \@keys ] ];
+	};
+	$params{_roles} = [ 'Freeze' ];
     }
 
-    $class ->_ITERATOR_BASE->construct(
+    return {
         %params,
         exhausted => 'predicate',
         name      => 'iproduct'
-    );
+    };
 }
 
-sub _thaw {
+sub new_from_state {
 
     my $class = shift;
 
@@ -185,14 +193,20 @@ sub _thaw {
 
         @$keys == @$iterators
           or croak(
-            "iproduct thaw: number of keys not equal to number of iterators\n"
+            "product thaw: number of keys not equal to number of iterators\n"
           );
 
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }
 
-    $class->_construct( $iterators, \@value );
+    $class->new_from_attrs( $class->construct_from_state( $iterators, \@value ) );
 }
 
+__PACKAGE__->_add_roles( qw[
+      ExhaustedPredicate
+      Current
+      Reset
+      Rewind
+] );
 
 1;

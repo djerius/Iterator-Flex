@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Previous;
+package Iterator::Flex::Role::Prev;
 
 # ABSTRACT: Role to add prev method to an Iterator::Flex::Base
 
