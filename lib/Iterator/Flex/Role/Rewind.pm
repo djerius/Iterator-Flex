@@ -7,8 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use List::Util ();
-
 use Iterator::Flex::Base ();
 use Role::Tiny;
 

@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.10';
 
 use parent 'Iterator::Flex::Base';
-use Ref::Util;
+use Scalar::Util;
 
 =method new
 

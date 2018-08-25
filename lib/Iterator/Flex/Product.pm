@@ -9,7 +9,7 @@ our $VERSION = '0.10';
 
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
-use List::Util ();
+use List::Util;
 
 =method new
 

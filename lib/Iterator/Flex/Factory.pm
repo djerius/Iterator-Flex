@@ -1,4 +1,4 @@
-package Iterator::Flex::Base;
+package Iterator::Flex::Factory;
 
 # ABSTRACT: Iterator object
 
