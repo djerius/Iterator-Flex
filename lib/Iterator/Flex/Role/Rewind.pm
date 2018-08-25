@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp       ();
 use List::Util ();
 
 use Iterator::Flex::Base ();
@@ -30,7 +29,7 @@ sub rewind {
 
     if ( defined $attributes->{depends} ) {
 
-        Carp::croak( "a dependency is not rewindable\n" )
+        $obj->_croak( "a dependency is not rewindable\n" )
           unless $obj->_may_meth( 'rewind', $attributes );
 
         # now rewind them

@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use Scalar::Util;
 use List::Util;
 

@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use parent 'Iterator::Flex::Base';
 use Scalar::Util;
 
@@ -54,7 +53,7 @@ sub construct_from_state {
 
     my $src = $class->to_iterator( shift );
 
-    croak( "iterator must provide a freeze method" )
+    $class->_croak( "iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
 
     my $self;

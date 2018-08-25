@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 

@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use Scalar::Util;
 use Ref::Util;
 use Role::Tiny       ();
@@ -24,6 +23,13 @@ use overload ( '<>' => 'next', fallback => 1 );
 sub _ITERATOR_BASE {
     require Iterator::Flex;
     goto \&Iterator::Flex::_ITERATOR_BASE;
+}
+
+sub _croak {
+    my $class = ref $_[0] || $_[0];
+    shift;
+    require Carp;
+    Carp::croak( "$class: ", @_ );
 }
 
 sub new {
@@ -52,7 +58,7 @@ sub new_from_attrs {
     # add roles if necessary
     if ( @{ $attrs{_roles} } ) {
 
-	Carp::croak( "_roles must be an arrayref" )
+	$class->_croak( "_roles must be an arrayref" )
 	    unless Ref::Util::is_arrayref( $attrs{_roles} );
 
 	$class = Role::Tiny->create_class_with_roles( $class,
@@ -83,7 +89,7 @@ sub _validate_attrs {
         $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
         $attrs->{depends} = $attr;
 
-        Carp::croak( "dependency #$_ is not an iterator object\n" )
+        $class->_croak( "dependency #$_ is not an iterator object\n" )
           for grep {
             !( Scalar::Util::blessed( $attr->[$_] )
                 && $attr->[$_]->isa( $class->_ITERATOR_BASE ) )
@@ -333,7 +339,7 @@ sub construct_from_iterable {
 
     my $class = shift;
 
-    Carp::croak( "construct_from_iterable is a class method\n" )
+    $class->_croak( "construct_from_iterable is a class method\n" )
       if Scalar::Util::blessed $class;
 
     my ( $obj ) = @_;
@@ -358,8 +364,8 @@ sub construct_from_iterable {
         return $class->construct( next => sub { scalar <$obj> } );
     }
 
-    Carp::croak sprintf "'%s' object is not iterable",
-      ( ref( $obj ) || 'SCALAR' );
+    $class->_croak( sprintf "'%s' object is not iterable",
+      ( ref( $obj ) || 'SCALAR' ) );
 
 }
 
@@ -407,7 +413,7 @@ sub construct_from_object {
 
     my $class = shift;
 
-    Carp::croak( "construct_from_object is a class method\n" )
+    $class->_croak( "construct_from_object is a class method\n" )
       if Scalar::Util::blessed $class;
 
 

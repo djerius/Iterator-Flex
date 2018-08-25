@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp       ();
 use List::Util ();
 
 use Iterator::Flex::Base ();
@@ -34,7 +33,7 @@ sub reset {
         # first check if dependencies can reset.
         my $cant
           = List::Util::first { !$_->can( 'reset' ) } @{ $attributes->{depends} };
-        Carp::croak( "dependency: @{[ $cant->{name} ]} is not resetable\n" )
+        $obj->_croak( "dependency: @{[ $cant->{name} ]} is not resetable\n" )
           if $cant;
 
         # now reset them

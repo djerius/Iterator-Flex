@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 
@@ -52,7 +51,7 @@ sub construct_from_state {
 
     my ( $arr, $prev, $current, $next ) = @_;
 
-    Carp::croak "$class: argument must be an ARRAY reference"
+    $class->_croak( "argument must be an ARRAY reference" )
       unless Ref::Util::is_arrayref( $arr );
 
     my $len = @$arr;

@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util ();
@@ -78,7 +77,7 @@ sub construct_from_state {
     }
 
     # can only work if the iterators support a rwind method
-    croak( "iproduct requires that all iteratables provide a rewind method\n" )
+    $class->_croak( "all iteratables must provide a rewind method\n" )
       unless @iterator == grep { defined }
       map { $class->_ITERATOR_BASE->_can_meth( $_, 'rewind' ) } @iterator;
 
@@ -192,7 +191,7 @@ sub new_from_state {
     if ( @$keys ) {
 
         @$keys == @$iterators
-          or croak(
+          or $class->_croak(
             "product thaw: number of keys not equal to number of iterators\n"
           );
 

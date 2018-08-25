@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use List::Util ();
 
 use Iterator::Flex;
@@ -33,7 +32,7 @@ sub freeze {
 
         # first check if dependencies can freeze.
         my $cant = List::Util::first { ! $_->can( 'freeze' ) } @{ $attributes->{depends} };
-        Carp::croak( "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
+        $obj->_croak( "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
             if $cant;
 
         # now freeze them

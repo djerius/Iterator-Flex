@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Carp ();
 use Scalar::Util;
 use List::Util;
 
@@ -67,7 +66,7 @@ sub construct_from_state {
     # order
     my ( $next, $current, $prev ) = ( pop, pop, pop );
 
-    Carp::croak( "$class: arguments must be numbers\n" )
+    $class->_croak( "$class: arguments must be numbers\n" )
       if List::Util::first { !Scalar::Util::looks_like_number( $_ ) } @_;
 
     my ( $self, $begin, $end, $step, $iter );
@@ -106,7 +105,7 @@ sub construct_from_state {
 
         ( $begin, $end, $step, $iter ) = @_;
 
-        croak(
+        $class->_croak(
             "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
           )
           if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
