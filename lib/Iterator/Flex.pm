@@ -397,6 +397,9 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
+    _croak( "state argument for $package constructor must be a HASH or ARRAY reference ")
+      unless is_hashref( $state ) || is_arrayref( $state );
+
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
       or _croak(

@@ -59,6 +59,9 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
+    $class->_croak( "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
+
     my ( $iterators, $value ) = @{$state}{ qw[ iterators value ] };
 
     $value = [] unless defined $value;

@@ -52,6 +52,9 @@ sub construct_from_state {
 
     my ( $class, $state ) = ( shift, shift );
 
+    $class->_croak( "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
+
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 
     $src = $class->to_iterator( $src );

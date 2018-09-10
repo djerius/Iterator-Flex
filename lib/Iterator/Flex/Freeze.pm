@@ -9,6 +9,7 @@ our $VERSION = '0.10';
 
 use parent 'Iterator::Flex::Base';
 use Scalar::Util;
+use Ref::Util;
 
 =method construct
 
@@ -45,6 +46,8 @@ sub construct {
 
     my ( $class, $serialize, $src )  = ( shift, shift, shift );
 
+    $class->_croak( "'serialize' must be a CODE reference" )
+      unless Ref::Util::is_coderef( $serialize );
 
     $src = $class->to_iterator( $src );
 
