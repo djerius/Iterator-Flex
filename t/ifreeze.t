@@ -60,7 +60,7 @@ subtest "reset" => sub {
 
     my $iter = ifreeze {} iseq( 3 );
 
-    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
+    drain( $iter, 4 );
 
     try_ok { $iter->reset } "reset";
 
@@ -75,7 +75,7 @@ subtest "serialize" => sub {
 
     my $iter = ifreeze { push @freeze, $_ } iseq( 3 );
 
-    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
+    drain( $iter, 4 );
 
     is( scalar @freeze, 5, "number of frozen states" );
 

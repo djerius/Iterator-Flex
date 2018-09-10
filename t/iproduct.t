@@ -90,7 +90,7 @@ subtest "rewind" => sub {
 
     my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
 
-    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
+    drain( $iter, 4 );
 
     is( $iter->next, undef, "iterator exhausted" );
     ok( $iter->is_exhausted, "iterator exhausted (officially)" );
