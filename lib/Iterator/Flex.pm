@@ -384,14 +384,14 @@ sub thaw {
 
     my $step = shift;
 
-    croak( "thaw: too many args\n" )
+    _croak( "thaw: too many args\n" )
       if @_;
 
     my @steps = @$step;
 
     # parent data and iterator state is last
-    my $exhausted  = pop @steps;
-    my $parent = pop @steps;
+    my $exhausted = pop @steps;
+    my $parent    = pop @steps;
 
     my @depends = map { thaw( $_ ) } @steps;
 

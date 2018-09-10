@@ -113,7 +113,8 @@ sub construct_from_state {
         $class->_croak(
             "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
           )
-          if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
+          if ( $begin < $end && $step <= 0 )
+          || ( $begin > $end && $step >= 0 );
 
         $next = $begin unless defined $next;
         $iter = 0      unless defined $iter;

@@ -40,7 +40,7 @@ The returned iterator supports the following methods:
 
 sub construct {
 
-    my $class  = shift;
+    my $class = shift;
 
     $class->construct_from_state( { array => $_[0] } );
 }

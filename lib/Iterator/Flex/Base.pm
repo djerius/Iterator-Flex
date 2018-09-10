@@ -81,7 +81,6 @@ sub _validate_attrs {
     my $attrs = shift;
 
     my %iattr = %$attrs;
-
     my $attr;
 
     if ( defined( $attr = delete $iattr{depends} ) ) {

@@ -196,7 +196,7 @@ sub new_from_state {
 
         @$keys == @$iterators
           or $class->_croak(
-            "product thaw: number of keys not equal to number of iterators\n"
+            "number of keys not equal to number of iterators\n"
           );
 
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
