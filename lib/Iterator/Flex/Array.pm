@@ -38,14 +38,16 @@ The returned iterator supports the following methods:
 
 sub construct {
     my $class = shift;
-    $class->construct_from_state( $_[0] );
+    $class->construct_from_state( { array => $_[0] } );
 }
 
 sub construct_from_state {
-    my $class = shift;
-    my ( $arr, $prev, $current, $next ) = @_;
+    my ( $class, $state ) = ( shift, shift );
 
-    $class->_croak( "argument must be an ARRAY reference" )
+    my ( $arr, $prev, $current, $next )
+      = @{$state}{qw[ array prev current next ]};
+
+    $class->_croak( "state 'array' argument must be an ARRAY reference" )
       unless Ref::Util::is_arrayref( $arr );
 
     my $len = @$arr;
@@ -95,8 +97,14 @@ sub construct_from_state {
 
         freeze => sub {
             return [
-		    $class, [ $arr, $prev, $current, $next ],
-		  ];
+                $class,
+                {
+                    array   => $arr,
+                    prev    => $prev,
+                    current => $current,
+                    next    => $next,
+                },
+            ];
         },
     };
 }

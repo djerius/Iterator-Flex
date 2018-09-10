@@ -42,18 +42,13 @@ If C<$iterator> provides a C<prev> method.
 
 
 sub construct {
-    my $class = shift;
-    $class->construct_from_state( $_[0], $_[1] );
-}
 
-sub construct_from_state {
+    my ( $class, $serialize, $src )  = ( shift, shift, shift );
 
-    my $class     = shift;
-    my $serialize = shift;
 
-    my $src = $class->to_iterator( shift );
+    $src = $class->to_iterator( $src );
 
-    $class->_croak( "iterator must provide a freeze method" )
+    $class->_croak( "'src' iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
 
     my $self;

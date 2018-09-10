@@ -44,15 +44,15 @@ sub construct {
 
     my $class = shift;
 
-    $class->construct_from_state( $_[0] );
+    $class->construct_from_state( { depends => $_[0] } );
 }
 
 
 sub construct_from_state {
 
-    my $class = shift;
+    my ( $class, $state ) = ( shift, shift );
 
-    my ( $src, $prev, $current ) = @_;
+    my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 
     $src = $class->to_iterator( $src );
 
@@ -95,7 +95,7 @@ sub construct_from_state {
         },
 
         freeze => sub {
-            return [ $class, [ $prev, $current ] ];
+            return [ $class, { prev => $prev, current => $current } ];
         },
 
         depends => $src,
@@ -108,9 +108,10 @@ sub new_from_state {
 
     my $class = shift;
 
-    my ( $src ) = @{ pop @_ };
+    my $state = shift;
+    $state->{depends} = $state->{depends}[0];
 
-    $class->new_from_attrs( $class->construct_from_state( $src, @_ ) );
+    $class->new_from_attrs( $class->construct_from_state( $state ) );
 }
 
 

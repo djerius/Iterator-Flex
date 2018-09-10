@@ -395,24 +395,25 @@ sub thaw {
 
     my @depends = map { thaw( $_ ) } @steps;
 
-    my ( $package, $args ) = @$parent;
+    my ( $package, $state ) = @$parent;
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
       or _croak(
         "unable to thaw: $package doesn't provide 'new_from_state' method\n" );
 
-    my @args
-      = is_arrayref( $args ) ? @$args
-      : is_hashref( $args )  ? %$args
-      :                        $args;
+    if ( @depends ) {
 
-    push @args, is_hashref( $args )
-      ? ( depends => \@depends )
-      : ( \@depends )
-      if @depends;
+        if ( is_hashref( $state ) ) {
+            $state->{depends} = \@depends;
+        }
 
-    my $iter = $package->$new_from_state( @args );
+        elsif ( is_arrayref( $state ) ) {
+            push @$state, \@depends;
+        }
+    }
+
+    my $iter = $package->$new_from_state( $state );
     $iter->set_exhausted( $exhausted );
     return $iter;
 }

@@ -52,13 +52,14 @@ sub construct {
 
     my $class = shift;
 
-    $class->construct_from_state( [@_] );
+    $class->construct_from_state( { iterators => [ @_ ] } );
 }
 
 sub construct_from_state {
 
-    my $class = shift;
-    my ( $iterators, $value ) = @_;
+    my ( $class, $state ) = @_;
+
+    my ( $iterators, $value ) = @{$state}{ qw[ iterators value ] };
 
     $value = [] unless defined $value;
 
@@ -169,7 +170,7 @@ sub construct_from_state {
     {
 
         $params{freeze} = sub {
-            return [ $class, [  \@keys ] ];
+            return [ $class, { keys => \@keys } ];
 	};
 	$params{_roles} = [ 'Freeze' ];
     }
@@ -183,9 +184,9 @@ sub construct_from_state {
 
 sub new_from_state {
 
-    my $class = shift;
+    my ( $class, $state ) = @_;
 
-    my ( $keys, $iterators ) = @_;
+    my ( $keys, $iterators ) = @{$state}{ 'keys', 'depends' };
     my @value = map { $_->current } @$iterators;
 
     if ( @$keys ) {
@@ -198,7 +199,8 @@ sub new_from_state {
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }
 
-    $class->new_from_attrs( $class->construct_from_state( $iterators, \@value ) );
+    $class->new_from_attrs( $class->construct_from_state( { iterators => $iterators,
+							    value => \@value } ) );
 }
 
 __PACKAGE__->_add_roles( qw[

@@ -42,14 +42,16 @@ sub construct {
 
     my $class  = shift;
 
-    $class->construct_from_state( $_[0] );
+    $class->construct_from_state( { array => $_[0] } );
 }
 
 sub construct_from_state {
 
-    my $class = shift;
+    my ( $class, $state ) = ( shift, shift );
 
-    my ( $arr, $prev, $current, $next ) = @_;
+
+    my ( $arr, $prev, $current, $next )
+      = @{$state}{qw[ array prev current next ]};
 
     $class->_croak( "argument must be an ARRAY reference" )
       unless Ref::Util::is_arrayref( $arr );
@@ -86,7 +88,14 @@ sub construct_from_state {
 
         freeze => sub {
             return [
-                $class, [ $arr, $prev, $current, $next ] ];
+                $class,
+                {
+                    array   => $arr,
+                    prev    => $prev,
+                    current => $current,
+                    next    => $next,
+                },
+            ];
         },
     };
 }

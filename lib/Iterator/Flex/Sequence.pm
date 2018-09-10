@@ -46,13 +46,15 @@ sub construct {
 
     my $class = shift;
 
-    # only three arguments
-    splice( @_, 3 );
+    $class->_croak( "incorrect number of arguments for sequence" )
+      if @_ < 1 || @_ > 3;
 
-    # add history
-    push @_, ( undef ) x 3;
+    my %state;
+    $state{step} = pop if @_ == 3;
+    $state{end} = pop;
+    $state{begin} = shift;
 
-    $class->construct_from_state( @_ );
+    $class->construct_from_state( \%state );
 }
 
 
@@ -60,23 +62,19 @@ sub construct {
 # three arguments.
 sub construct_from_state {
 
-    my $class = shift;
-
-    # these get pushed on as $prev, $current, $next, so pop in opposite
-    # order
-    my ( $next, $current, $prev ) = ( pop, pop, pop );
+    my ( $class, $state ) = @_;
 
     $class->_croak( "$class: arguments must be numbers\n" )
-      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) } @_;
+      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) } values %$state;
 
-    my ( $self, $begin, $end, $step, $iter );
+    my ( $begin, $end, $step, $iter, $next, $current, $prev ) =
+      @{$state}{ qw[ begin end step iter next current prev ] };
+
+    my $self;
 
     my %params;
 
-    if ( @_ < 3 ) {
-
-        $end   = pop;
-        $begin = shift;
+    if ( ! defined $step ) {
 
         $begin = 0      unless defined $begin;
         $next  = $begin unless defined $next;
@@ -96,14 +94,21 @@ sub construct_from_state {
                 return $current;
             },
             freeze => sub {
-                [ $class, [ $begin, $end, $prev, $current, $next ] ];
+                [
+                    $class,
+                    {
+                        begin   => $begin,
+                        end     => $end,
+                        prev    => $prev,
+                        current => $current,
+                        next    => $next,
+                    },
+                ]
             },
         );
     }
 
     else {
-
-        ( $begin, $end, $step, $iter ) = @_;
 
         $class->_croak(
             "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
@@ -117,7 +122,15 @@ sub construct_from_state {
             freeze => sub {
                 [
                     $class,
-                    [ $begin, $end, $step, $iter, $prev, $current, $next ] ];
+                    {
+                        begin   => $begin,
+                        end     => $end,
+                        step    => $step,
+                        iter    => $iter,
+                        prev    => $prev,
+                        current => $current,
+                        next    => $next,
+                    } ]
             },
 
             next => $begin < $end
