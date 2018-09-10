@@ -38,6 +38,31 @@ version 0.10
     Iterators may optionally provide a `freeze` method for serialization.
     Iterators may be chained, and an iterator's dependencies are frozen automatically.
 
+## Serialiation of Iterators
+
+- freeze _optional_
+
+    A subroutine which returns an array reference with the following elements, in the specified order :
+
+    1. The name of the package containing the thaw subroutine.
+    2. The name of the thaw subroutine.
+    3. The data to be passed to the thaw routine.  The routine will be called
+    as:
+
+            thaw( @{$data}, ?$depends );
+
+        if `$data` is an arrayref,
+
+            thaw( %{$data}, ?( depends => $depends )  );
+
+        if `$data` is a hashref, or
+
+            thaw( $data, ?$depends );
+
+        for any other type of data.
+
+        Dependencies are passed to the thaw routine only if they are present.
+
 # SUBROUTINES
 
 ## iterator
