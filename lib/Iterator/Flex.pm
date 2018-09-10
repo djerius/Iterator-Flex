@@ -13,7 +13,6 @@ our @EXPORT_OK
   = qw[ iterator iter iarray icycle icache igrep imap iproduct iseq ifreeze thaw ];
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-use Carp;
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
 
@@ -22,6 +21,12 @@ use Iterator::Flex::Base;
 our $ITERATOR_BASE_CLASS = __PACKAGE__ . '::Base';
 
 sub _ITERATOR_BASE { $ITERATOR_BASE_CLASS };
+
+
+sub _croak {
+    require Carp;
+    Carp::croak( @_ );
+}
 
 
 =sub iterator
@@ -394,7 +399,8 @@ sub thaw {
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
-      or croak( "unable to thaw: $package doesn't provide 'new_from_state' method\n" );
+      or _croak(
+        "unable to thaw: $package doesn't provide 'new_from_state' method\n" );
 
     my @args
       = is_arrayref( $args ) ? @$args
