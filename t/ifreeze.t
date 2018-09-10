@@ -1,6 +1,9 @@
 #! perl
 
 use Test2::V0;
+use Test::Lib;
+
+use MyTest::Utils qw[ drain ];
 
 use Iterator::Flex qw[ iseq ifreeze thaw ];
 use Data::Dump 'pp';
@@ -57,7 +60,7 @@ subtest "reset" => sub {
 
     my $iter = ifreeze {} iseq( 3 );
 
-    1 while <$iter>;
+    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
 
     try_ok { $iter->reset } "reset";
 
@@ -72,7 +75,7 @@ subtest "serialize" => sub {
 
     my $iter = ifreeze { push @freeze, $_ } iseq( 3 );
 
-    1 while <$iter>;
+    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
 
     is( scalar @freeze, 5, "number of frozen states" );
 

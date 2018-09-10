@@ -1,6 +1,8 @@
 #! perl
 
 use Test2::V0;
+use Test::Lib;
+use MyTest::Utils qw[ drain ];
 
 use Iterator::Flex qw[ iarray thaw ];
 use Data::Dump 'pp';
@@ -56,7 +58,7 @@ subtest "reset" => sub {
     subtest "fully drain iterator" => sub {
         my $iter = iarray( [ 0, 10, 20 ] );
 
-        1 while <$iter>;
+	is ( drain( 3, $iter ), 3, "not enough or too few iterations" );
 
         try_ok { $iter->reset } "reset";
 
@@ -84,7 +86,7 @@ subtest "rewind" => sub {
     subtest "fully drain iterator" => sub {
         my $iter = iarray( [ 0, 10, 20 ] );
 
-        1 while <$iter>;
+	is ( drain( 3, $iter ), 3, "not enough or too few iterations" );
 
         is(
             [ $iter->prev, $iter->current ],
@@ -175,7 +177,7 @@ subtest "freeze" => sub {
     {
         my $iter = iarray( [ 0, 10, 20 ] );
 
-        1 while <$iter>;
+	is ( drain( 3, $iter ), 3, "not enough or too few iterations" );
 
         try_ok { $freeze = $iter->freeze } "freeze iterator";
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";

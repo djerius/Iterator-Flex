@@ -1,6 +1,9 @@
 #! perl
 
 use Test2::V0;
+use Test::Lib;
+
+use MyTest::Utils qw[ drain ];
 
 use Iterator::Flex qw[ iproduct thaw ];
 use Data::Dump 'pp';
@@ -87,7 +90,7 @@ subtest "rewind" => sub {
 
     my $iter = iproduct( [ 0, 1 ], [ 2, 3 ] );
 
-    1 while <$iter>;
+    is ( drain( 4, $iter ), 4, "not enough or too few iterations" );
 
     is( $iter->next, undef, "iterator exhausted" );
     ok( $iter->is_exhausted, "iterator exhausted (officially)" );
