@@ -7,7 +7,7 @@ use Iterator::Flex qw[ iseq thaw ];
 my @tests = (
 
     {
-        name     => "begin",
+        name     => "end",
         args     => [3],
         expected => [
             [ undef, undef, 0 ],
