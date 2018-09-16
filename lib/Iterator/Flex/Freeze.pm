@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
+use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 use Scalar::Util;
 use Ref::Util;
@@ -49,7 +50,7 @@ sub construct {
     $class->_croak( "'serialize' must be a CODE reference" )
       unless Ref::Util::is_coderef( $serialize );
 
-    $src = $class->to_iterator( $src );
+    $src = Iterator::Flex::Factory::to_iterator( $src );
 
     $class->_croak( "'src' iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
@@ -78,11 +79,11 @@ sub construct {
     for my $meth ( 'prev', 'current', 'rewind', 'reset' ) {
         next unless $src->_may_meth( $meth );
         my $sub = $src->can( $meth );
-	Scalar::Util::weaken $sub;
+        Scalar::Util::weaken $sub;
         $params{$meth} = sub {
-	    $src->$sub();
-	};
-        push @{ $params{_roles} }, $class->_method_to_role( $meth );
+            $src->$sub();
+        };
+        push @{ $params{_roles} }, $class->_load_role( ucfirst $meth );
     }
 
 

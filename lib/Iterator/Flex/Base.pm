@@ -11,9 +11,11 @@ use Scalar::Util;
 use Ref::Util;
 use Role::Tiny       ();
 use Role::Tiny::With ();
+use Module::Runtime  ();
 
-Role::Tiny::With::with 'Iterator::Flex::Role';
+Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
+use Iterator::Flex::Utils;
 use Iterator::Flex::Failure;
 
 our %REGISTRY;
@@ -56,14 +58,15 @@ sub new_from_attrs {
         $class->_croak( "_roles must be an arrayref" )
           unless Ref::Util::is_arrayref( $attrs{_roles} );
 
-	$class = Role::Tiny->create_class_with_roles( $class,
-						      map { "Iterator::Flex::Role::$_" }
-						      @{ $attrs{_roles} } );
+        $class = Iterator::Flex::Utils::create_class_with_roles( $class,
+            @{ $attrs{_roles} } );
     }
 
-    my $self = bless $class->_construct_next( $attrs ), $class;
+    $attrs{name} = $class unless defined $attrs{name};
 
-    $REGISTRY{ Scalar::Util::refaddr $self } = $attrs;
+    my $self = bless $class->_construct_next( \%attrs ), $class;
+
+    $REGISTRY{ Scalar::Util::refaddr $self } = \%attrs;
 
     $self->set_exhausted( 0 );
 
@@ -75,6 +78,7 @@ sub _validate_attrs {
     my $class = shift;
     my $attrs = shift;
 
+    # FIXME - don't copy until it's actually needed.
     my %iattr = %$attrs;
     my $attr;
 
@@ -83,6 +87,7 @@ sub _validate_attrs {
         $attr = [$attr] unless Ref::Util::is_arrayref( $attr );
         $attrs->{depends} = $attr;
 
+# FIXME: this is too restrictive. It should allow simple coderefs, or things with a next or __next__ .
         $class->_croak( "dependency #$_ is not an iterator object\n" )
           for grep {
             !( Scalar::Util::blessed( $attr->[$_] )
@@ -96,25 +101,10 @@ sub _validate_attrs {
 sub DESTROY {
 
     if ( defined $_[0] ) {
-        my $attributes = delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
-        delete $attributes->{_overload_next};
+        delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
     }
 }
 
-sub _can_meth {
-
-    # my $class = shift;
-    shift;
-    my ( $obj, $meth ) = @_;
-
-    my $sub;
-    foreach ( "__${meth}__", $meth ) {
-
-        last if defined( $sub = $obj->can( $_ ) );
-    }
-
-    return $sub;
-}
 
 
 =method set_exhausted
@@ -218,238 +208,37 @@ sub _wrap_may {
 
 }
 
+sub _namespaces {
+
+    my $class = shift;
+
+    ( my $namespace ) = $class =~ /(.*)::[^:]+$/;
+
+    return ( $namespace, 'Iterator::Flex' );
+}
+
+
 # return the role name for a given method
-sub _method_to_role {
-    # ( $class, $method )
-    return ucfirst $_[1];
+sub _load_role {
+    my ( $class, $role ) = @_;
+
+    for my $namespace ( $class->_namespaces ) {
+        my $module = "${namespace}::Role::${role}";
+        return $module if eval { Module::Runtime::require_module( $module ) };
+    }
+
+    _croak(
+        "unable to find a module for role '$role' in @{[ join( ',', $class->_namespaces ) ]}"
+    );
 }
 
 sub _add_roles {
     my $class = shift;
 
     Role::Tiny->apply_roles_to_package( $class,
-        map { "Iterator::Flex::Role::$_" } @_ );
+        map { $class->_load_role( $_ ) } @_ );
 }
 
-=method to_iterator
-
-  $iter = $class->to_iterator( $iterable );
-
-Construct an iterator from an iterable thing. The iterator will
-return C<undef> upon exhaustion.
-
- An iterable thing is
-
-=over
-
-=item an object
-
-An iterable object has one or more of the following methods
-
-=over
-
-=item C<__iter__> or C<iter>
-
-=item C<__next__> or C<next>
-
-=item an overloaded C<< <> >> operator
-
-This should return the next item.
-
-=item an overloaded C<< &{} >> operator
-
-This should return a subroutine which returns the next item.
-
-=back
-
-Additionally, if the object has the following methods, they are used
-by the constructed iterator:
-
-=over
-
-=item C<__prev__> or C<prev>
-
-=item C<__current__> or C<current>
-
-=back
-
-See L</construct_from_object>
-
-=item an arrayref
-
-The returned iterator will be an L<Iterator::Flex::Array> iterator.
-
-=item a coderef
-
-The coderef must return the next element in the iteration.
-
-=item a globref
-
-=back
-
-=cut
-
-sub to_iterator {
-
-    my $class = shift;
-
-    return $class->_ITERATOR_BASE->construct( next => sub { return } )
-      unless @_;
-
-    $class->_ITERATOR_BASE->construct_from_iterable( @_ );
-}
-
-=method construct_from_iterable
-
-  $iter = Iterator::Flex::Base->construct_from_iterable( $iterable );
-
-Construct an iterator from an iterable thing.  The returned iterator will
-return C<undef> upon exhaustion.
-
-An iterable thing is
-
-=over
-
-=item an object with certain methods
-
-See L</construct_from_object>
-
-=item an arrayref
-
-The returned iterator will be an L<Iterator::Flex::Array> iterator.
-
-=item a coderef
-
-The coderef must return the next element in the iteration.
-
-=item a globref
-
-=back
-
-=cut
-
-
-sub construct_from_iterable {
-
-    my $class = shift;
-
-    $class->_croak( "construct_from_iterable is a class method\n" )
-      if Scalar::Util::blessed $class;
-
-    my ( $obj ) = @_;
-
-    if ( Scalar::Util::blessed $obj) {
-
-        return $class->construct_from_object( $obj );
-    }
-
-    elsif ( Ref::Util::is_arrayref( $obj ) ) {
-
-        require Iterator::Flex::Array;
-        return Iterator::Flex::Array->new( $obj );
-    }
-
-    elsif ( Ref::Util::is_coderef( $obj ) ) {
-
-        return $class->construct( next => $obj );
-    }
-
-    elsif ( Ref::Util::is_globref( $obj ) ) {
-        return $class->construct( next => sub { scalar <$obj> } );
-    }
-
-    $class->_croak( sprintf "'%s' object is not iterable",
-      ( ref( $obj ) || 'SCALAR' ) );
-
-}
-
-=method construct_from_object
-
-  $iter = Iterator::Flex::Base->construct_from_object( $iterable );
-
-Construct an iterator from an object.  Normal use is to call L<construct_from_iterable> or
-simply use L<Iterator::Flex/iter>.  The returned iterator will return C<undef> upon exhaustion.
-
-
-An iterable object has one or more of the following methods
-
-=over
-
-=item C<__iter__> or C<iter>
-
-=item C<__next__> or C<next>
-
-=item an overloaded C<< <> >> operator
-
-This should return the next item.
-
-=item an overloaded C<< &{} >> operator
-
-This should return a subroutine which returns the next item.
-
-=back
-
-Additionally, if the object has the following methods, they are used
-by the constructed iterator:
-
-=over
-
-=item C<__prev__> or C<prev>
-
-=item C<__current__> or C<current>
-
-=back
-
-=cut
-
-
-sub construct_from_object {
-
-    my $class = shift;
-
-    $class->_croak( "construct_from_object is a class method\n" )
-      if Scalar::Util::blessed $class;
-
-
-    my $obj = shift;
-
-    return $obj if $obj->isa( $class );
-
-
-    my %param;
-    my $code;
-
-    # assume the iterator returns undef on exhausted
-    $param{exhausted} = 'undef';
-
-    if ( $code = $class->_can_meth( $obj, 'iter' ) ) {
-        $param{next} = $code->( $obj );
-    }
-    elsif ( $code = $class->_can_meth( $obj, 'next' )
-        || overload::Method( $obj, '<>' ) )
-    {
-        $param{next} = sub { $code->( $obj ) };
-    }
-
-    elsif ( $code = overload::Method( $obj, '&{}' ) ) {
-        $param{next} = $code->( $obj );
-    }
-
-    elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-
-        require Iterator::Flex::Array;
-        return Iterator::Flex::Array->new( $code->( $obj ) );
-    }
-
-    for my $method ( 'prev', 'current' ) {
-        $code = $class->_can_meth( $obj, $method );
-
-        $param{$method} = sub { $code->( $obj ) }
-          if $code;
-    }
-
-    return $class->construct( %param );
-}
 
 
 1;

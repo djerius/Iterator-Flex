@@ -16,13 +16,6 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
 
-use Iterator::Flex::Base;
-
-our $ITERATOR_BASE_CLASS = __PACKAGE__ . '::Base';
-
-sub _ITERATOR_BASE { $ITERATOR_BASE_CLASS };
-
-
 sub _croak {
     require Carp;
     Carp::croak( @_ );
@@ -42,7 +35,8 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 =cut
 
 sub iterator(&@) {
-    $ITERATOR_BASE_CLASS->construct( next => shift, @_ );
+    require Iterator::Flex::Factory;
+    Iterator::Flex::Factory::construct( { next => shift, @_ } );
 }
 
 
@@ -106,7 +100,8 @@ The coderef must return the next element in the iteration.
 =cut
 
 sub iter {
-    $ITERATOR_BASE_CLASS->to_iterator( @_ );
+    require Iterator::Flex::Factory;
+    Iterator::Flex::Factory::to_iterator( @_ );
 }
 
 

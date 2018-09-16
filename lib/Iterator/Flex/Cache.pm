@@ -8,6 +8,7 @@ use warnings;
 our $VERSION = '0.10';
 
 use parent 'Iterator::Flex::Base';
+use Iterator::Flex::Factory;
 use Scalar::Util;
 
 =method new
@@ -16,8 +17,7 @@ use Scalar::Util;
 
 The iterator caches the current and previous values of C<$iterable>,
 C<$iteratable> is converted into an iterator (if it is not already
-one) via C<$class->to_iterator>, which defaults to
-L<Iterator::Flex::Base/to_iterable>).
+one) via L<Iterator::Flex::Factory/to_iterable>).
 
 The returned iterator supports the following methods:
 
@@ -57,7 +57,7 @@ sub construct_from_state {
 
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 
-    $src = $class->to_iterator( $src );
+    $src = Iterator::Flex::Factory::to_iterator( $src );
 
     my $self;
 

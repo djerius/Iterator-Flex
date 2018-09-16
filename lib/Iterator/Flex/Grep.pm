@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
+use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 
 =method new
@@ -35,10 +36,11 @@ The iterator supports the following methods:
 
 sub construct {
 
-    my $class = shift;
+    # my $class =
+    shift;
 
     my ( $code, $src ) = @_;
-    $src = $class->to_iterator( $src );
+    $src = Iterator::Flex::Factory::to_iterator( $src );
 
     return {
         name => 'igrep',

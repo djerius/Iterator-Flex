@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
+use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 
 =method new
@@ -15,8 +16,7 @@ use parent 'Iterator::Flex::Base';
 
 Returns an iterator equivalent to running L<map> on C<$iterable> with
 the specified code.  C<$iteratable> is converted into an iterator (if
-it is not already one) via C<$class->to_iterator>, which defaults to
-L<Iterator::Flex::Base/to_iterable>).
+it is not already one) via  L<Iterator::Flex::Factory/to_iterable>).
 
 C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is
 exhausted).
@@ -35,11 +35,12 @@ The iterator supports the following methods:
 
 sub construct {
 
-    my $class = shift;
+    # my $class =
+    shift;
 
     my ( $code, $src ) = @_;
 
-    $src = $class->to_iterator( $src );
+    $src = Iterator::Flex::Factory::to_iterator( $src );
 
     return {
         name => 'imap',

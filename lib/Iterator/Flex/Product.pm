@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
+use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util;
@@ -72,12 +73,12 @@ sub construct_from_state {
     # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
-        @iterator = map { $class->to_iterator( $_ ) } @$iterators;
+        @iterator = map { Iterator::Flex::Factory::to_iterator( $_ ) } @$iterators;
     }
 
     else {
         @keys = List::Util::pairkeys @$iterators;
-        @iterator = map { $class->to_iterator( $_ ) } List::Util::pairvalues @$iterators;
+        @iterator = map { Iterator::Flex::Factory::to_iterator( $_ ) } List::Util::pairvalues @$iterators;
     }
 
     # can only work if the iterators support a rwind method

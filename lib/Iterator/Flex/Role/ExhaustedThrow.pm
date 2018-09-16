@@ -1,6 +1,6 @@
 package Iterator::Flex::Role::ExhaustedThrow;
 
-# ABSTRACT: Role to add throw on exhaustion to an Iterator::Flex::Base
+# ABSTRACT: Role to add throw on exhaustion to an iterator which sets is_exhausted.
 
 use strict;
 use warnings;

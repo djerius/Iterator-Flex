@@ -46,7 +46,8 @@ sub construct {
 }
 
 sub construct_from_state {
-    my ( $class, $state ) = ( shift, shift );
+
+    my ( $class, $state ) = @_;
 
     $class->_croak( "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
@@ -108,6 +109,7 @@ sub construct_from_state {
             }
             $prev    = $current;
             $current = $next++;
+
             return $arr->[$current];
         },
 

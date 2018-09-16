@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Ref::Util qw[ is_coderef ];
+use Ref::Util;
 use Scalar::Util;
 use Role::Tiny;
 
@@ -17,8 +17,7 @@ use Role::Tiny;
 
    $iterator->next;
 
-Wrapper for iterator next callback optimized for the case where
-the iterator itself indicates it is exhausted by calling the C<set_exhausted> method
+Wrapper for an iterator whose next method invokes C<set_exhausted> 
 
 =cut
 
@@ -28,19 +27,19 @@ sub _construct_next {
     shift;
     my $attributes = shift;
 
-    my $next = $attributes->{next};
-
     my $sub;
 
     # if we can store self directly, let's do that
-    if ( is_coderef( $attributes->{ set_self } ) ) {
-	$attributes->{set_self}->( $next );
-	$sub = $next;
+    if ( Ref::Util::is_coderef( $attributes->{ set_self } ) ) {
+        $sub = $attributes->{next};
+	Scalar::Util::weaken $attributes->{next};
+        $attributes->{set_self}->( $sub );
     }
 
     # otherwise, need to wrap and pass $self
     else {
-	Scalar::Util::weaken $next;
+	my $next = $attributes->{next};
+        Scalar::Util::weaken $next;
 
         my $wsub;
         $wsub = sub { $next->( $wsub)  };
