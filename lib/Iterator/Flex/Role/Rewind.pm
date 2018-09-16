@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Rewind;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Iterator::Flex::Base ();
 use Role::Tiny;

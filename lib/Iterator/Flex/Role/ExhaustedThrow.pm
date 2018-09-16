@@ -5,7 +5,7 @@ package Iterator::Flex::Role::ExhaustedThrow;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Scalar::Util;
 use Role::Tiny;

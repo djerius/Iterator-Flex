@@ -3,7 +3,7 @@ package Iterator::Flex::Method;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Package::Variant importing => qw[ Role::Tiny ];
 use Iterator::Flex::Failure 'RoleExists';

@@ -7,7 +7,7 @@ use warnings;
 
 use Role::Tiny;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub _module_name {
 

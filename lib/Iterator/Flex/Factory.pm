@@ -5,7 +5,7 @@ package Iterator::Flex::Factory;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Ref::Util qw[ is_hashref is_coderef is_ref is_arrayref ];
 use Scalar::Util qw[ blessed ];

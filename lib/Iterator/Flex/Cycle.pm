@@ -5,7 +5,7 @@ package Iterator::Flex::Cycle;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use parent 'Iterator::Flex::Base';
 use Ref::Util;

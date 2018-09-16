@@ -5,7 +5,7 @@ package Iterator::Flex::Utils;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use Ref::Util qw[ is_arrayref ];
 use Exporter 'import';

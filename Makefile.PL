@@ -40,12 +40,13 @@ my %WriteMakefileArgs = (
     "File::Spec" => 0,
     "IO::Handle" => 0,
     "IPC::Open3" => 0,
+    "Test2::API" => 0,
     "Test2::V0" => 0,
     "Test::Lib" => 0,
     "Test::More" => 0,
     "aliased" => 0
   },
-  "VERSION" => "0.10",
+  "VERSION" => "0.11",
   "test" => {
     "TESTS" => "t/*.t t/regressions/*.t"
   }
@@ -69,6 +70,7 @@ my %FallbackPrereqs = (
   "Role::Tiny::With" => 0,
   "Safe::Isa" => 0,
   "Scalar::Util" => 0,
+  "Test2::API" => 0,
   "Test2::V0" => 0,
   "Test::Lib" => 0,
   "Test::More" => 0,
