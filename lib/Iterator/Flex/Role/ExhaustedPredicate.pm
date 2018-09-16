@@ -17,7 +17,7 @@ use Role::Tiny;
 
    $iterator->next;
 
-Wrapper for an iterator whose next method invokes C<set_exhausted> 
+Wrapper for an iterator whose next method invokes C<set_exhausted>
 
 =cut
 
