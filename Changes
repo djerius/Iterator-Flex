@@ -2,6 +2,23 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.10      2018-09-16 18:21:49-04:00 America/New_York
+
+  [REFACTOR]
+
+    * Internal refactor to improve performance and simplify code
+
+    * Iterator classes are constructed directly without requiring
+      parsing of the attribute hash.
+
+    * Only existing class based iterators should/can be frozen.
+
+    * ITERATOR_BASE has been removed.  The idea was never thought completely
+      through. Still haven't worked out how to change base class for
+
+    * on-the-fly creation of iterators is now in Factory.
+
+
 0.09      2018-06-01 13:10:56-04:00 America/New_York
 
   [BUG FIX]
