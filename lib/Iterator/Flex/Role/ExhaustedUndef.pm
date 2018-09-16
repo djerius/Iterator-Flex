@@ -35,7 +35,7 @@ sub _construct_next {
     my $wsub;
     $wsub = sub {
         my $val = $next->( $wsub );
-        $attributes->{is_exhausted} = ! defined $val;
+        $attributes->{is_exhausted} = !defined $val;
         $val;
     };
 
@@ -48,7 +48,7 @@ sub _construct_next {
     return $sub;
 }
 
-sub next { &{$_[0]} }
+sub next { &{ $_[0] } }
 
 *__next__ = \&next;
 

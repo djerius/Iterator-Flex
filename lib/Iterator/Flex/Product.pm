@@ -174,8 +174,8 @@ sub construct_from_state {
 
         $params{freeze} = sub {
             return [ $class, { keys => \@keys } ];
-	};
-	$params{_roles} = [ 'Freeze' ];
+        };
+        $params{_roles} = [ 'Freeze' ];
     }
 
     return {
@@ -203,7 +203,7 @@ sub new_from_state {
     }
 
     $class->new_from_attrs( $class->construct_from_state( { iterators => $iterators,
-							    value => \@value } ) );
+                                                            value => \@value } ) );
 }
 
 __PACKAGE__->_add_roles( qw[

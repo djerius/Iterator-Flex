@@ -28,7 +28,6 @@ sub _croak {
     Carp::croak( @_ );
 }
 
-
 =sub iterator
 
   $iter = iterator { CODE } ?%params;

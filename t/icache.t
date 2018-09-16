@@ -59,7 +59,7 @@ subtest "reset" => sub {
     subtest "fully drain iterator" => sub {
         my $iter = icache( iarray( [ 0, 10, 20 ] ) );
 
-	drain( $iter, 3 );
+        drain( $iter, 3 );
 
         try_ok { $iter->reset } "reset";
 
@@ -87,7 +87,7 @@ subtest "rewind" => sub {
     subtest "fully drain iterator" => sub {
         my $iter = icache( iarray( [ 0, 10, 20 ] ) );
 
-	drain( $iter, 3 );
+        drain( $iter, 3 );
 
         is(
             [ $iter->prev, $iter->current ],
@@ -177,7 +177,7 @@ subtest "freeze" => sub {
     {
         my $iter = icache( iarray( [ 0, 10, 20 ] ) );
 
-	drain( $iter, 3 );
+        drain( $iter, 3 );
 
         try_ok { $freeze = $iter->freeze } "freeze iterator";
         try_ok { $iter = thaw( $freeze ) } "thaw iterator";

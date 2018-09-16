@@ -7,19 +7,36 @@ use warnings;
 
 our $VERSION = '0.10';
 
-use Iterator::Flex::Role::Method;
+use Ref::Util qw[ is_arrayref ];
+use Exporter 'import';
 
-=sub create_method
+use Role::Tiny::With;
 
-A horrible kludge to avoid adding a C<Method> to
-L<Iterator::Flex::Base>.  L<Package::Variant> based classes export a generated factory into
-the calling package, which pollutes a class' namespace
+with 'Iterator::Flex::Role::Utils';
 
-=cut
+our @EXPORT_OK = qw(
+  create_class_with_roles
+  _can_meth
+);
 
-*create_method = \&Method;
+
+sub create_class_with_roles {
+
+    my $base = shift;
+
+    my $class = Role::Tiny->create_class_with_roles( $base,
+        map { $base->_module_name( 'Role' => ref $_ ? @{$_} : $_ ) } @_ );
+
+    _croak(
+        "class '$class' does not provide the required _construct_next method\n" )
+      unless $class->can( '_construct_next' );
+
+    return $class;
+}
+
 
 1;
+
 
 
 

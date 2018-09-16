@@ -1,6 +1,6 @@
 package Iterator::Flex::Role::ExhaustedPredicate;
 
-# ABSTRACT: Role for iterator which sets the is_exhausted predicate
+# ABSTRACT: Role for iterator which sets the is_exhausted predicate.
 
 use strict;
 use warnings;
@@ -42,15 +42,15 @@ sub _construct_next {
     else {
 	Scalar::Util::weaken $next;
 
-	my $wsub;
-	$wsub = sub { $next->( $wsub)  };
+        my $wsub;
+        $wsub = sub { $next->( $wsub)  };
 
-	# create a second reference to $wsub, before we weaken it,
-	# otherwise it will lose its contents, as it would be the only
-	# reference.
+        # create a second reference to $wsub, before we weaken it,
+        # otherwise it will lose its contents, as it would be the only
+        # reference.
 
-	$sub = $wsub;
-	Scalar::Util::weaken( $wsub );
+        $sub = $wsub;
+        Scalar::Util::weaken( $wsub );
     }
 
     return $sub;

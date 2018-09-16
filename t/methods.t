@@ -11,21 +11,32 @@ my $iter = iterator {
 
     pop @data;
 
-} methods => { now => sub {
+}
+methods => {
+    now => sub {
 
-                   isa_ok( $_[0], [ 'Iterator::Flex::Base' ], 'initial arg is object' );
-                   $data[-1]
-               } };
+        isa_ok( $_[0], ['Iterator::Flex::Base'], 'initial arg is object' );
+        $data[-1];
+    }
+};
 
 
-is ( $iter->next, 10, "first value" );
-is ( $iter->now, 9, "method call" );
+is( $iter->next, 10, "first value" );
+is( $iter->now,  9,  "method call" );
 
 # creating another now method should succeed
 my $error;
-ok( lives { $iter = iterator( sub {}, methods => { now => sub {} } );  },
-    'reuse method name' ) or note $@;
+ok(
+    lives {
+        $iter = iterator(
+            sub { },
+            methods => {
+                now => sub { }
+            } );
+    },
+    'reuse method name'
+) or note $@;
 
-can_ok( $iter, [ 'now' ], "method created for second iterator" );
+can_ok( $iter, ['now'], "method created for second iterator" );
 
 done_testing;

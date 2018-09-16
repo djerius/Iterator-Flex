@@ -53,13 +53,13 @@ sub new_from_attrs {
 
     # copy attrs as we may change it
     my %attrs = ( _roles => [], %$attrs );
-    $class->_validate_attrs( \%$attrs );
+    $class->_validate_attrs( \%attrs );
 
     # add roles if necessary
     if ( @{ $attrs{_roles} } ) {
 
-	$class->_croak( "_roles must be an arrayref" )
-	    unless Ref::Util::is_arrayref( $attrs{_roles} );
+        $class->_croak( "_roles must be an arrayref" )
+          unless Ref::Util::is_arrayref( $attrs{_roles} );
 
 	$class = Role::Tiny->create_class_with_roles( $class,
 						      map { "Iterator::Flex::Role::$_" }
@@ -70,7 +70,7 @@ sub new_from_attrs {
 
     $REGISTRY{ Scalar::Util::refaddr $self } = $attrs;
 
-    $self->set_exhausted(0);
+    $self->set_exhausted( 0 );
 
     return $self;
 }
@@ -85,7 +85,7 @@ sub _validate_attrs {
 
     if ( defined( $attr = delete $iattr{depends} ) ) {
 
-        $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
+        $attr = [$attr] unless Ref::Util::is_arrayref( $attr );
         $attrs->{depends} = $attr;
 
         $class->_croak( "dependency #$_ is not an iterator object\n" )
@@ -155,7 +155,7 @@ will switch the iterator state to I<exhausted>.
 
 sub is_exhausted {
     my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    !! $attributes->{is_exhausted};
+    !!$attributes->{is_exhausted};
 }
 
 =method __iter__

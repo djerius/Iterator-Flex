@@ -20,7 +20,7 @@ sub _construct_next {
 
     # if we can store self directly, let's do that
     if ( is_coderef( $attributes->{ set_self } ) ) {
-	$aattributes->{set_self}->( $next );
+        $attributes->{set_self}->( $next );
     }
 
     # ensure we don't hold any strong references in the subroutine
