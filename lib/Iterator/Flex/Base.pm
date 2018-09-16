@@ -20,11 +20,6 @@ our %REGISTRY;
 
 use overload ( '<>' => 'next', fallback => 1 );
 
-sub _ITERATOR_BASE {
-    require Iterator::Flex;
-    goto \&Iterator::Flex::_ITERATOR_BASE;
-}
-
 sub _croak {
     my $class = ref $_[0] || $_[0];
     shift;
@@ -91,7 +86,7 @@ sub _validate_attrs {
         $class->_croak( "dependency #$_ is not an iterator object\n" )
           for grep {
             !( Scalar::Util::blessed( $attr->[$_] )
-                && $attr->[$_]->isa( $class->_ITERATOR_BASE ) )
+                && $attr->[$_]->isa( __PACKAGE__ ) )
           } 0 .. $#{$attr};
     }
 

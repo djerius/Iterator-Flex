@@ -83,7 +83,7 @@ sub construct_from_state {
     # can only work if the iterators support a rwind method
     $class->_croak( "all iteratables must provide a rewind method\n" )
       unless @iterator == grep { defined }
-      map { $class->_ITERATOR_BASE->_can_meth( $_, 'rewind' ) } @iterator;
+      map { $class->_can_meth( $_, 'rewind' ) } @iterator;
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
@@ -168,7 +168,7 @@ sub construct_from_state {
     # can only freeze if the iterators support a prev method
     if (
         @iterator == grep { defined }
-        map { $class->_ITERATOR_BASE->_can_meth( $_, 'current' ) } @iterator
+        map { $class->_can_meth( $_, 'current' ) } @iterator
       )
     {
 
