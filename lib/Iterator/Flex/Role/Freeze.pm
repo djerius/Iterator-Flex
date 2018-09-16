@@ -45,3 +45,5 @@ sub freeze {
 }
 
 1;
+
+# COPYRIGHT

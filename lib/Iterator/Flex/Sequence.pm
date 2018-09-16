@@ -197,5 +197,6 @@ __PACKAGE__->_add_roles( qw[
       Freeze
 ] );
 
-
 1;
+
+# COPYRIGHT

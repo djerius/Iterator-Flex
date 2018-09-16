@@ -10,6 +10,8 @@ our $VERSION = '0.10';
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 
+=for stopwords attr
+
 =method attr
 
   $iterator = Iterator::Flex::Array->attr( $array_ref );
@@ -138,3 +140,5 @@ __PACKAGE__->_add_roles( qw[
 ] );
 
 1;
+
+# COPYRIGHT

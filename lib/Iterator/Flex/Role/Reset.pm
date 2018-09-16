@@ -51,3 +51,5 @@ sub reset {
 around may => Iterator::Flex::Base->_wrap_may( 'reset' );
 
 1;
+
+# COPYRIGHT

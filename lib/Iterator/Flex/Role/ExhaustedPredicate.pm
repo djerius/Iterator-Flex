@@ -32,13 +32,13 @@ sub _construct_next {
     # if we can store self directly, let's do that
     if ( Ref::Util::is_coderef( $attributes->{ set_self } ) ) {
         $sub = $attributes->{next};
-	Scalar::Util::weaken $attributes->{next};
+        Scalar::Util::weaken $attributes->{next};
         $attributes->{set_self}->( $sub );
     }
 
     # otherwise, need to wrap and pass $self
     else {
-	my $next = $attributes->{next};
+        my $next = $attributes->{next};
         Scalar::Util::weaken $next;
 
         my $wsub;
@@ -60,3 +60,5 @@ sub next { &{$_[0]} }
 *__next__ = \&next;
 
 1;
+
+# COPYRIGHT

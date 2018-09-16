@@ -239,6 +239,6 @@ sub _add_roles {
         map { $class->_load_role( $_ ) } @_ );
 }
 
-
-
 1;
+
+# COPYRIGHT

@@ -215,3 +215,5 @@ __PACKAGE__->_add_roles( qw[
 ] );
 
 1;
+
+# COPYRIGHT

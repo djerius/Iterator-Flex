@@ -27,5 +27,6 @@ sub current {
 }
 *__current__ = \&current;
 
-
 1;
+
+# COPYRIGHT

@@ -68,5 +68,6 @@ __PACKAGE__->_add_roles(
       Current
       ] );
 
-
 1;
+
+# COPYRIGHT

@@ -10,3 +10,5 @@ our $VERSION = '0.10';
 use custom::failures qw/Exhausted RoleExists/;
 
 1;
+
+# COPYRIGHT

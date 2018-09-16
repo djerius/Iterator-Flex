@@ -458,7 +458,7 @@ Iterators may be chained, and an iterator's dependencies are frozen automaticall
 
 =back
 
-=head2 Serialiation of Iterators
+=head2 Serialization of Iterators
 
 =over
 

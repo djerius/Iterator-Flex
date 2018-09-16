@@ -431,3 +431,5 @@ sub construct_from_object {
 }
 
 1;
+
+# COPYRIGHT

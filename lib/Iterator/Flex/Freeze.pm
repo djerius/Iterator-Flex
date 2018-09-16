@@ -94,5 +94,6 @@ __PACKAGE__->_add_roles( qw[
       ExhaustedPredicate
 ] );
 
-
 1;
+
+# COPYRIGHT

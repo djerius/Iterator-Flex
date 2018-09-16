@@ -27,5 +27,6 @@ sub prev {
 }
 *__prev__ = \&prev;
 
-
 1;
+
+# COPYRIGHT

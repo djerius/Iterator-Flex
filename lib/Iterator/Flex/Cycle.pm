@@ -123,3 +123,5 @@ __PACKAGE__->_add_roles(
 
 
 1;
+
+# COPYRIGHT

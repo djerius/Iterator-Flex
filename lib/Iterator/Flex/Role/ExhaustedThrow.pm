@@ -59,5 +59,6 @@ C<next> callback must set the iterator state to C<EXHAUSTED>.
 sub next { &{$_[0]} }
 *__next__ = \&next;
 
-
 1;
+
+# COPYRIGHT

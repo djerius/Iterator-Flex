@@ -37,6 +37,4 @@ sub _can_meth {
 
 1;
 
-
-
-
+# COPYRIGHT

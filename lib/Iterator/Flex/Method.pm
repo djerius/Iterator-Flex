@@ -30,11 +30,10 @@ sub make_variant {
 
 1;
 
+# COPYRIGHT
+
 __END__
 
 =for Pod::Coverage
   make_variant_package_name
   make_variant
-
-
-

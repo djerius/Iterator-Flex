@@ -34,9 +34,6 @@ sub create_class_with_roles {
     return $class;
 }
 
-
 1;
 
-
-
-
+# COPYRIGHT

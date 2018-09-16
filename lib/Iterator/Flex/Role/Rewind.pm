@@ -44,3 +44,5 @@ sub rewind {
 around may => Iterator::Flex::Base->_wrap_may( 'rewind' );
 
 1;
+
+# COPYRIGHT

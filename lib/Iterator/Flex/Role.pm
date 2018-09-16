@@ -54,5 +54,6 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/ifree
 
 sub ifreeze { Iterator::Flex::ifreeze( \&{$_[1]}, $_[0] )  }
 
-
 1;
+
+# COPYRIGHT
