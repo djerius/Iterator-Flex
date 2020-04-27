@@ -57,12 +57,12 @@ sub construct {
         },
         reset     => sub { },
         depends   => $src,
-        exhausted => 'predicate',
     };
 }
 
 __PACKAGE__->_add_roles(
     qw[
+      SetExhausted
       ExhaustedPredicate
       Rewind
       Reset

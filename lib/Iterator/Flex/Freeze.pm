@@ -55,6 +55,9 @@ sub construct {
     $class->_croak( "'src' iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
 
+    $class->_croak( "'src' iterator must provide set_exhausted/is_exhausted methods" )
+      unless $class->_can_meth( $src, 'set_exhausted' ) && $class->_can_meth( $src, 'is_exhausted' );
+
     my $self;
     my %params = (
         name => 'freeze',
@@ -91,6 +94,7 @@ sub construct {
 }
 
 __PACKAGE__->_add_roles( qw[
+      SetExhausted
       ExhaustedPredicate
 ] );
 

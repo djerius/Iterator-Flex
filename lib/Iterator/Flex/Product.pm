@@ -208,6 +208,7 @@ sub new_from_state {
 }
 
 __PACKAGE__->_add_roles( qw[
+      SetExhausted
       ExhaustedPredicate
       Current
       Reset
