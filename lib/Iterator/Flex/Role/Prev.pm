@@ -21,7 +21,7 @@ Returns the previous value.
 
 sub prev {
 
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ $_[0] };
 
     $attributes->{prev}->( $_[0] );
 }

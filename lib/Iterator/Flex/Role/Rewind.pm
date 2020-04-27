@@ -23,7 +23,7 @@ Resets the iterator to its initial value.
 sub rewind {
 
     my $obj  = $_[0];
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ $obj };
 
     if ( defined $attributes->{depends} ) {
 

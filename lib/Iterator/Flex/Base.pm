@@ -18,7 +18,9 @@ Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 use Iterator::Flex::Utils;
 use Iterator::Flex::Failure;
 
-our %REGISTRY;
+use Hash::Util::FieldHash;
+
+Hash::Util::FieldHash::fieldhashes \ our (%REGISTRY );
 
 use overload ( '<>' => 'next', fallback => 1 );
 
@@ -66,7 +68,7 @@ sub new_from_attrs {
 
     my $self = bless $class->_construct_next( \%attrs ), $class;
 
-    $REGISTRY{ Scalar::Util::refaddr $self } = \%attrs;
+    $REGISTRY{ $self } = \%attrs;
 
     $self->set_exhausted( 0 );
 
@@ -98,15 +100,6 @@ sub _validate_attrs {
     return;
 }
 
-sub DESTROY {
-
-    if ( defined $_[0] ) {
-        delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    }
-}
-
-
-
 =method set_exhausted
 
   $iter->set_exhausted;
@@ -116,7 +109,7 @@ Set the iterator's state to exhausted
 =cut
 
 sub set_exhausted {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $REGISTRY{  $_[0] };
     $attributes->{is_exhausted} = @_ > 1 ? $_[1] : 1;
 }
 
@@ -139,7 +132,7 @@ will switch the iterator state to I<exhausted>.
 =cut
 
 sub is_exhausted {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $REGISTRY{ $_[0] };
     !!$attributes->{is_exhausted};
 }
 
@@ -152,7 +145,7 @@ Returns the subroutine which returns the next value from the iterator.
 =cut
 
 sub __iter__ {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $REGISTRY{ $_[0] };
     $attributes->{next};
 }
 
@@ -178,7 +171,7 @@ sub _may_meth {
     my $meth = shift;
 
     my $attributes = shift
-      // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+      // $Iterator::Flex::Base::REGISTRY{ $obj };
 
     my $pred = "_may_$meth";
 

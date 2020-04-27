@@ -24,7 +24,7 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 sub freeze {
 
     my $obj = $_[0];
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $Iterator::Flex::Base::REGISTRY{ $obj };
 
     my @freeze;
 

@@ -23,7 +23,7 @@ sub make_variant {
   my ($class, $target_package, $package, %arg) = @_;
   my $name = $arg{name};
   install $name => sub {
-      my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
+      my $attributes = $Iterator::Flex::Base::REGISTRY{  $_[0] };
       return $attributes->{methods}{$name}->( @_ );
   };
 }
