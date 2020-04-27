@@ -411,7 +411,7 @@ sub thaw {
     }
 
     my $iter = $package->$new_from_state( $state );
-    $iter->set_exhausted( $exhausted );
+    $exhausted? $iter->set_exhausted : $iter->_reset_exhausted;
     return $iter;
 }
 

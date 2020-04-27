@@ -68,7 +68,7 @@ sub new_from_attrs {
 
     $REGISTRY{ Scalar::Util::refaddr $self } = \%attrs;
 
-    $self->set_exhausted( 0 );
+    $self->_reset_exhausted;
 
     return $self;
 }
@@ -117,7 +117,12 @@ Set the iterator's state to exhausted
 
 sub set_exhausted {
     my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
-    $attributes->{is_exhausted} = @_ > 1 ? $_[1] : 1;
+    $attributes->{is_exhausted} = 1;
+}
+
+sub _reset_exhausted {
+    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    $attributes->{is_exhausted} = 0;
 }
 
 
