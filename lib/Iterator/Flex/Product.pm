@@ -73,12 +73,12 @@ sub construct_from_state {
     # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
-        @iterator = map { Iterator::Flex::Factory::to_iterator( $_ ) } @$iterators;
+        @iterator = map { Iterator::Flex::Factory::to_iterator( $_, on_exhaustion_return => undef ) } @$iterators;
     }
 
     else {
         @keys = List::Util::pairkeys @$iterators;
-        @iterator = map { Iterator::Flex::Factory::to_iterator( $_ ) } List::Util::pairvalues @$iterators;
+        @iterator = map { Iterator::Flex::Factory::to_iterator( $_, on_exhaustion_return => undef ) } List::Util::pairvalues @$iterators;
     }
 
     # can only work if the iterators support a rwind method

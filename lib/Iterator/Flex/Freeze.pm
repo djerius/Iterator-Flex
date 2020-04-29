@@ -50,7 +50,7 @@ sub construct {
     $class->_croak( "'serialize' must be a CODE reference" )
       unless Ref::Util::is_coderef( $serialize );
 
-    $src = Iterator::Flex::Factory::to_iterator( $src );
+    $src = Iterator::Flex::Factory::to_iterator( $src, on_exhaustion_return => undef );
 
     $class->_croak( "'src' iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
