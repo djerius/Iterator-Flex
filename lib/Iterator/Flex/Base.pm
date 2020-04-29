@@ -75,6 +75,9 @@ sub new_from_attrs {
     my $self = bless $class->_construct_next( \%attr ), $class;
 
 
+    $self->_croak( "internal error: duplicate iterator object?" )
+      if exists $REGISTRY{ refaddr $self };
+
     $REGISTRY{ refaddr $self } = \%attr;
 
     $self->_reset_exhausted if $self->can('_reset_exhausted');
