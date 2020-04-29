@@ -16,14 +16,10 @@ around _construct_next => sub {
 
     my $next = $orig->( @_ );
 
-    # ensure we don't hold any strong references in the subroutine
-    Scalar::Util::weaken $next;
-
-    # this will be weakened latter.
     my $wsub;
     $wsub = sub {
         my $val = eval { $next->( $_[0] ) };
-        return $@ ne '' ? $_[0]->signal_exhaustion : $val;
+        return $@ eq '' ? $val : $_[0]->signal_exhaustion;
     };
 
     # create a second reference to $wsub, before we weaken it,

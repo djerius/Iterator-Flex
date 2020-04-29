@@ -65,8 +65,8 @@ sub new_from_attrs {
     }
     elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
         push @{ $roles }, [ Exhaustion => 'RequestedThrow' ];
+        $attr{+ON_EXHAUSTION_THROW} = delete $attr{$exhaustion_action};
     }
-    delete $attr{$exhaustion_action};
 
     $class = Iterator::Flex::Utils::create_class_with_roles( $class, @{ $roles } );
 

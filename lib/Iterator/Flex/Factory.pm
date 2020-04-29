@@ -16,7 +16,10 @@ use Safe::Isa;
 
 use Iterator::Flex::Base;
 use Iterator::Flex::Failure;
-use Iterator::Flex::Utils qw[ _croak _can_meth :NativeExhaustionActions ];
+use Iterator::Flex::Utils qw[ _croak _can_meth
+                              :NativeExhaustionActions
+                              :RequestedExhaustionActions
+                           ];
 use Iterator::Flex::Method;
 
 =sub to_iterator
@@ -218,23 +221,34 @@ sub construct {
     $class->_croak( "specify only one native exhaustion action" )
       if 1 < ( my ( $exhaustion_action ) =  grep { exists $iattr{$_} } @NativeExhaustionActions );
 
+    my $has_output_exhaustion_policy =   grep { exists $iattr{$_} } @RequestedExhaustionActions;
+
     # default to returning undef on exhaustion
     if ( ! defined $exhaustion_action ) {
         $exhaustion_action = RETURNS_ON_EXHAUSTION;
-        $attr{+RETURNS_ON_EXHAUSTION} = undef;
+        $iattr{+RETURNS_ON_EXHAUSTION} = undef;
     }
 
     if ( $exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
         push @roles, [ Exhaustion => 'NativeReturn' ],
-          [ Next => 'WrapReturn' ]
+          [ Next => 'WrapReturn' ];
+        $attr{+RETURNS_ON_EXHAUSTION} = delete $iattr{+RETURNS_ON_EXHAUSTION};
+
+        $attr{+ON_EXHAUSTION_RETURN} = $attr{+RETURNS_ON_EXHAUSTION}
+          unless $has_output_exhaustion_policy;
     }
     elsif ( $exhaustion_action eq THROWS_ON_EXHAUSTION ) {
         push @roles, [ Exhaustion => 'NativeThrow' ],
-          [ Next => 'WrapThrow' ]
+          [ Next => 'WrapThrow' ];
+        $attr{+THROWS_ON_EXHAUSTION} = delete $iattr{+THROWS_ON_EXHAUSTION};
+
+        $attr{+ON_EXHAUSTION_THROW} = $attr{+THROWS_ON_EXHAUSTION}
+          unless $has_output_exhaustion_policy;
     }
-    delete $iattr{$exhaustion_action};
     push @roles, 'Exhausted';
 
+    # copy over any output exhaustion policy specifications
+    $attr{$_} = delete $iattr{$_} for grep { exists $iattr{$_} }  @RequestedExhaustionActions;
 
     for my $method ( qw[ next rewind reset prev current ] ) {
 
