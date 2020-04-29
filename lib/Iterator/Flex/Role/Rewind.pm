@@ -8,6 +8,7 @@ use warnings;
 our $VERSION = '0.11';
 
 use Iterator::Flex::Base ();
+use Iterator::Flex::Utils;
 use Role::Tiny;
 
 =method rewind
@@ -23,7 +24,7 @@ Resets the iterator to its initial value.
 sub rewind {
 
     my $obj  = $_[0];
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $REGISTRY{ refaddr $obj };
 
     if ( defined $attributes->{depends} ) {
 

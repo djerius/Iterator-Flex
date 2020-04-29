@@ -7,17 +7,31 @@ use warnings;
 
 our $VERSION = '0.11';
 
-use Ref::Util qw[ is_arrayref ];
+use Scalar::Util qw( refaddr );
+
 use Exporter 'import';
 
-use Role::Tiny::With;
+our %REGISTRY;
 
-with 'Iterator::Flex::Role::Utils';
-
-our @EXPORT_OK = qw(
-  create_class_with_roles
-  _can_meth
+our %EXPORT_TAGS = (
+    default => [ qw( %REGISTRY refaddr ) ]
 );
+
+our @EXPORT = @{ $EXPORT_TAGS{default} };
+
+
+our @EXPORT_OK = ( qw(
+      create_class_with_roles
+      _can_meth
+      ),
+    map { @{$_} } values %EXPORT_TAGS,
+);
+
+use Ref::Util qw[ is_arrayref ];
+
+
+use Role::Tiny::With;
+with 'Iterator::Flex::Role::Utils';
 
 
 sub create_class_with_roles {

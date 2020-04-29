@@ -11,6 +11,7 @@ use Scalar::Util;
 use List::Util;
 
 use Iterator::Flex::Base ();
+use Iterator::Flex::Utils;
 use Role::Tiny;
 
 =method reset
@@ -27,14 +28,14 @@ sub reset {
 
     my $obj = $_[0];
 
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $REGISTRY{ refaddr $obj };
 
     if ( defined $attributes->{depends} ) {
 
         # first check if dependencies can reset.
         my $cant
           = List::Util::first { !$_->can( 'reset' ) } @{ $attributes->{depends} };
-        $obj->_croak( "dependency: @{[ $cant->{name} ]} is not resetable\n" )
+        $obj->_croak( "dependency: @{[ $cant->{name} ]} does not have a 'reset' method\n" )
           if $cant;
 
         # now reset them

@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.11';
 
+use Iterator::Flex::Utils;
 use Role::Tiny;
 
 =method current
@@ -21,7 +22,7 @@ Returns the current value.
 
 sub current {
 
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $REGISTRY{ refaddr $_[0] };
 
     $attributes->{current}->( $_[0] );
 }

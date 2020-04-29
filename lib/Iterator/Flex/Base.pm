@@ -18,8 +18,6 @@ Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 use Iterator::Flex::Utils;
 use Iterator::Flex::Failure;
 
-our %REGISTRY;
-
 use overload ( '<>' => 'next', fallback => 1 );
 
 sub _croak {
@@ -101,7 +99,7 @@ sub _validate_attrs {
 sub DESTROY {
 
     if ( defined $_[0] ) {
-        delete $REGISTRY{ Scalar::Util::refaddr $_[0] };
+        delete $REGISTRY{ refaddr $_[0] };
     }
 }
 
@@ -116,7 +114,7 @@ Returns the subroutine which returns the next value from the iterator.
 =cut
 
 sub __iter__ {
-    my $attributes = $REGISTRY{ Scalar::Util::refaddr $_[0] };
+    my $attributes = $REGISTRY{ refaddr $_[0] };
     $attributes->{next};
 }
 
@@ -141,8 +139,7 @@ sub _may_meth {
     my $obj  = shift;
     my $meth = shift;
 
-    my $attributes = shift
-      // $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = shift // $REGISTRY{ refaddr $obj };
 
     my $pred = "_may_$meth";
 

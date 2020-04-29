@@ -5,6 +5,7 @@ use warnings;
 
 our $VERSION = '0.11';
 
+use Iterator::Flex::Utils;
 use Package::Variant importing => qw[ Role::Tiny ];
 use Iterator::Flex::Failure 'RoleExists';
 
@@ -23,8 +24,7 @@ sub make_variant {
   my ($class, $target_package, $package, %arg) = @_;
   my $name = $arg{name};
   install $name => sub {
-      my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $_[0] };
-      return $attributes->{methods}{$name}->( @_ );
+      return $REGISTRY{ refaddr $_[0] }{methods}{$name}->( @_ );
   };
 }
 
