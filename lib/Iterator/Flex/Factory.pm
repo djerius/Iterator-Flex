@@ -24,7 +24,7 @@ use Iterator::Flex::Method;
 
 =sub to_iterator
 
-  $iter = Iterator::Flex::Factory::to_iterator( $iterable );
+  $iter = Iterator::Flex::Factory::to_iterator( $iterable, %attributes );
 
 Construct an iterator from an iterable thing. The iterator will
 return C<undef> upon exhaustion.
@@ -310,7 +310,7 @@ sub construct {
 
 =method construct_from_iterable
 
-  $iter = Iterator::Flex::Factory::construct_from_iterable( $iterable );
+  $iter = Iterator::Flex::Factory::construct_from_iterable( $iterable, %attributes );
 
 Construct an iterator from an iterable thing.  The returned iterator will
 return C<undef> upon exhaustion.
@@ -340,29 +340,26 @@ The coderef must return the next element in the iteration.
 
 sub construct_from_iterable {
 
-    my $obj = shift;
-
-    my %attr = %{ shift // {} };
+    my ( $obj, %attr ) = @_;
 
     if ( blessed $obj) {
-        return construct_from_object( $obj );
+        return construct_from_object( $obj, %attr );
     }
 
     elsif ( is_arrayref( $obj ) ) {
         require Iterator::Flex::Array;
-        return Iterator::Flex::Array->new( $obj );
+        return Iterator::Flex::Array->new( $obj, %attr );
     }
 
     elsif ( is_coderef( $obj ) ) {
-        $attr{next} = $obj;
+        return construct( %attr, next => $obj );
     }
 
     elsif ( is_globref( $obj ) ) {
-        return construct( next => sub { scalar <$obj> } );
+        return construct( %attr, next => sub { scalar <$obj> } );
     }
 
     _croak sprintf "'%s' object is not iterable", ( ref( $obj ) || 'SCALAR' );
-
 }
 
 =method construct_from_object
