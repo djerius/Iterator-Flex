@@ -75,7 +75,7 @@ sub new_from_attrs {
     my $self = bless $class->_construct_next( \%attr ), $class;
 
 
-    $self->_croak( "internal error: duplicate iterator object?" )
+    $self->_croak( "attempt to register an iterator subroutine which has already been registered." )
       if exists $REGISTRY{ refaddr $self };
 
     $REGISTRY{ refaddr $self } = \%attr;

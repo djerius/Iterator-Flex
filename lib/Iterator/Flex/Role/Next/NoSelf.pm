@@ -7,7 +7,6 @@ use warnings;
 
 our $VERSION = '0.11';
 
-use Iterator::Flex::Utils ();
 use Scalar::Util;
 use Role::Tiny;
 
@@ -33,7 +32,7 @@ sub _construct_next {
     # ensure we don't hold any strong references in the subroutine
     my $sub = $attributes->{next};
     Scalar::Util::weaken $attributes->{next};
-    return Iterator::Flex::Utils::_safe_wrap_next( $sub );
+    return $sub;
 }
 
 1;

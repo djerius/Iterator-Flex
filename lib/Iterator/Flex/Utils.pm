@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.11';
 
-use Scalar::Util qw( refaddr weaken );
+use Scalar::Util qw( refaddr );
 
 use Exporter 'import';
 
@@ -45,7 +45,6 @@ our @EXPORT = @{ $EXPORT_TAGS{default} };
 
 our @EXPORT_OK = ( qw(
       create_class_with_roles
-      _safe_wrap_next
       _can_meth
       _croak
       ),
@@ -62,21 +61,6 @@ sub _croak {
     require Carp;
     Carp::croak( @_ );
 }
-
-sub _safe_wrap_next {
-
-    if ( exists $REGISTRY{ refaddr $_[0] } ) {
-        my $sub = $_[0];
-        my $rsub = sub { goto &$sub; };
-        weaken $sub;
-        return $rsub;
-    }
-    else {
-        return $_[0];
-    }
-
-}
-
 
 sub create_class_with_roles {
 
