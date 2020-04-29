@@ -114,8 +114,9 @@ sub construct_from_state {
 
 __PACKAGE__->_add_roles(
     qw[
-      SetExhausted
-      ExhaustedUndef
+      Exhausted
+      Next::NoSelf
+      Next
       Rewind
       Reset
       Prev

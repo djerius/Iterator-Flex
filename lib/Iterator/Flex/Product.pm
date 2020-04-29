@@ -107,8 +107,7 @@ sub construct_from_state {
                     push @value, $iter->();
 
                     if ( $iter->is_exhausted ) {
-                        $self->set_exhausted;
-                        return undef;
+                        return $self->signal_exhaustion;
                     }
                 }
 
@@ -128,8 +127,7 @@ sub construct_from_state {
                     }
 
                     if ( !$set[0] ) {
-                        $self->set_exhausted;
-                        return undef;
+                        return $self->signal_exhaustion;
                     }
 
                     while ( ++$idx < @iterator ) {
@@ -208,8 +206,9 @@ sub new_from_state {
 }
 
 __PACKAGE__->_add_roles( qw[
-      SetExhausted
-      ExhaustedPredicate
+      Exhausted
+      Next::ClosedSelf
+      Next
       Current
       Reset
       Rewind

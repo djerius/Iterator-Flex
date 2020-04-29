@@ -71,7 +71,7 @@ version 0.11
 
 Construct an iterator from code. The code will have access to the
 iterator object through `$_[0]`.  The optional parameters are any of
-the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator::Flex::Base#construct).
+the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3ABase#construct).
 
     By default the code is expected to return C<undef> upon exhaustion.
 
@@ -108,7 +108,7 @@ return `undef` upon exhaustion.
 
 - an arrayref
 
-    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator::Flex#iarray) iterator.
+    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator%3A%3AFlex#iarray) iterator.
 
 - a coderef
 
@@ -300,21 +300,21 @@ Not all iterators support all methods.
     Resets the iterator to its initial state.  The iterator's state is not
     changed.
 
-# BUGS
+# SUPPORT
 
-Please report any bugs or feature requests on the bugtracker website
-[https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex](https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex) or by
-email to
-[bug-Iterator-Flex@rt.cpan.org](mailto:bug-Iterator-Flex@rt.cpan.org).
+## Bugs
 
-When submitting a bug or request, please include a test-file or a
-patch to an existing test-file that illustrates the bug or desired
-feature.
+Please report any bugs or feature requests to bug-iterator-flex@rt.cpan.org  or through the web interface at: https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex
 
-# SOURCE
+## Source
 
-The development version is on github at [https://github.com/djerius/iterator-flex](https://github.com/djerius/iterator-flex)
-and may be cloned from [git://github.com/djerius/iterator-flex.git](git://github.com/djerius/iterator-flex.git)
+Source is available at
+
+    https://gitlab.com/djerius/iterator-flex
+
+and may be cloned from
+
+    https://gitlab.com/djerius/iterator-flex.git
 
 # AUTHOR
 

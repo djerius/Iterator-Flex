@@ -15,7 +15,7 @@ use Module::Runtime  ();
 
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw ( :default :RequestedExhaustionActions );
 use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next', fallback => 1 );
@@ -28,18 +28,13 @@ sub _croak {
 }
 
 sub new {
-
     my $class = shift;
-
     return $class->new_from_attrs( $class->construct( @_ ) );
 }
 
 sub new_from_state {
-
     my $class = shift;
-
     return $class->new_from_attrs( $class->construct_from_state( @_ ) );
-
 }
 
 sub new_from_attrs {
@@ -47,24 +42,40 @@ sub new_from_attrs {
     my ( $class, $attrs ) = ( shift, shift );
 
     # copy attrs as we may change it
-    my %attrs = ( _roles => [], %$attrs );
-    $class->_validate_attrs( \%attrs );
+    my %attr = ( _roles => [], %$attrs );
 
-    # add roles if necessary
-    if ( @{ $attrs{_roles} } ) {
+    $class->_validate_attrs( \%attr );
 
-        $class->_croak( "_roles must be an arrayref" )
-          unless Ref::Util::is_arrayref( $attrs{_roles} );
+    my $roles = delete( $attr{_roles} ) // [];
+    $class->_croak( "_roles must be an arrayref" )
+      unless Ref::Util::is_arrayref( $roles );
 
-        $class = Iterator::Flex::Utils::create_class_with_roles( $class,
-            @{ $attrs{_roles} } );
+    $class->_croak( "specify only one output exhaustion action" )
+      if 1 < ( my ( $exhaustion_action ) =  grep { exists $attr{$_} } @RequestedExhaustionActions );
+
+    # default to returning undef on exhaustion
+    if ( ! defined $exhaustion_action ) {
+        $exhaustion_action = ON_EXHAUSTION_RETURN;
+        $attr{+ON_EXHAUSTION_RETURN} = undef;
     }
 
-    $attrs{name} = $class unless defined $attrs{name};
+    if ( $exhaustion_action eq ON_EXHAUSTION_RETURN ) {
+        push @{ $roles }, [ Exhaustion => 'RequestedReturn' ];
+        $attr{+ON_EXHAUSTION_RETURN} = delete $attr{$exhaustion_action};
+    }
+    elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
+        push @{ $roles }, [ Exhaustion => 'RequestedThrow' ];
+    }
+    delete $attr{$exhaustion_action};
 
-    my $self = bless $class->_construct_next( \%attrs ), $class;
+    $class = Iterator::Flex::Utils::create_class_with_roles( $class, @{ $roles } );
 
-    $REGISTRY{ Scalar::Util::refaddr $self } = \%attrs;
+    $attr{name} = delete $attr{name} // $class;
+
+    my $self = bless $class->_construct_next( \%attr ), $class;
+
+
+    $REGISTRY{ refaddr $self } = \%attr;
 
     $self->_reset_exhausted if $self->can('_reset_exhausted');
 
@@ -170,32 +181,15 @@ sub _wrap_may {
 }
 
 sub _namespaces {
-
     my $class = shift;
-
     ( my $namespace ) = $class =~ /(.*)::[^:]+$/;
-
     return ( $namespace, 'Iterator::Flex' );
 }
 
 
 # return the role name for a given method
-sub _load_role {
-    my ( $class, $role ) = @_;
-
-    for my $namespace ( $class->_namespaces ) {
-        my $module = "${namespace}::Role::${role}";
-        return $module if eval { Module::Runtime::require_module( $module ) };
-    }
-
-    _croak(
-        "unable to find a module for role '$role' in @{[ join( ',', $class->_namespaces ) ]}"
-    );
-}
-
 sub _add_roles {
     my $class = shift;
-
     Role::Tiny->apply_roles_to_package( $class,
         map { $class->_load_role( $_ ) } @_ );
 }

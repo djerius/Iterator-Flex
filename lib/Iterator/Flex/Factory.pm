@@ -16,13 +16,8 @@ use Safe::Isa;
 
 use Iterator::Flex::Base;
 use Iterator::Flex::Failure;
-use Iterator::Flex::Utils qw[ _can_meth ];
+use Iterator::Flex::Utils qw[ _croak _can_meth :NativeExhaustionActions ];
 use Iterator::Flex::Method;
-
-sub _croak {
-    require Carp;
-    Carp::croak( @_ );
-}
 
 =sub to_iterator
 
@@ -194,7 +189,6 @@ sub construct {
       unless is_hashref( $_[-1] );
 
     my %iattr = (
-        exhausted => 'undef',
         class     => 'Iterator::Flex::Base',
         %{ $_[-1] },
     );
@@ -212,19 +206,37 @@ sub construct {
     Module::Runtime::require_module( $class )
       or _croak( "can't load class $class" );
 
-    defined( $attr{next} = delete $iattr{next} )
-      or _croak( "missing or undefined 'next' attribute" );
-
-    is_coderef $attr{next}
-      or _croak( "'next' attribute value must be a code reference\n" );
-
     if ( defined( $attr = delete $iattr{name} ) ) {
         !is_ref( $attr )
           or _croak( "'name' attribute value must be a string\n" );
         $attr{name} = $attr;
     }
 
-    for my $method ( qw[ rewind reset prev current ] ) {
+    # close over self 
+    push @roles, [ Next => 'NoSelf' ];
+
+    $class->_croak( "specify only one native exhaustion action" )
+      if 1 < ( my ( $exhaustion_action ) =  grep { exists $iattr{$_} } @NativeExhaustionActions );
+
+    # default to returning undef on exhaustion
+    if ( ! defined $exhaustion_action ) {
+        $exhaustion_action = RETURNS_ON_EXHAUSTION;
+        $attr{+RETURNS_ON_EXHAUSTION} = undef;
+    }
+
+    if ( $exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
+        push @roles, [ Exhaustion => 'NativeReturn' ],
+          [ Next => 'WrapReturn' ]
+    }
+    elsif ( $exhaustion_action eq THROWS_ON_EXHAUSTION ) {
+        push @roles, [ Exhaustion => 'NativeThrow' ],
+          [ Next => 'WrapThrow' ]
+    }
+    delete $iattr{$exhaustion_action};
+    push @roles, 'Exhausted';
+
+
+    for my $method ( qw[ next rewind reset prev current ] ) {
 
         next unless defined( my $code = delete $iattr{$method} );
 
@@ -238,17 +250,8 @@ sub construct {
 
         $attr{$method} = $code;
     }
-
-    if ( defined( $attr = delete $iattr{exhausted} ) ) {
-
-        my $role
-          = $class->_module_name( Role => 'Exhausted' . ucfirst( $attr ) );
-
-        Module::Runtime::require_module( $role )
-          or _croak( "unknown means of handling exhausted iterators: $attr\n" );
-
-        push @roles, $role;
-    }
+    defined( $attr{next}  )
+      or _croak( "missing or undefined 'next' attribute" );
 
     if ( defined( $attr = delete $iattr{methods} ) ) {
 
@@ -270,7 +273,7 @@ sub construct {
             # create role for the method
             my $role = eval { Method( $cap_name, name => $name ) };
 
-            if ( $@ ) {
+            if ( $@ ne '' ) {
                 my $error = $@;
                 die $error
                   unless $error->$_isa( 'Iterator::Flex::Failure::RoleExists' );
@@ -325,20 +328,19 @@ sub construct_from_iterable {
 
     my $obj = shift;
 
-    if ( blessed $obj) {
+    my %attr = %{ shift // {} };
 
+    if ( blessed $obj) {
         return construct_from_object( $obj );
     }
 
     elsif ( is_arrayref( $obj ) ) {
-
         require Iterator::Flex::Array;
         return Iterator::Flex::Array->new( $obj );
     }
 
     elsif ( is_coderef( $obj ) ) {
-
-        return construct( next => $obj );
+        $attr{next} = $obj;
     }
 
     elsif ( is_globref( $obj ) ) {
@@ -415,14 +417,12 @@ sub construct_from_object {
     }
 
     elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-
         require Iterator::Flex::Array;
         return Iterator::Flex::Array->new( $code->( $obj ) );
     }
 
     for my $method ( 'prev', 'current' ) {
         $code = _can_meth( $obj, $method );
-
         $param{$method} = sub { $code->( $obj ) }
           if $code;
     }

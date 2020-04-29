@@ -72,8 +72,8 @@ sub construct {
             my $value = $src->();
             local $_ = $src->freeze;
             &$serialize();
-            $self->set_exhausted if $src->is_exhausted;
-            $value;
+            $value = $self->signal_exhaustion if $src->is_exhausted;
+            return $value;
         },
     );
 
@@ -94,8 +94,9 @@ sub construct {
 }
 
 __PACKAGE__->_add_roles( qw[
-      SetExhausted
-      ExhaustedPredicate
+      Next::ClosedSelf
+      Next
+      Exhausted
 ] );
 
 1;

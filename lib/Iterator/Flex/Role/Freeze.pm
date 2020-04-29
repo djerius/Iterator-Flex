@@ -9,6 +9,7 @@ our $VERSION = '0.11';
 
 use List::Util;
 
+use Iterator::Flex::Utils;
 use Iterator::Flex::Base;
 use Role::Tiny;
 
@@ -24,7 +25,7 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 sub freeze {
 
     my $obj = $_[0];
-    my $attributes = $Iterator::Flex::Base::REGISTRY{ Scalar::Util::refaddr $obj };
+    my $attributes = $REGISTRY{ refaddr $obj };
 
     my @freeze;
 

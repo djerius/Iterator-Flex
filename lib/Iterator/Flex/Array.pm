@@ -104,10 +104,9 @@ sub construct_from_state {
                 # if first time through, set current/prev
                 if ( !$self->is_exhausted ) {
                     $prev    = $current;
-                    $current = undef;
-                    $self->set_exhausted;
+                    $current = $self->signal_exhaustion;
                 }
-                return undef;
+                return $current;
             }
             $prev    = $current;
             $current = $next++;
@@ -131,8 +130,9 @@ sub construct_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
-      SetExhausted
-      ExhaustedPredicate
+      Exhausted
+      Next::ClosedSelf
+      Next
       Rewind
       Reset
       Prev

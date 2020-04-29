@@ -42,13 +42,20 @@ sub construct {
 
     $src = Iterator::Flex::Factory::to_iterator( $src );
 
+    my $self;
+
     return {
         name => 'imap',
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
+
         next => sub {
             my $value = $src->();
             if ( $src->is_exhausted ) {
-                $_[0]->set_exhausted;
-                return undef;
+                return $self->signal_exhaustion;
             }
             local $_ = $value;
             return $code->();
@@ -62,8 +69,9 @@ sub construct {
 
 __PACKAGE__->_add_roles(
     qw[
-      SetExhausted
-      ExhaustedPredicate
+      Exhausted
+      Next::ClosedSelf
+      Next
       Rewind
       Reset
       Current

@@ -42,8 +42,16 @@ sub construct {
     my ( $code, $src ) = @_;
     $src = Iterator::Flex::Factory::to_iterator( $src );
 
+    my $self;
+
     return {
         name => 'igrep',
+
+        set_self => sub {
+            $self = shift;
+            Scalar::Util::weaken( $self );
+        },
+
         next => sub {
 
             foreach ( ; ; ) {
@@ -52,8 +60,7 @@ sub construct {
                 local $_ = $rv;
                 return $rv if $code->();
             }
-            $_[0]->set_exhausted;
-            return undef;
+            return $self->signal_exhaustion;
         },
         reset     => sub { },
         depends   => $src,
@@ -62,8 +69,9 @@ sub construct {
 
 __PACKAGE__->_add_roles(
     qw[
-      SetExhausted
-      ExhaustedPredicate
+      Exhausted
+      Next::ClosedSelf
+      Next
       Rewind
       Reset
       Current
