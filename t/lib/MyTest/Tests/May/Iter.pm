@@ -15,10 +15,11 @@ sub construct_from_state {
 
     my $class = shift;
 
+    my $x;
     return {
         name   => 'prev',
-        next   => sub { },
-        rewind => sub { },
+        next   => sub { ++$x },
+        rewind => sub { ++$x },
         ( @_ ? ( depends => [ @_ ] ) : () ),
     };
 }
