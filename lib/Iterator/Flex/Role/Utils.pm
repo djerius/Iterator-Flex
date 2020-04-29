@@ -51,8 +51,6 @@ sub _module_name {
     my $module    = pop;
     my @hierarchy = @_;
 
-    $DB::single = $module eq "Iterator::Flex::Role::Method::Now";
-
     return $module if $module =~ /::/;
 
     $class = 'Iterator::Flex' if $class =~ /^Iterator::Flex(?:::.*|$)/;
