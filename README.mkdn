@@ -71,7 +71,7 @@ version 0.11
 
 Construct an iterator from code. The code will have access to the
 iterator object through `$_[0]`.  The optional parameters are any of
-the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3ABase#construct).
+the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator::Flex::Base#construct).
 
     By default the code is expected to return C<undef> upon exhaustion.
 
@@ -108,7 +108,7 @@ return `undef` upon exhaustion.
 
 - an arrayref
 
-    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator%3A%3AFlex#iarray) iterator.
+    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator::Flex#iarray) iterator.
 
 - a coderef
 
