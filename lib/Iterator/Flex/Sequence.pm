@@ -189,7 +189,6 @@ sub construct_from_state {
 }
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted
       Next::ClosedSelf
       Next
       Rewind

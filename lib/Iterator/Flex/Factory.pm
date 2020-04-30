@@ -247,7 +247,6 @@ sub construct {
         $attr{ +ON_EXHAUSTION_THROW } = ON_EXHAUSTION_PASSTHROUGH
           unless $has_output_exhaustion_policy;
     }
-    push @roles, 'Exhausted';
 
     # copy over any output exhaustion policy specifications
     $attr{$_} = delete $iattr{$_}

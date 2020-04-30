@@ -99,7 +99,6 @@ sub construct {
 __PACKAGE__->_add_roles( qw[
       Next::ClosedSelf
       Next
-      Exhausted
 ] );
 
 1;

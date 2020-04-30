@@ -77,6 +77,8 @@ sub new_from_attrs {
         }
     }
 
+    push @{$roles}, 'Exhausted';
+
     $class
       = Iterator::Flex::Utils::create_class_with_roles( $class, @{$roles} );
 

@@ -69,7 +69,6 @@ sub construct {
 
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted
       Next::ClosedSelf
       Next
       Rewind
