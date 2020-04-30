@@ -17,7 +17,7 @@ use Module::Runtime  ();
 
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Utils qw ( :default :RequestedExhaustionActions );
+use Iterator::Flex::Utils qw ( :default :ExhaustionActions );
 use Iterator::Flex::Failure;
 
 use overload ( '<>' => 'next', fallback => 1 );
@@ -54,7 +54,7 @@ sub new_from_attrs {
 
     $class->_croak( "specify only one output exhaustion action" )
       if 1 < ( my ( $exhaustion_action )
-          = grep { exists $attr{$_} } @RequestedExhaustionActions );
+          = grep { exists $attr{$_} } @ExhaustionActions );
 
     # default to returning undef on exhaustion
     if ( !defined $exhaustion_action ) {
@@ -63,17 +63,17 @@ sub new_from_attrs {
     }
 
     if ( $exhaustion_action eq ON_EXHAUSTION_RETURN ) {
-        push @{$roles}, [ Exhaustion => 'RequestedReturn' ];
+        push @{$roles}, [ Exhaustion => 'Return' ];
         $attr{ +ON_EXHAUSTION_RETURN } = delete $attr{$exhaustion_action};
     }
     elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
 
         if ( $attr{ +ON_EXHAUSTION_THROW } eq ON_EXHAUSTION_PASSTHROUGH ) {
-            push @{$roles}, [ Exhaustion => 'RequestedPassthroughThrow' ];
+            push @{$roles}, [ Exhaustion => 'PassthroughThrow' ];
         }
         else {
             $attr{ +ON_EXHAUSTION_THROW } = delete $attr{$exhaustion_action};
-            push @{$roles}, [ Exhaustion => 'RequestedThrow' ];
+            push @{$roles}, [ Exhaustion => 'Throw' ];
         }
     }
 

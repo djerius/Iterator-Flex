@@ -18,8 +18,8 @@ use Safe::Isa;
 use Iterator::Flex::Base;
 use Iterator::Flex::Failure;
 use Iterator::Flex::Utils qw[ _croak _can_meth
-  :NativeExhaustionActions
-  :RequestedExhaustionActions
+  :ImportedExhaustionActions
+  :ExhaustionActions
 ];
 use Iterator::Flex::Method;
 
@@ -221,10 +221,10 @@ sub construct {
 
     $class->_croak( "specify only one native exhaustion action" )
       if 1 < ( my ( $exhaustion_action )
-          = grep { exists $iattr{$_} } @NativeExhaustionActions );
+          = grep { exists $iattr{$_} } @ImportedExhaustionActions );
 
     my $has_output_exhaustion_policy
-      = grep { exists $iattr{$_} } @RequestedExhaustionActions;
+      = grep { exists $iattr{$_} } @ExhaustionActions;
 
     # default to returning undef on exhaustion
     if ( !defined $exhaustion_action ) {
@@ -233,7 +233,7 @@ sub construct {
     }
 
     if ( $exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
-        push @roles, [ Exhaustion => 'NativeReturn' ], [ Next => 'WrapReturn' ];
+        push @roles, [ Exhaustion => 'ImportedReturn' ], [ Next => 'WrapReturn' ];
         $attr{ +RETURNS_ON_EXHAUSTION }
           = delete $iattr{ +RETURNS_ON_EXHAUSTION };
 
@@ -241,7 +241,7 @@ sub construct {
           unless $has_output_exhaustion_policy;
     }
     elsif ( $exhaustion_action eq THROWS_ON_EXHAUSTION ) {
-        push @roles, [ Exhaustion => 'NativeThrow' ], [ Next => 'WrapThrow' ];
+        push @roles, [ Exhaustion => 'ImportedThrow' ], [ Next => 'WrapThrow' ];
         $attr{ +THROWS_ON_EXHAUSTION } = delete $iattr{ +THROWS_ON_EXHAUSTION };
 
         $attr{ +ON_EXHAUSTION_THROW } = ON_EXHAUSTION_PASSTHROUGH
@@ -250,7 +250,7 @@ sub construct {
 
     # copy over any output exhaustion policy specifications
     $attr{$_} = delete $iattr{$_}
-      for grep { exists $iattr{$_} } @RequestedExhaustionActions;
+      for grep { exists $iattr{$_} } @ExhaustionActions;
 
     for my $method ( qw[ next rewind reset prev current ] ) {
 

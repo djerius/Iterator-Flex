@@ -13,32 +13,32 @@ use Exporter 'import';
 
 our %REGISTRY;
 
-our %NativeExhaustionActions;
-our %RequestedExhaustionActions;
+our %ImportedExhaustionActions;
+our %ExhaustionActions;
 
 BEGIN {
-    %NativeExhaustionActions = (
+    %ImportedExhaustionActions = (
         THROWS_ON_EXHAUSTION  => 'throws_on_exhaustion',
         RETURNS_ON_EXHAUSTION => 'returns_on_exhaustion',
     );
-    %RequestedExhaustionActions = (
+    %ExhaustionActions = (
         ON_EXHAUSTION_THROW       => 'on_exhaustion_throw',
         ON_EXHAUSTION_RETURN      => 'on_exhaustion_return',
         ON_EXHAUSTION_PASSTHROUGH => 'on_exhaustion_passthrough',
     );
 }
 
-use constant \%NativeExhaustionActions;
-use constant \%RequestedExhaustionActions;
+use constant \%ImportedExhaustionActions;
+use constant \%ExhaustionActions;
 
-our @NativeExhaustionActions    = values %NativeExhaustionActions;
-our @RequestedExhaustionActions = values %RequestedExhaustionActions;
+our @ImportedExhaustionActions    = values %ImportedExhaustionActions;
+our @ExhaustionActions = values %ExhaustionActions;
 
 our %EXPORT_TAGS = (
-    NativeExhaustionActions =>
-      [ qw( @NativeExhaustionActions ), keys %NativeExhaustionActions, ],
-    RequestedExhaustionActions =>
-      [ qw( @RequestedExhaustionActions ), keys %RequestedExhaustionActions, ],
+    ImportedExhaustionActions =>
+      [ qw( @ImportedExhaustionActions ), keys %ImportedExhaustionActions, ],
+    ExhaustionActions =>
+      [ qw( @ExhaustionActions ), keys %ExhaustionActions, ],
     default => [qw( %REGISTRY refaddr )],
 );
 

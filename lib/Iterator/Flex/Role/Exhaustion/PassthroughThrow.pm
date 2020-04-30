@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Exhaustion::RequestedPassthroughThrow;
+package Iterator::Flex::Role::Exhaustion::PassthroughThrow;
 
 # ABSTRACT: signal exhaustion by setting exhausted flag;
 

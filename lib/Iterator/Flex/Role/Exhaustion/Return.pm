@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Exhaustion::RequestedReturn;
+package Iterator::Flex::Role::Exhaustion::Return;
 
 # ABSTRACT: signal exhaustion by setting exhausted flag;
 
