@@ -2,6 +2,29 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+  [INCOMPATIBILITY]
+
+    * explicitly requires Perl 5.10.0.
+
+  [API_CHANGE]
+
+    * native iterators must use the 'self' rather than 'set_self'
+      attributes to provide access to the closed-over self.
+
+  [REFACTOR]
+
+    * new iterator exhaustion model cleanly separates exhaustion
+      transition policies (return/throw) and handling imported
+      iterables' policies (pass through, replace).
+
+    * robust handling of imported iterables exhaustion sentinels or
+      exceptions.
+
+  [BUILD]
+
+    * now uses Module::Build::Tiny
+
+
 0.10      2018-09-16 18:21:49-04:00 America/New_York
 
   [REFACTOR]
