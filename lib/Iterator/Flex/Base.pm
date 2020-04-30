@@ -20,6 +20,8 @@ Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 use Iterator::Flex::Utils qw ( :default :ExhaustionActions );
 use Iterator::Flex::Failure;
 
+use namespace::clean;
+
 use overload ( '<>' => 'next', fallback => 1 );
 
 sub _croak {

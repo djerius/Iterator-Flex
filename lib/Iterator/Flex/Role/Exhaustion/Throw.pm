@@ -12,6 +12,8 @@ use Iterator::Flex::Utils qw( :default ON_EXHAUSTION_THROW );
 use Ref::Util qw( is_coderef );
 use Iterator::Flex::Failure;
 
+use namespace::clean;
+
 =method signal_exhaustion
 
    $iterator->signal_exhaustion;

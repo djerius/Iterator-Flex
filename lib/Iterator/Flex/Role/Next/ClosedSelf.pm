@@ -11,6 +11,8 @@ use Ref::Util;
 use Scalar::Util;
 use Role::Tiny;
 
+use namespace::clean;
+
 =method next
 
 =method __next__

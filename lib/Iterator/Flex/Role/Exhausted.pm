@@ -10,6 +10,8 @@ our $VERSION = '0.11';
 use Role::Tiny;
 use Iterator::Flex::Utils;
 
+use namespace::clean;
+
 =method set_exhausted
 
   $iter->set_exhausted;

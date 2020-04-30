@@ -11,6 +11,8 @@ use Iterator::Flex::Base ();
 use Iterator::Flex::Utils;
 use Role::Tiny;
 
+use namespace::clean;
+
 =method rewind
 
 =method __rewind__

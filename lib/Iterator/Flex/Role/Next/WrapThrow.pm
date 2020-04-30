@@ -12,6 +12,8 @@ use Scalar::Util;
 use Ref::Util qw( is_regexpref is_arrayref is_coderef );
 use Role::Tiny;
 
+use namespace::clean;
+
 around _construct_next => sub {
 
     my $orig = shift;

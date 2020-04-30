@@ -10,6 +10,8 @@ our $VERSION = '0.11';
 use Scalar::Util;
 use Role::Tiny;
 
+use namespace::clean;
+
 sub _construct_next {
 
     # my $class = shift;

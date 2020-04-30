@@ -10,6 +10,8 @@ our $VERSION = '0.11';
 use Role::Tiny;
 use Iterator::Flex::Failure;
 
+use namespace::clean;
+
 =method signal_exhaustion
 
    $iterator->signal_exhaustion( @_ );

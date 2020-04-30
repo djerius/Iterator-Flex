@@ -13,6 +13,8 @@ use Iterator::Flex::Utils;
 use Iterator::Flex::Base;
 use Role::Tiny;
 
+use namespace::clean;
+
 =method freeze
 
   $freeze = $iter->freeze;

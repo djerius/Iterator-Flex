@@ -10,6 +10,8 @@ our $VERSION = '0.11';
 use Iterator::Flex::Utils;
 use Role::Tiny;
 
+use namespace::clean;
+
 =method current
 
 =method __current__

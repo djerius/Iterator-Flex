@@ -10,6 +10,8 @@ our $VERSION = '0.11';
 use Role::Tiny;
 use Iterator::Flex::Utils qw( :default :ImportedExhaustionActions );
 
+use namespace::clean;
+
 sub sentinel {
     return $REGISTRY{ refaddr $_[0] }{ +RETURNS_ON_EXHAUSTION };
 }

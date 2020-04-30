@@ -11,6 +11,8 @@ use Scalar::Util();
 use Iterator::Flex::Utils qw[ :default ON_EXHAUSTION_RETURN ];
 use Role::Tiny;
 
+use namespace::clean;
+
 =method signal_exhaustion
 
    $iterator->signal_exhaustion;

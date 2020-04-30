@@ -14,6 +14,8 @@ use Iterator::Flex::Base ();
 use Iterator::Flex::Utils;
 use Role::Tiny;
 
+use namespace::clean;
+
 =method reset
 
 =method __reset__

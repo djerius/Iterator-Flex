@@ -11,6 +11,8 @@ use Iterator::Flex::Utils qw( :default RETURNS_ON_EXHAUSTION );
 use Scalar::Util;
 use Role::Tiny;
 
+use namespace::clean;
+
 around _construct_next => sub {
 
     my $orig = shift;
