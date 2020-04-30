@@ -2,6 +2,7 @@ package Iterator::Flex;
 
 # ABSTRACT: Iterators which can be rewound and serialized
 
+use 5.10.0;
 use strict;
 use warnings;
 

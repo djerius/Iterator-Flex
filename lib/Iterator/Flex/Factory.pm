@@ -2,6 +2,7 @@ package Iterator::Flex::Factory;
 
 # ABSTRACT: Create on-the-fly Iterator::Flex classes/objects
 
+use 5.10.0;
 use strict;
 use warnings;
 

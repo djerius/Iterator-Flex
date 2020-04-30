@@ -2,6 +2,8 @@ package Iterator::Flex::Base;
 
 # ABSTRACT: Iterator object
 
+use 5.10.0;
+
 use strict;
 use warnings;
 
