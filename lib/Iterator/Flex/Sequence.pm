@@ -180,10 +180,7 @@ sub construct_from_state {
             $iter = 0;
         },
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
     };
 
 }

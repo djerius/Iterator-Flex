@@ -48,10 +48,7 @@ sub construct {
     return {
         name => 'igrep',
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
 
         next => sub {
 

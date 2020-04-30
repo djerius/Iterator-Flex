@@ -28,10 +28,18 @@ sub _construct_next {
 
     my $sub = $attributes->{next}
       // $class->_croak( "Missing 'next' attribute" );
-    my $set_self = $attributes->{set_self}
-      // $class->_croak( "Missing 'set_self' attribute" );
+
     Scalar::Util::weaken $attributes->{next};
-    $set_self->( $sub );
+
+    if ( exists $attributes->{self} ) {
+        my $ref = $attributes->{self};
+        $$ref = $sub;
+        Scalar::Util::weaken $$ref;
+    }
+    else {
+        $class->_croak( "Missing ability to set self" );
+    }
+
     return $sub;
 }
 

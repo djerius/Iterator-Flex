@@ -63,10 +63,7 @@ sub construct_from_state {
 
     return {
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
 
         reset => sub {
             $prev = $current = undef;

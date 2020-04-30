@@ -98,10 +98,7 @@ sub construct_from_state {
     my $self;
     my %params = (
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
 
         next => sub {
             return undef if $self->is_exhausted;

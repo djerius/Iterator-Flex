@@ -65,10 +65,7 @@ sub construct {
     my %params = (
         name => 'freeze',
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
 
         depends => $src,
         next    => sub {

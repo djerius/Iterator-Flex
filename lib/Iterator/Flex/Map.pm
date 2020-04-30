@@ -48,10 +48,7 @@ sub construct {
     return {
         name => 'imap',
 
-        set_self => sub {
-            $self = shift;
-            Scalar::Util::weaken( $self );
-        },
+        self => \$self,
 
         next => sub {
             my $value = $src->();
