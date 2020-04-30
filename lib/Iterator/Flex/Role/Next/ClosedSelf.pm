@@ -21,11 +21,13 @@ use Role::Tiny;
 
 sub _construct_next {
 
-    my $class = shift;
+    my $class      = shift;
     my $attributes = shift;
 
-    my $sub = $attributes->{next} // $class->_croak( "Missing 'next' attribute" );
-    my $set_self = $attributes->{set_self} // $class->_croak( "Missing 'set_self' attribute" );
+    my $sub = $attributes->{next}
+      // $class->_croak( "Missing 'next' attribute" );
+    my $set_self = $attributes->{set_self}
+      // $class->_croak( "Missing 'set_self' attribute" );
     Scalar::Util::weaken $attributes->{next};
     $set_self->( $sub );
     return $sub;

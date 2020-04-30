@@ -27,38 +27,40 @@ around _construct_next => sub {
 
     # undef
     if ( !defined $sentinel ) {
-	$wsub = sub {
-	    my $val = $next->( $_[0] );
-	    return !defined $val ? $_[0]->signal_exhaustion : $val;
-	};
+        $wsub = sub {
+            my $val = $next->( $_[0] );
+            return !defined $val ? $_[0]->signal_exhaustion : $val;
+        };
     }
 
     # reference
     elsif ( ref $sentinel ) {
-	my $sentinel = refaddr $sentinel;
+        my $sentinel = refaddr $sentinel;
 
-	$wsub = sub {
-	    my $val  = $next->( $_[0] );
-	    my $addr = refaddr $val;
-	    return defined $addr
-	      && $addr == $sentinel ? $_[0]->signal_exhaustion : $val;
-	};
+        $wsub = sub {
+            my $val  = $next->( $_[0] );
+            my $addr = refaddr $val;
+            return defined $addr
+              && $addr == $sentinel ? $_[0]->signal_exhaustion : $val;
+        };
     }
 
     # number
     elsif ( Scalar::Util::looks_like_number( $sentinel ) ) {
-	$wsub = sub {
-	    my $val = $next->( $_[0] );
-            return defined $val && $val == $sentinel ? $_[0]->signal_exhaustion : $val;
-	};
+        $wsub = sub {
+            my $val = $next->( $_[0] );
+            return defined $val
+              && $val == $sentinel ? $_[0]->signal_exhaustion : $val;
+        };
     }
 
     # string
     else {
-	$wsub = sub {
-	    my $val = $next->( $_[0] );
-            return defined $val && $val eq $sentinel ? $_[0]->signal_exhaustion : $val;
-	};
+        $wsub = sub {
+            my $val = $next->( $_[0] );
+            return defined $val
+              && $val eq $sentinel ? $_[0]->signal_exhaustion : $val;
+        };
     }
 
     # create a second reference to $wsub, before we weaken it,

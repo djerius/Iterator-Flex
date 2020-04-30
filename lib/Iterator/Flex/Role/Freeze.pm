@@ -24,7 +24,7 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 
 sub freeze {
 
-    my $obj = $_[0];
+    my $obj        = $_[0];
     my $attributes = $REGISTRY{ refaddr $obj };
 
     my @freeze;
@@ -32,12 +32,14 @@ sub freeze {
     if ( defined $attributes->{depends} ) {
 
         # first check if dependencies can freeze.
-        my $cant = List::Util::first { ! $_->can( 'freeze' ) } @{ $attributes->{depends} };
-        $obj->_croak( "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
-            if $cant;
+        my $cant = List::Util::first { !$_->can( 'freeze' ) }
+        @{ $attributes->{depends} };
+        $obj->_croak(
+            "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
+          if $cant;
 
         # now freeze them
-        @freeze = map $_->freeze, @{$attributes->{depends} };
+        @freeze = map $_->freeze, @{ $attributes->{depends} };
     }
 
     push @freeze, $attributes->{freeze}->( $obj ), $attributes->{is_exhausted};

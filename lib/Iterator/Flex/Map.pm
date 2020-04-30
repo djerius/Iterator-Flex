@@ -40,7 +40,8 @@ sub construct {
 
     my ( $code, $src ) = @_;
 
-    $src = Iterator::Flex::Factory::to_iterator( $src, on_exhaustion_return => undef );
+    $src = Iterator::Flex::Factory::to_iterator( $src,
+        on_exhaustion_return => undef );
 
     my $self;
 
@@ -67,15 +68,14 @@ sub construct {
 }
 
 
-__PACKAGE__->_add_roles(
-    qw[
+__PACKAGE__->_add_roles( qw[
       Exhausted
       Next::ClosedSelf
       Next
       Rewind
       Reset
       Current
-      ] );
+] );
 
 1;
 

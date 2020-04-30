@@ -10,7 +10,7 @@ use Data::Dump 'pp';
 
 sub _test_values {
 
-    my $iter = shift;
+    my $iter  = shift;
     my $npull = shift || 6;
     my ( $begin, $end );
 
@@ -40,11 +40,7 @@ subtest "basic" => sub {
         subtest "object properties" => sub {
 
             my @methods = ( 'rewind', 'freeze' );
-            isa_ok(
-                $iter,
-                ['Iterator::Flex::Base'],
-                "correct parent class"
-            );
+            isa_ok( $iter, ['Iterator::Flex::Base'], "correct parent class" );
             can_ok( $iter, \@methods, join( ' ', "has", @methods ) );
         };
 

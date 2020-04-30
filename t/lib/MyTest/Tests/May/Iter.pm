@@ -20,7 +20,7 @@ sub construct_from_state {
         name   => 'prev',
         next   => sub { ++$x },
         rewind => sub { ++$x },
-        ( @_ ? ( depends => [ @_ ] ) : () ),
+        ( @_ ? ( depends => [@_] ) : () ),
     };
 }
 

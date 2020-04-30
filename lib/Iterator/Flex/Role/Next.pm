@@ -19,7 +19,7 @@ use Role::Tiny;
 =cut
 
 
-sub next { &{$_[0]} }
+sub next { &{ $_[0] } }
 
 *__next__ = \&next;
 

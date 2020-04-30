@@ -322,7 +322,7 @@ The iterator supports the following methods:
 
 sub iseq {
     require Iterator::Flex::Sequence;
-    Iterator::Flex::Sequence->new ( @_ );
+    Iterator::Flex::Sequence->new( @_ );
 }
 
 
@@ -359,7 +359,7 @@ If C<$iterator> provides a C<prev> method.
 
 sub ifreeze (&$) {
     require Iterator::Flex::Freeze;
-    Iterator::Flex::Freeze->new(@_);
+    Iterator::Flex::Freeze->new( @_ );
 }
 
 
@@ -391,8 +391,9 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
-    _croak( "state argument for $package constructor must be a HASH or ARRAY reference ")
-      unless is_hashref( $state ) || is_arrayref( $state );
+    _croak(
+        "state argument for $package constructor must be a HASH or ARRAY reference "
+    ) unless is_hashref( $state ) || is_arrayref( $state );
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
@@ -411,7 +412,7 @@ sub thaw {
     }
 
     my $iter = $package->$new_from_state( $state );
-    $exhausted? $iter->set_exhausted : $iter->_reset_exhausted;
+    $exhausted ? $iter->set_exhausted : $iter->_reset_exhausted;
     return $iter;
 }
 

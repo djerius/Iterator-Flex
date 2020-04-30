@@ -21,7 +21,7 @@ sub _construct_next {
     Scalar::Util::weaken $next;
 
     my $sub;
-    $sub = sub { $next->( $sub )  };
+    $sub = sub { $next->( $sub ) };
 
     # create a second reference to the subroutine before we weaken $sub,
     # otherwise $sub will lose its contents, as it would be the only

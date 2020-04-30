@@ -10,22 +10,22 @@ use Package::Variant importing => qw[ Role::Tiny ];
 use Iterator::Flex::Failure 'RoleExists';
 
 sub make_variant_package_name {
-  my ($class, $package ) = @_;
+    my ( $class, $package ) = @_;
 
-  $package = "Iterator::Flex::Role::Method::$package";
+    $package = "Iterator::Flex::Role::Method::$package";
 
-  Iterator::Flex::Failure::RoleExists->throw( { payload => $package } )
-     if Role::Tiny->is_role( $package );
+    Iterator::Flex::Failure::RoleExists->throw( { payload => $package } )
+      if Role::Tiny->is_role( $package );
 
-  return $package;
+    return $package;
 }
 
 sub make_variant {
-  my ($class, $target_package, $package, %arg) = @_;
-  my $name = $arg{name};
-  install $name => sub {
-      return $REGISTRY{ refaddr $_[0] }{methods}{$name}->( @_ );
-  };
+    my ( $class, $target_package, $package, %arg ) = @_;
+    my $name = $arg{name};
+    install $name => sub {
+        return $REGISTRY{ refaddr $_[0] }{methods}{$name}->( @_ );
+    };
 }
 
 1;

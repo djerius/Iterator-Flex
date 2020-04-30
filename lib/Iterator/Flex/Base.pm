@@ -51,42 +51,45 @@ sub new_from_attrs {
       unless Ref::Util::is_arrayref( $roles );
 
     $class->_croak( "specify only one output exhaustion action" )
-      if 1 < ( my ( $exhaustion_action ) =  grep { exists $attr{$_} } @RequestedExhaustionActions );
+      if 1 < ( my ( $exhaustion_action )
+          = grep { exists $attr{$_} } @RequestedExhaustionActions );
 
     # default to returning undef on exhaustion
-    if ( ! defined $exhaustion_action ) {
+    if ( !defined $exhaustion_action ) {
         $exhaustion_action = ON_EXHAUSTION_RETURN;
-        $attr{+ON_EXHAUSTION_RETURN} = undef;
+        $attr{ +ON_EXHAUSTION_RETURN } = undef;
     }
 
     if ( $exhaustion_action eq ON_EXHAUSTION_RETURN ) {
-        push @{ $roles }, [ Exhaustion => 'RequestedReturn' ];
-        $attr{+ON_EXHAUSTION_RETURN} = delete $attr{$exhaustion_action};
+        push @{$roles}, [ Exhaustion => 'RequestedReturn' ];
+        $attr{ +ON_EXHAUSTION_RETURN } = delete $attr{$exhaustion_action};
     }
     elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
 
         if ( $attr{ +ON_EXHAUSTION_THROW } eq ON_EXHAUSTION_PASSTHROUGH ) {
-            push @{$roles}, [ Exhaustion =>  'RequestedPassthroughThrow' ];
+            push @{$roles}, [ Exhaustion => 'RequestedPassthroughThrow' ];
         }
         else {
             $attr{ +ON_EXHAUSTION_THROW } = delete $attr{$exhaustion_action};
-            push @{$roles}, [ Exhaustion =>  'RequestedThrow' ];
+            push @{$roles}, [ Exhaustion => 'RequestedThrow' ];
         }
     }
 
-    $class = Iterator::Flex::Utils::create_class_with_roles( $class, @{ $roles } );
+    $class
+      = Iterator::Flex::Utils::create_class_with_roles( $class, @{$roles} );
 
     $attr{name} = delete $attr{name} // $class;
 
     my $self = bless $class->_construct_next( \%attr ), $class;
 
 
-    $self->_croak( "attempt to register an iterator subroutine which has already been registered." )
-      if exists $REGISTRY{ refaddr $self };
+    $self->_croak(
+        "attempt to register an iterator subroutine which has already been registered."
+    ) if exists $REGISTRY{ refaddr $self };
 
     $REGISTRY{ refaddr $self } = \%attr;
 
-    $self->_reset_exhausted if $self->can('_reset_exhausted');
+    $self->_reset_exhausted if $self->can( '_reset_exhausted' );
 
     return $self;
 }

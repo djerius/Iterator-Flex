@@ -50,8 +50,8 @@ sub construct {
       if @_ < 1 || @_ > 3;
 
     my %state;
-    $state{step} = pop if @_ == 3;
-    $state{end} = pop;
+    $state{step}  = pop if @_ == 3;
+    $state{end}   = pop;
     $state{begin} = shift;
 
     $class->construct_from_state( \%state );
@@ -65,16 +65,17 @@ sub construct_from_state {
     my ( $class, $state ) = @_;
 
     $class->_croak( "$class: arguments must be numbers\n" )
-      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) } values %$state;
+      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) }
+    values %$state;
 
-    my ( $begin, $end, $step, $iter, $next, $current, $prev ) =
-      @{$state}{ qw[ begin end step iter next current prev ] };
+    my ( $begin, $end, $step, $iter, $next, $current, $prev )
+      = @{$state}{qw[ begin end step iter next current prev ]};
 
     my $self;
 
     my %params;
 
-    if ( ! defined $step ) {
+    if ( !defined $step ) {
 
         $begin = 0      unless defined $begin;
         $next  = $begin unless defined $next;

@@ -45,18 +45,21 @@ If C<$iterator> provides a C<prev> method.
 
 sub construct {
 
-    my ( $class, $serialize, $src )  = ( shift, shift, shift );
+    my ( $class, $serialize, $src ) = ( shift, shift, shift );
 
     $class->_croak( "'serialize' must be a CODE reference" )
       unless Ref::Util::is_coderef( $serialize );
 
-    $src = Iterator::Flex::Factory::to_iterator( $src, on_exhaustion_return => undef );
+    $src = Iterator::Flex::Factory::to_iterator( $src,
+        on_exhaustion_return => undef );
 
     $class->_croak( "'src' iterator must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
 
-    $class->_croak( "'src' iterator must provide set_exhausted/is_exhausted methods" )
-      unless $class->_can_meth( $src, 'set_exhausted' ) && $class->_can_meth( $src, 'is_exhausted' );
+    $class->_croak(
+        "'src' iterator must provide set_exhausted/is_exhausted methods" )
+      unless $class->_can_meth( $src, 'set_exhausted' )
+      && $class->_can_meth( $src, 'is_exhausted' );
 
     my $self;
     my %params = (

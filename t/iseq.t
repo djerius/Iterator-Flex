@@ -62,11 +62,8 @@ for my $test ( @tests ) {
             subtest "object properties" => sub {
 
                 my @methods = ( 'rewind', 'freeze', 'prev', 'current' );
-                isa_ok(
-                    $iter,
-                    ['Iterator::Flex::Base'],
-                    "correct parent class"
-                );
+                isa_ok( $iter, ['Iterator::Flex::Base'],
+                    "correct parent class" );
                 can_ok( $iter, \@methods, join( ' ', "has", @methods ) );
             };
 
@@ -102,24 +99,26 @@ for my $test ( @tests ) {
                 $iter->reset;
 
                 <$iter>;
-                my ( $prev, $current ) = ( $expected->[1][0], $expected->[1][1] );
+                my ( $prev, $current )
+                  = ( $expected->[1][0], $expected->[1][1] );
                 is(
-                   [ $iter->prev, $iter->current ],
-                   [ $prev, $current ],
-                   "prev/current before rewind"
-                  );
+                    [ $iter->prev, $iter->current ],
+                    [ $prev,       $current ],
+                    "prev/current before rewind"
+                );
 
                 try_ok { $iter->rewind } "reset";
 
                 is(
-                   [ $iter->prev, $iter->current ],
-                   [ $prev, $current ],
-                   "prev/current after rewind"
-                  );
+                    [ $iter->prev, $iter->current ],
+                    [ $prev,       $current ],
+                    "prev/current after rewind"
+                );
 
                 my @expected = @$expected;
                 $expected[0] = [ $prev, $current, $expected->[0][-1] ];
-                $expected[1] = [ $current, $expected->[0][-1], $expected->[1][-1] ];
+                $expected[1]
+                  = [ $current, $expected->[0][-1], $expected->[1][-1] ];
 
                 my @values
                   = map { [ $iter->prev, $iter->current, $iter->next ] }
@@ -149,8 +148,7 @@ for my $test ( @tests ) {
                     \@values,
                     [ @{$expected}[ 0 .. $split - 1 ] ],
                     "values are correct"
-                )
-                  or diag pp( \@values );
+                ) or diag pp( \@values );
 
                 try_ok { $freeze = $iter->freeze } "freeze iterator";
             };

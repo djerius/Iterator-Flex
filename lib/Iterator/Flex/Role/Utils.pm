@@ -9,7 +9,7 @@ our $VERSION = '0.11';
 
 use Role::Tiny;
 
-sub _load_module{
+sub _load_module {
 
     my $class     = shift;
     my $module    = pop;
@@ -21,14 +21,14 @@ sub _load_module{
     return $module if $module =~ /::/;
 
     for my $namespace ( $class->_namespaces ) {
-        my $module = _module_name( $namespace, @hierarchy, $module);
+        my $module = _module_name( $namespace, @hierarchy, $module );
         return $module if eval { Module::Runtime::require_module( $module ) };
     }
 
     $class->_croak(
-           "unable to find a module for ",
-           join( "::", @hierarchy, $module ),
-           " in @{[ join( ', ', $class->_namespaces ) ]}"
+        "unable to find a module for ",
+        join( "::", @hierarchy, $module ),
+        " in @{[ join( ', ', $class->_namespaces ) ]}"
     );
 }
 
@@ -61,7 +61,7 @@ sub _module_name {
 sub _can_meth {
 
     # just in case the first argument is an object or class
-    my ( $obj, $meth ) = @{_}[-2,-1];
+    my ( $obj, $meth ) = @{_}[ -2, -1 ];
 
     my $sub;
     foreach ( "__${meth}__", $meth ) {

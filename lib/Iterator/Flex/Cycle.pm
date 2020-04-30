@@ -112,8 +112,7 @@ sub construct_from_state {
 }
 
 
-__PACKAGE__->_add_roles(
-    qw[
+__PACKAGE__->_add_roles( qw[
       Exhausted
       Next::NoSelf
       Next
@@ -122,7 +121,7 @@ __PACKAGE__->_add_roles(
       Prev
       Current
       Freeze
-      ] );
+] );
 
 
 1;

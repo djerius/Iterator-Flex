@@ -53,7 +53,7 @@ sub construct {
 
     my $class = shift;
 
-    $class->construct_from_state( { iterators => [ @_ ] } );
+    $class->construct_from_state( { iterators => [@_] } );
 }
 
 sub construct_from_state {
@@ -63,22 +63,28 @@ sub construct_from_state {
     $class->_croak( "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
-    my ( $iterators, $value ) = @{$state}{ qw[ iterators value ] };
+    my ( $iterators, $value ) = @{$state}{qw[ iterators value ]};
 
     $value = [] unless defined $value;
 
     my @keys;
     my @iterator;
 
-    # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
+# distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
-        @iterator = map { Iterator::Flex::Factory::to_iterator( $_, on_exhaustion_return => undef ) } @$iterators;
+        @iterator = map {
+            Iterator::Flex::Factory::to_iterator( $_,
+                on_exhaustion_return => undef )
+        } @$iterators;
     }
 
     else {
-        @keys = List::Util::pairkeys @$iterators;
-        @iterator = map { Iterator::Flex::Factory::to_iterator( $_, on_exhaustion_return => undef ) } List::Util::pairvalues @$iterators;
+        @keys     = List::Util::pairkeys @$iterators;
+        @iterator = map {
+            Iterator::Flex::Factory::to_iterator( $_,
+                on_exhaustion_return => undef )
+        } List::Util::pairvalues @$iterators;
     }
 
     # can only work if the iterators support a rwind method
@@ -174,7 +180,7 @@ sub construct_from_state {
         $params{freeze} = sub {
             return [ $class, { keys => \@keys } ];
         };
-        $params{_roles} = [ 'Freeze' ];
+        $params{_roles} = ['Freeze'];
     }
 
     return {
@@ -194,15 +200,17 @@ sub new_from_state {
     if ( @$keys ) {
 
         @$keys == @$iterators
-          or $class->_croak(
-            "number of keys not equal to number of iterators\n"
-          );
+          or
+          $class->_croak( "number of keys not equal to number of iterators\n" );
 
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }
 
-    $class->new_from_attrs( $class->construct_from_state( { iterators => $iterators,
-                                                            value => \@value } ) );
+    $class->new_from_attrs(
+        $class->construct_from_state( {
+                iterators => $iterators,
+                value     => \@value
+            } ) );
 }
 
 __PACKAGE__->_add_roles( qw[

@@ -13,7 +13,7 @@ subtest "basic" => sub {
 
         isa_ok( $iter, ['Iterator::Flex::Base'], "correct parent class" );
         can_ok( $iter, [ 'reset', ], "has reset" );
-        is( $iter->can( 'freeze'), undef, "can't freeze" );
+        is( $iter->can( 'freeze' ), undef, "can't freeze" );
     };
 
     subtest "values" => sub {
@@ -47,7 +47,7 @@ subtest "reset" => sub {
         push @values, <$iter>;
         is( $iter->next, undef, "iterator exhausted" );
         is( \@values, [ 12, 22 ], "values are correct" )
-                  or diag pp( \@values );
+          or diag pp( \@values );
     };
 
 };

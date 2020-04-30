@@ -5,7 +5,7 @@ use Test2::V0;
 
 use aliased 'MyTest::Tests::May::Iter';
 
-my @depends = map Iter->new, 1..3;
+my @depends = map Iter->new, 1 .. 3;
 
 my $iter = Iter->new( @depends );
 

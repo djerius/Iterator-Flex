@@ -26,7 +26,7 @@ sub signal_exhaustion {
     my $self = shift;
     $self->set_exhausted;
 
-    die (@_) if @_;
+    die( @_ ) if @_;
     Iterator::Flex::Failure::Exhausted->throw;
 }
 

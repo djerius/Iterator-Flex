@@ -24,7 +24,7 @@ iterator's exhausted flag.
 sub signal_exhaustion {
     my $self = shift;
     $self->set_exhausted;
-    return $REGISTRY{ refaddr $self }{+ON_EXHAUSTION_RETURN};
+    return $REGISTRY{ refaddr $self }{ +ON_EXHAUSTION_RETURN };
 }
 
 requires 'set_exhausted';

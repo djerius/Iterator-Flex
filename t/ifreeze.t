@@ -83,10 +83,11 @@ subtest "serialize" => sub {
         subtest(
             "thaw state $_" => sub {
                 my $idx = shift;
-                _test_values( thaw( $freeze[$idx] ),
-                              pull_begin => $idx + 2,
-                              begin => $idx + 1,
-                            );
+                _test_values(
+                    thaw( $freeze[$idx] ),
+                    pull_begin => $idx + 2,
+                    begin      => $idx + 1,
+                );
             },
             $_
         );

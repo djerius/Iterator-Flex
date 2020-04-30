@@ -17,9 +17,9 @@ use Safe::Isa;
 use Iterator::Flex::Base;
 use Iterator::Flex::Failure;
 use Iterator::Flex::Utils qw[ _croak _can_meth
-                              :NativeExhaustionActions
-                              :RequestedExhaustionActions
-                           ];
+  :NativeExhaustionActions
+  :RequestedExhaustionActions
+];
 use Iterator::Flex::Method;
 
 =sub to_iterator
@@ -192,7 +192,7 @@ sub construct {
       unless is_hashref( $_[-1] );
 
     my %iattr = (
-        class     => 'Iterator::Flex::Base',
+        class => 'Iterator::Flex::Base',
         %{ $_[-1] },
     );
 
@@ -215,40 +215,42 @@ sub construct {
         $attr{name} = $attr;
     }
 
-    # close over self 
+    # close over self
     push @roles, [ Next => 'NoSelf' ];
 
     $class->_croak( "specify only one native exhaustion action" )
-      if 1 < ( my ( $exhaustion_action ) =  grep { exists $iattr{$_} } @NativeExhaustionActions );
+      if 1 < ( my ( $exhaustion_action )
+          = grep { exists $iattr{$_} } @NativeExhaustionActions );
 
-    my $has_output_exhaustion_policy =   grep { exists $iattr{$_} } @RequestedExhaustionActions;
+    my $has_output_exhaustion_policy
+      = grep { exists $iattr{$_} } @RequestedExhaustionActions;
 
     # default to returning undef on exhaustion
-    if ( ! defined $exhaustion_action ) {
+    if ( !defined $exhaustion_action ) {
         $exhaustion_action = RETURNS_ON_EXHAUSTION;
-        $iattr{+RETURNS_ON_EXHAUSTION} = undef;
+        $iattr{ +RETURNS_ON_EXHAUSTION } = undef;
     }
 
     if ( $exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
-        push @roles, [ Exhaustion => 'NativeReturn' ],
-          [ Next => 'WrapReturn' ];
-        $attr{+RETURNS_ON_EXHAUSTION} = delete $iattr{+RETURNS_ON_EXHAUSTION};
+        push @roles, [ Exhaustion => 'NativeReturn' ], [ Next => 'WrapReturn' ];
+        $attr{ +RETURNS_ON_EXHAUSTION }
+          = delete $iattr{ +RETURNS_ON_EXHAUSTION };
 
-        $attr{+ON_EXHAUSTION_RETURN} = $attr{+RETURNS_ON_EXHAUSTION}
+        $attr{ +ON_EXHAUSTION_RETURN } = $attr{ +RETURNS_ON_EXHAUSTION }
           unless $has_output_exhaustion_policy;
     }
     elsif ( $exhaustion_action eq THROWS_ON_EXHAUSTION ) {
-        push @roles, [ Exhaustion => 'NativeThrow' ],
-          [ Next => 'WrapThrow' ];
-        $attr{+THROWS_ON_EXHAUSTION} = delete $iattr{+THROWS_ON_EXHAUSTION};
+        push @roles, [ Exhaustion => 'NativeThrow' ], [ Next => 'WrapThrow' ];
+        $attr{ +THROWS_ON_EXHAUSTION } = delete $iattr{ +THROWS_ON_EXHAUSTION };
 
-        $attr{+ON_EXHAUSTION_THROW} = ON_EXHAUSTION_PASSTHROUGH
+        $attr{ +ON_EXHAUSTION_THROW } = ON_EXHAUSTION_PASSTHROUGH
           unless $has_output_exhaustion_policy;
     }
     push @roles, 'Exhausted';
 
     # copy over any output exhaustion policy specifications
-    $attr{$_} = delete $iattr{$_} for grep { exists $iattr{$_} }  @RequestedExhaustionActions;
+    $attr{$_} = delete $iattr{$_}
+      for grep { exists $iattr{$_} } @RequestedExhaustionActions;
 
     for my $method ( qw[ next rewind reset prev current ] ) {
 
@@ -264,7 +266,7 @@ sub construct {
 
         $attr{$method} = $code;
     }
-    defined( $attr{next}  )
+    defined( $attr{next} )
       or _croak( "missing or undefined 'next' attribute" );
 
     if ( defined( $attr = delete $iattr{methods} ) ) {

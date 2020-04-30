@@ -26,7 +26,7 @@ sub signal_exhaustion {
     my $self = shift;
     $self->set_exhausted;
 
-    my $exception = $REGISTRY{refaddr $self}{+ON_EXHAUSTION_THROW};
+    my $exception = $REGISTRY{ refaddr $self}{ +ON_EXHAUSTION_THROW };
 
     $exception->() if is_coderef( $exception );
 

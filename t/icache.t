@@ -180,9 +180,10 @@ subtest "freeze" => sub {
         drain( $iter, 3 );
 
         try_ok { $freeze = $iter->freeze } "freeze iterator";
-        try_ok { $iter = thaw( $freeze ) } "thaw iterator";
+        try_ok { $iter   = thaw( $freeze ) } "thaw iterator";
 
-        ok( $iter->is_exhausted, "thawed, frozen, exhausted iterator is still exhausted" );
+        ok( $iter->is_exhausted,
+            "thawed, frozen, exhausted iterator is still exhausted" );
 
     }
 

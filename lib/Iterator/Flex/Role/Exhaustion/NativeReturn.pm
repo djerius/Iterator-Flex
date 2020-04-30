@@ -11,7 +11,7 @@ use Role::Tiny;
 use Iterator::Flex::Utils qw( :default :NativeExhaustionActions );
 
 sub sentinel {
-    return $REGISTRY{ refaddr $_[0] }{+RETURNS_ON_EXHAUSTION};
+    return $REGISTRY{ refaddr $_[0] }{ +RETURNS_ON_EXHAUSTION };
 }
 
 1;
