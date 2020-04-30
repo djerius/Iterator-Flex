@@ -32,3 +32,5 @@ sub signal_exhaustion {
 requires 'set_exhausted';
 
 1;
+
+# COPYRIGHT
