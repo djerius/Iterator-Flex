@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Exhaustion::RequestedThrow;
+package Iterator::Flex::Role::Exhaustion::RequestedPassthroughThrow;
 
 # ABSTRACT: signal exhaustion by setting exhausted flag;
 
@@ -8,28 +8,25 @@ use warnings;
 our $VERSION = '0.11';
 
 use Role::Tiny;
-use Iterator::Flex::Utils qw( :default ON_EXHAUSTION_THROW );
-use Ref::Util qw( is_coderef );
 use Iterator::Flex::Failure;
 
 =method signal_exhaustion
 
-   $iterator->signal_exhaustion;
+   $iterator->signal_exhaustion( @_ );
 
 Signal that the iterator is exhausted.  This version sets the
-iterator's exhausted flag and throws an exception.
+iterator's exhausted flag and throws C<@_> if provided,
+else C<Iterator::Flex::Failure::Exhausted>.
 
 
 =cut
 
 sub signal_exhaustion {
+
     my $self = shift;
     $self->set_exhausted;
 
-    my $exception = $REGISTRY{refaddr $self}{+ON_EXHAUSTION_THROW};
-
-    $exception->() if is_coderef( $exception );
-
+    die (@_) if @_;
     Iterator::Flex::Failure::Exhausted->throw;
 }
 

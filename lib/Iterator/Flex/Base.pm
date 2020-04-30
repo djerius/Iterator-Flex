@@ -64,8 +64,14 @@ sub new_from_attrs {
         $attr{+ON_EXHAUSTION_RETURN} = delete $attr{$exhaustion_action};
     }
     elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
-        push @{ $roles }, [ Exhaustion => 'RequestedThrow' ];
-        $attr{+ON_EXHAUSTION_THROW} = delete $attr{$exhaustion_action};
+
+        if ( $attr{ +ON_EXHAUSTION_THROW } eq ON_EXHAUSTION_PASSTHROUGH ) {
+            push @{$roles}, [ Exhaustion =>  'RequestedPassthroughThrow' ];
+        }
+        else {
+            $attr{ +ON_EXHAUSTION_THROW } = delete $attr{$exhaustion_action};
+            push @{$roles}, [ Exhaustion =>  'RequestedThrow' ];
+        }
     }
 
     $class = Iterator::Flex::Utils::create_class_with_roles( $class, @{ $roles } );

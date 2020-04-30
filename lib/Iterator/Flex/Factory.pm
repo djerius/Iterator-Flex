@@ -242,7 +242,7 @@ sub construct {
           [ Next => 'WrapThrow' ];
         $attr{+THROWS_ON_EXHAUSTION} = delete $iattr{+THROWS_ON_EXHAUSTION};
 
-        $attr{+ON_EXHAUSTION_THROW} = $attr{+THROWS_ON_EXHAUSTION}
+        $attr{+ON_EXHAUSTION_THROW} = ON_EXHAUSTION_PASSTHROUGH
           unless $has_output_exhaustion_policy;
     }
     push @roles, 'Exhausted';

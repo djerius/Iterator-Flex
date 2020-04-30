@@ -24,6 +24,7 @@ BEGIN {
     %RequestedExhaustionActions = (
 	ON_EXHAUSTION_THROW  => 'on_exhaustion_throw',
 	ON_EXHAUSTION_RETURN => 'on_exhaustion_return'
+	ON_EXHAUSTION_PASSTHROUGH => 'on_exhaustion_passthrough',
     );
 }
 
