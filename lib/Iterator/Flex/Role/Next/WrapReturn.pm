@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Next::WrapReturn;
 use strict;
 use warnings;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use Iterator::Flex::Utils qw( :default RETURNS_ON_EXHAUSTION );
 use Scalar::Util;

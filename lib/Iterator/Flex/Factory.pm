@@ -6,7 +6,7 @@ use 5.10.0;
 use strict;
 use warnings;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use Ref::Util qw[ is_hashref is_coderef is_ref is_arrayref ];
 use Scalar::Util qw[ blessed ];

@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Next::ClosedSelf;
 use strict;
 use warnings;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use Ref::Util;
 use Scalar::Util;
