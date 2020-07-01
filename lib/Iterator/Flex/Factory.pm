@@ -219,7 +219,7 @@ sub construct {
     # close over self
     push @roles, [ Next => 'NoSelf' ];
 
-    $class->_croak( "specify only one native exhaustion action" )
+    _croak( "specify only one native exhaustion action" )
       if 1 < ( my ( $exhaustion_action )
           = grep { exists $iattr{$_} } @ImportedExhaustionActions );
 
