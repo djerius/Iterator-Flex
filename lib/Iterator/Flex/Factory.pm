@@ -441,36 +441,38 @@ sub construct_from_object ( $CLASS, $obj, %attr ) {
 
     return $obj if $obj->isa( 'Iterator::Flex::Base' );
 
-    my %param;
-    my $code;
-
-    # assume the iterator returns undef on exhausted
-    $param{exhausted} = 'undef';
-
-    if ( $code = _can_meth( $obj, 'iter' ) ) {
-        $param{next} = $code->( $obj );
-    }
-    elsif ( $code = _can_meth( $obj, 'next' )
-        || overload::Method( $obj, '<>' ) )
-    {
-        $param{next} = sub { $code->( $obj ) };
+    if ( !has_native_exhaustion_policy( \%attr ) ) {
+        $attr{ +RETURNS_ON_EXHAUSTION } = undef;
     }
 
-    elsif ( $code = overload::Method( $obj, '&{}' ) ) {
-        $param{next} = $code->( $obj );
+    if ( !exists $attr{next} ) {
+        my $code;
+        if ( $code = _can_meth( $obj, 'iter' ) ) {
+            $attr{next} = $code->( $obj );
+        }
+        elsif ( $code = _can_meth( $obj, 'next' )
+            || overload::Method( $obj, '<>' ) )
+        {
+            $attr{next} = sub { $code->( $obj ) };
+        }
+
+        elsif ( $code = overload::Method( $obj, '&{}' ) ) {
+            $attr{next} = $code->( $obj );
+        }
+
+        elsif ( $code = overload::Method( $obj, '@{}' ) ) {
+            return $CLASS->construct_from_array( $code->( $obj ) );
+        }
+
     }
 
-    elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-        return $CLASS->construct_from_array( $code->( $obj ) );
-    }
-
-    for my $method ( 'prev', 'current' ) {
-        $code = _can_meth( $obj, $method );
-        $param{$method} = sub { $code->( $obj ) }
+    for my $method ( grep { !exists $attr{$_} } 'prev', 'current' ) {
+        my $code = _can_meth( $obj, $method );
+        $attr{$method} = sub { $code->( $obj ) }
           if $code;
     }
 
-    return construct( %param );
+    return construct( %attr );
 }
 
 1;
