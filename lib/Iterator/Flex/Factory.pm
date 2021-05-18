@@ -10,8 +10,7 @@ use experimental 'signatures';
 
 our $VERSION = '0.12';
 
-use Ref::Util qw[ is_hashref is_coderef is_ref is_arrayref ];
-use Scalar::Util qw[ blessed ];
+use Ref::Util ();
 use Role::Tiny       ();
 use Role::Tiny::With ();
 use Module::Runtime;
@@ -384,20 +383,19 @@ The coderef must return the next element in the iteration.
 
 sub construct_from_iterable ( $CLASS, $obj, %attr ) {
 
-
-    if ( blessed $obj) {
+    if ( Ref::Util::is_blessed_ref($obj) ) {
         return $CLASS->construct_from_object( $obj, %attr );
     }
 
-    elsif ( is_arrayref( $obj ) ) {
+    elsif ( Ref::Util::is_arrayref( $obj ) ) {
         return $CLASS->construct_from_array( $obj, %attr );
     }
 
-    elsif ( is_coderef( $obj ) ) {
+    elsif ( Ref::Util::is_coderef( $obj ) ) {
         return $CLASS->construct( %attr, next => $obj );
     }
 
-    elsif ( is_globref( $obj ) ) {
+    elsif ( Ref::Util::is_globref( $obj ) ) {
         return $CLASS->construct( %attr, next => sub { scalar <$obj> } );
     }
 
