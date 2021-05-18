@@ -4,7 +4,7 @@ Iterator::Flex - Iterators which can be rewound and serialized
 
 # VERSION
 
-version 0.11
+version 0.12
 
 # SYNOPSIS
 
@@ -18,50 +18,30 @@ version 0.11
     returns the new value.
 
 - _exhaustion_
+    - Iterators provide an `is_exhausted` method.
+    - The `next` method indicates exhaustion either by `next` returning a sentinel (e.g. `undef`) or by throwing an exception.
+    - _reset_
 
-    Iterator exhaustion is signified by `next` return `undef`.
+        Iterators may optionally be reset to their initial state.
 
-- _reset_
+    - _rewind_
 
-    Iterators may optionally be rewound to their initial state
+        Iterators may optionally be rewound, so that iterations may
+        cycle. This differs from a reset in that the iterator will correctly
+        return the previous value (if it provides that functionality).
 
-- _previous values_
+    - _previous values_
 
-    Iterators may optionally return their previous value.
+        Iterators may optionally return their previous value.
 
-- _current_
+    - _current_
 
-    Iterators return their current value.
+        Iterators return their current value.
 
-- _freeze_
+    - _freeze_
 
-    Iterators may optionally provide a `freeze` method for serialization.
-    Iterators may be chained, and an iterator's dependencies are frozen automatically.
-
-## Serialization of Iterators
-
-- freeze _optional_
-
-    A subroutine which returns an array reference with the following elements, in the specified order :
-
-    1. The name of the package containing the thaw subroutine.
-    2. The name of the thaw subroutine.
-    3. The data to be passed to the thaw routine.  The routine will be called
-    as:
-
-            thaw( @{$data}, ?$depends );
-
-        if `$data` is an arrayref,
-
-            thaw( %{$data}, ?( depends => $depends )  );
-
-        if `$data` is a hashref, or
-
-            thaw( $data, ?$depends );
-
-        for any other type of data.
-
-        Dependencies are passed to the thaw routine only if they are present.
+        Iterators may optionally provide a `freeze` method for serialization.
+        Iterators may be chained, and an iterator's dependencies are frozen automatically.
 
 # SUBROUTINES
 
@@ -71,7 +51,7 @@ version 0.11
 
 Construct an iterator from code. The code will have access to the
 iterator object through `$_[0]`.  The optional parameters are any of
-the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator::Flex::Base#construct).
+the parameters recognized by ["construct" in Iterator::Flex::Base](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3ABase#construct).
 
     By default the code is expected to return C<undef> upon exhaustion.
 
@@ -108,7 +88,7 @@ return `undef` upon exhaustion.
 
 - an arrayref
 
-    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator::Flex#iarray) iterator.
+    The returned iterator will be an ["iarray" in Iterator::Flex](https://metacpan.org/pod/Iterator%3A%3AFlex#iarray) iterator.
 
 - a coderef
 
@@ -257,6 +237,34 @@ The returned iterator supports the following methods:
 Restore an iterator that has been frozen.  See ["Serialization of
 Iterators"](#serialization-of-iterators) for more information.
 
+This module provides a generic generator for iterators (["iterator"](#iterator)) as
+well as friendly interfaces to special purpose iterators.  To create 
+
+## Serialization of Iterators
+
+- freeze _optional_
+
+    A subroutine which returns an array reference with the following elements, in the specified order :
+
+    1. The name of the package containing the thaw subroutine.
+    2. The name of the thaw subroutine.
+    3. The data to be passed to the thaw routine.  The routine will be called
+    as:
+
+            thaw( @{$data}, ?$depends );
+
+        if `$data` is an arrayref,
+
+            thaw( %{$data}, ?( depends => $depends )  );
+
+        if `$data` is a hashref, or
+
+            thaw( $data, ?$depends );
+
+        for any other type of data.
+
+        Dependencies are passed to the thaw routine only if they are present.
+
 # METHODS
 
 Not all iterators support all methods.
@@ -327,3 +335,35 @@ This software is Copyright (c) 2018 by Smithsonian Astrophysical Observatory.
 This is free software, licensed under:
 
     The GNU General Public License, Version 3, June 2007
+
+# POD ERRORS
+
+Hey! **The above document had some coding errors, which are explained below:**
+
+- Around line 38:
+
+    Expected '=item \*'
+
+- Around line 42:
+
+    Expected '=item \*'
+
+- Around line 48:
+
+    Expected '=item \*'
+
+- Around line 52:
+
+    Expected '=item \*'
+
+- Around line 56:
+
+    Expected '=item \*'
+
+- Around line 63:
+
+    You forgot a '=back' before '=head1'
+
+- Around line 331:
+
+    Unknown directive: =had2

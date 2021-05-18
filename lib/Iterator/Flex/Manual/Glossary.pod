@@ -1,0 +1,66 @@
+# PODNAME: Glossary.pod
+
+=pod
+
+=head1 NAME
+
+Iterator::Flex::Manual::Glossary
+
+=head1 GLOSSARY
+
+=head2 I<iterable object>
+
+An I<iterable object> is an object which can be wrapped by an L<Iterable::Flex::Base> based iterator,
+and which has one or more of the following:
+
+=over
+
+=item C<__iter__> or C<iter> methods
+
+=item C<__next__> or C<next> methods
+
+=item an overloaded C<< <> >> operator
+
+These should return the next item.
+
+=item an overloaded C<< &{} >> operator
+
+This should return a code reference which returns the next item.  The coderef
+will be called as
+
+  $next = $coderef->( $obj )
+
+=item an overloaded C<< @{} >> operator
+
+This should return a code reference which returns an array reference.   The coderef
+will be called as
+
+  $next = $coderef->( $obj )
+
+=back
+
+
+=head2 I<iterable thing>
+
+An I<iterable thing> is an entity which can be wrapped by an L<Iterable::Flex::Base> based iterator.
+
+It may be one of the following:
+
+=over
+
+=item *
+
+an L</iterable object>
+
+=item an arrayref
+
+=item a coderef
+
+The coderef must return the next element in the iteration.
+
+=item a globref
+
+Globrefs are assumed to be filehandles.
+
+=back
+

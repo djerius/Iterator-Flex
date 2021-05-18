@@ -12,7 +12,7 @@ use Ref::Util;
 
 =for stopwords attr
 
-=method attr
+=method new
 
   $iterator = Iterator::Flex::Array->new( $array_ref );
 

@@ -443,11 +443,25 @@ returns the new value.
 
 =item I<exhaustion>
 
-Iterator exhaustion is signified by C<next> return C<undef>.
+=over
+
+=item *
+
+Iterators provide an C<is_exhausted> method.
+
+=item *
+
+The C<next> method indicates exhaustion either by C<next> returning a sentinel (e.g. C<undef>) or by throwing an exception.
 
 =item I<reset>
 
-Iterators may optionally be rewound to their initial state
+Iterators may optionally be reset to their initial state.
+
+=item I<rewind>
+
+Iterators may optionally be rewound, so that iterations may
+cycle. This differs from a reset in that the iterator will correctly
+return the previous value (if it provides that functionality).
 
 =item I<previous values>
 
@@ -463,6 +477,12 @@ Iterators may optionally provide a C<freeze> method for serialization.
 Iterators may be chained, and an iterator's dependencies are frozen automatically.
 
 =back
+
+=had2 This Module
+
+This module provides a generic generator for iterators (L</iterator>) as
+well as friendly interfaces to special purpose iterators.  To create
+
 
 =head2 Serialization of Iterators
 

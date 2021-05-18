@@ -24,6 +24,7 @@ use Iterator::Flex::Utils qw[
   :ImportedExhaustionActions
   :ExhaustionActions
 ];
+
 use Iterator::Flex::Method;
 
 =class_method to_iterator
@@ -57,16 +58,6 @@ This should return a subroutine which returns the next item.
 
 =back
 
-Additionally, if the object has the following methods, they are used
-by the constructed iterator:
-
-=over
-
-=item C<__prev__> or C<prev>
-
-=item C<__current__> or C<current>
-
-=back
 
 See L</construct_from_object>
 
@@ -108,12 +99,6 @@ The following parameters are accepted:
 
 An optional name to be output during error messages
 
-=item class I<optional>
-
-If specified, the iterator will be blessed into this class.  Dynamic
-role assignments will not be performed; they should be performed
-statically by the class.
-
 =item methods I<optional>
 
 A hash whose keys are method names and whose values are coderefs.
@@ -129,20 +114,7 @@ the method was originally called with.
 
 =item next I<required>
 
-A subroutine which returns the next value.  When the iterator is
-exhausted, it should
-
-=over
-
-=item 1
-
-Call the L</set_exhausted> method
-
-=item 2
-
-return undefined
-
-=back
+A subroutine which returns the next value.
 
 =item prev I<optional>
 
@@ -163,31 +135,40 @@ if the iterator were initially started.
 =item rewind I<optional>
 
 A subroutine which rewinds the iterator such that the next element returned
-will be the first element from the iterator.  It does not alter the values
-returned by L</prev> or L</current>
+will be the first element from the iterator.  It should not alter the values
+returned by L</prev> or L</current>.
 
+=back
 
-=item exhausted I<optional>
+The following parameters define how iterator exhaustion is handled. It is separated into
+two classes: I<native> exhaustion and I<output> exhaustion.  I<Native> exhaustion describes
+how the I<next> method expresses exhaustion, while I<output> exhaustion describes how the
+generated iterator should express exhaustion.
 
-One of the following values:
+Native exhaustion is specified via one of the following parameters
 
 =over
 
-=item C<predicate>
+=item C<throws_on_exhaustion> => C<1>
 
-The iterator will signal its exhaustion by calling the C<L/set_prediate>
-method.  This state is queryable via the L</is_exhausted> predicate.
+The iterator will natively signal its exhaustion by throwing an exception.
 
-=item C<throw>
+=item C<returns_on_exhaustion> => I<sentinel value>
 
-The iterator will signal its exhaustion by throwing an
-C<Iterator::Flex::Failure::Exhausted> exception.
-
-=item C<undef>
-
-The iterator will signal its exhaustion by returning the undefined value.
+The iterator will signal its exhaustion by returning the specified
+sentinel value, which is typically C<undef>.
 
 =back
+
+Output exhaustion:
+
+=over
+
+=item C<on_exhaustion_throw>
+
+=item C<on_exhaustion_return>
+
+=item C<on_exhaustion_passthrough>
 
 =back
 
@@ -238,7 +219,7 @@ sub construct ( $CLASS, $iattr ) {
         $attr{name} = $attr;
     }
 
-    # close over self
+    # don't close over self
     push @roles, [ Next => 'NoSelf' ];
 
     my ( $native_exhaustion_action, @rest )
@@ -356,28 +337,29 @@ sub construct ( $CLASS, $iattr ) {
 
   $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, %attributes );
 
-Construct an iterator from an iterable thing.  The returned iterator will
-return C<undef> upon exhaustion.
+Construct an iterator from an
+L<Iterator::Flex::Manual::Glossary/iterable thing>.  The returned
+iterator will return C<undef> upon exhaustion.
 
-An iterable thing is
+If C<$iterable> is:
 
 =over
 
-=item an object with certain methods
+=item *
 
-See L</construct_from_object>
+an object, the arguments are passed to L</construct_from_object>.
 
-=item an arrayref
+=item *
 
-The returned iterator will be an L<Iterator::Flex::Array> iterator.
+an array, the arguments are passed to L<Iterator::Flex::Array/new>.
 
-=item a coderef
+=item *
 
-The coderef must return the next element in the iteration.
+a coderef, the arguments are passed to L</construct>.
 
-=item a globref
+=item *
 
-=back
+a globref, the arguments are passed to L</construct>.
 
 =cut
 
