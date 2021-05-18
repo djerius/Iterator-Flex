@@ -240,7 +240,7 @@ sub construct ( $CLASS, $iattr ) {
     # close over self
     push @roles, [ Next => 'NoSelf' ];
 
-    my ( $exhaustion_action, @rest )
+    my ( $native_exhaustion_action, @rest )
       = grep { exists $iattr{$_} } @ImportedExhaustionActions;
 
     if ( @rest ) {
@@ -253,20 +253,21 @@ sub construct ( $CLASS, $iattr ) {
       = grep { exists $iattr{$_} } @ExhaustionActions;
 
     # default to returning undef on exhaustion
-    if ( !defined $exhaustion_action ) {
-        $exhaustion_action = RETURNS_ON_EXHAUSTION;
+    if ( !defined $native_exhaustion_action ) {
+        $native_exhaustion_action = RETURNS_ON_EXHAUSTION;
         $iattr{ +RETURNS_ON_EXHAUSTION } = undef;
     }
 
-    if ( $exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
-        push @roles, [ Exhaustion => 'ImportedReturn' ], [ Next => 'WrapReturn' ];
+    if ( $native_exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
+        push @roles, [ Exhaustion => 'ImportedReturn' ],
+          [ Next => 'WrapReturn' ];
         $attr{ +RETURNS_ON_EXHAUSTION }
           = delete $iattr{ +RETURNS_ON_EXHAUSTION };
 
         $attr{ +ON_EXHAUSTION_RETURN } = $attr{ +RETURNS_ON_EXHAUSTION }
           unless $has_output_exhaustion_policy;
     }
-    elsif ( $exhaustion_action eq THROWS_ON_EXHAUSTION ) {
+    elsif ( $native_exhaustion_action eq THROWS_ON_EXHAUSTION ) {
         push @roles, [ Exhaustion => 'ImportedThrow' ], [ Next => 'WrapThrow' ];
         $attr{ +THROWS_ON_EXHAUSTION } = delete $iattr{ +THROWS_ON_EXHAUSTION };
 
