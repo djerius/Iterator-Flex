@@ -69,7 +69,7 @@ sub new_from_attrs {
         push @{$roles}, [ Exhaustion => 'Return' ];
         $attr{ +ON_EXHAUSTION_RETURN } = delete $attr{$exhaustion_action};
     }
-    elsif ( $exhaustion_action eq 'on_exhaustion_throw' ) {
+    elsif ( $exhaustion_action eq ON_EXHAUSTION_THROW ) {
 
         if ( $attr{ +ON_EXHAUSTION_THROW } eq ON_EXHAUSTION_PASSTHROUGH ) {
             push @{$roles}, [ Exhaustion => 'PassthroughThrow' ];
