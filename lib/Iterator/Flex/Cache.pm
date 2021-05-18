@@ -57,7 +57,7 @@ sub construct_from_state {
 
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 
-    $src = Iterator::Flex::Factory::to_iterator( $src );
+    $src = Iterator::Flex::Factory->to_iterator( $src );
 
     my $self;
 

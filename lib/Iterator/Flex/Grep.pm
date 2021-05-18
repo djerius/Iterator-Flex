@@ -40,7 +40,7 @@ sub construct {
     shift;
 
     my ( $code, $src ) = @_;
-    $src = Iterator::Flex::Factory::to_iterator( $src,
+    $src = Iterator::Flex::Factory->to_iterator( $src,
         on_exhaustion_return => undef );
 
     my $self;

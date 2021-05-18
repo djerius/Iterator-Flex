@@ -37,7 +37,7 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 
 sub iterator(&@) {
     require Iterator::Flex::Factory;
-    Iterator::Flex::Factory::construct( { next => shift, @_ } );
+    Iterator::Flex::Factory->construct( { next => shift, @_ } );
 }
 
 
@@ -102,7 +102,7 @@ The coderef must return the next element in the iteration.
 
 sub iter {
     require Iterator::Flex::Factory;
-    Iterator::Flex::Factory::to_iterator( @_ );
+    Iterator::Flex::Factory->to_iterator( @_ );
 }
 
 

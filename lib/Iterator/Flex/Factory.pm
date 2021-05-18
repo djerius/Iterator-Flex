@@ -6,6 +6,8 @@ use 5.10.0;
 use strict;
 use warnings;
 
+use experimental 'signatures';
+
 our $VERSION = '0.12';
 
 use Ref::Util qw[ is_hashref is_coderef is_ref is_arrayref ];
@@ -23,9 +25,9 @@ use Iterator::Flex::Utils qw[ _croak _can_meth
 ];
 use Iterator::Flex::Method;
 
-=sub to_iterator
+=class_method to_iterator
 
-  $iter = Iterator::Flex::Factory::to_iterator( $iterable, %attributes );
+  $iter = Iterator::Flex::Factory->to_iterator( $iterable, %attributes );
 
 Construct an iterator from an iterable thing. The iterator will
 return C<undef> upon exhaustion.
@@ -81,16 +83,19 @@ The coderef must return the next element in the iteration.
 
 =cut
 
-sub to_iterator {
-
-    return @_
-      ? construct_from_iterable( @_ )
-      : construct( next => sub { return } );
+sub to_iterator ( $CLASS, @args ) {
+    return @args
+      ? $CLASS->construct_from_iterable( @args )
+      : $CLASS->construct( next => sub { return } );
 }
 
-=sub construct
 
-  $iterator = Iterator::Flex::Factory::construct( %params );
+
+############################################################################
+
+=class_method construct
+
+  $iterator = Iterator::Flex::Factory->construct( %params );
 
 Construct an iterator object.
 
@@ -187,14 +192,14 @@ The iterator will signal its exhaustion by returning the undefined value.
 
 =cut
 
-sub construct {
+sub construct ( $CLASS, $iattr ) {
 
     _croak( "attributes must be passed as a hashref\n" )
       unless is_hashref( $_[-1] );
 
     my %iattr = (
         class => 'Iterator::Flex::Base',
-        %{ $_[-1] },
+        $iattr->%*,
     );
 
     my $attr;
@@ -310,9 +315,9 @@ sub construct {
     return $class->new_from_attrs( \%attr );
 }
 
-=method construct_from_iterable
+=class_method construct_from_iterable
 
-  $iter = Iterator::Flex::Factory::construct_from_iterable( $iterable, %attributes );
+  $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, %attributes );
 
 Construct an iterator from an iterable thing.  The returned iterator will
 return C<undef> upon exhaustion.
@@ -340,12 +345,11 @@ The coderef must return the next element in the iteration.
 =cut
 
 
-sub construct_from_iterable {
+sub construct_from_iterable ( $CLASS, $obj, %attr ) {
 
-    my ( $obj, %attr ) = @_;
 
     if ( blessed $obj) {
-        return construct_from_object( $obj, %attr );
+        return $CLASS->construct_from_object( $obj, %attr );
     }
 
     elsif ( is_arrayref( $obj ) ) {
@@ -354,17 +358,17 @@ sub construct_from_iterable {
     }
 
     elsif ( is_coderef( $obj ) ) {
-        return construct( %attr, next => $obj );
+        return $CLASS->construct( %attr, next => $obj );
     }
 
     elsif ( is_globref( $obj ) ) {
-        return construct( %attr, next => sub { scalar <$obj> } );
+        return $CLASS->construct( %attr, next => sub { scalar <$obj> } );
     }
 
     _croak sprintf "'%s' object is not iterable", ( ref( $obj ) || 'SCALAR' );
 }
 
-=method construct_from_object
+=class_method construct_from_object
 
   $iter = Iterator::Flex::Factory::construct_from_object( $iterable );
 
@@ -404,9 +408,7 @@ by the constructed iterator:
 =cut
 
 
-sub construct_from_object {
-
-    my $obj = shift;
+sub construct_from_object ( $CLASS, $obj, %attr ) {
 
     return $obj if $obj->isa( 'Iterator::Flex::Base' );
 

@@ -14,7 +14,7 @@ use Ref::Util;
 
 =method attr
 
-  $iterator = Iterator::Flex::Array->attr( $array_ref );
+  $iterator = Iterator::Flex::Array->new( $array_ref );
 
 Wrap an array in an iterator.
 

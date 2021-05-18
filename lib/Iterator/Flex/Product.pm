@@ -74,7 +74,7 @@ sub construct_from_state {
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
         @iterator = map {
-            Iterator::Flex::Factory::to_iterator( $_,
+            Iterator::Flex::Factory->to_iterator( $_,
                 on_exhaustion_return => undef )
         } @$iterators;
     }
@@ -82,7 +82,7 @@ sub construct_from_state {
     else {
         @keys     = List::Util::pairkeys @$iterators;
         @iterator = map {
-            Iterator::Flex::Factory::to_iterator( $_,
+            Iterator::Flex::Factory->to_iterator( $_,
                 on_exhaustion_return => undef )
         } List::Util::pairvalues @$iterators;
     }
