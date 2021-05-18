@@ -19,6 +19,8 @@ use Safe::Isa;
 use Iterator::Flex::Base;
 use Iterator::Flex::Utils qw[
   _can_meth
+  has_output_exhaustion_policy
+  has_native_exhaustion_policy
   :ImportedExhaustionActions
   :ExhaustionActions
 ];
@@ -248,8 +250,7 @@ sub construct ( $CLASS, $iattr ) {
             "specify only one native exhaustion action" );
     }
 
-    my $has_output_exhaustion_policy
-      = grep { exists $iattr{$_} } @ExhaustionActions;
+    my $has_output_exhaustion_policy = has_output_exhaustion_policy( \%iattr );
 
     # default to returning undef on exhaustion
     if ( !defined $native_exhaustion_action ) {
