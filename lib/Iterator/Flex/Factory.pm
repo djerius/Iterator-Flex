@@ -390,8 +390,7 @@ sub construct_from_iterable ( $CLASS, $obj, %attr ) {
     }
 
     elsif ( is_arrayref( $obj ) ) {
-        require Iterator::Flex::Array;
-        return Iterator::Flex::Array->new( $obj, %attr );
+        return $CLASS->construct_from_array( $obj, %attr );
     }
 
     elsif ( is_coderef( $obj ) ) {
@@ -410,31 +409,22 @@ sub construct_from_iterable ( $CLASS, $obj, %attr ) {
 
 =class_method construct_from_object
 
-  $iter = Iterator::Flex::Factory::construct_from_object( $iterable );
+=cut
 
-Construct an iterator from an object.  Normal use is to call L<construct_from_iterable> or
-simply use L<Iterator::Flex/iter>.  The returned iterator will return C<undef> upon exhaustion.
+sub construct_from_array ( $CLASS, $obj, %attr ) {
+    require Iterator::Flex::Array;
+    return Iterator::Flex::Array->new( $obj, %attr );
+}
 
+=class_method construct_from_object
 
-An iterable object has one or more of the following methods
+  $iter = Iterator::Flex::Factory->construct_from_object( $object, %attributes );
 
-=over
+Construct an iterator from an L<Iterator::Flex::Manual::Glossary/iterable object>.
+Normal use is to call L</to_iterator>, L</construct_from_iterable> or
+simply use L<Iterator::Flex/iter>.
 
-=item C<__iter__> or C<iter>
-
-=item C<__next__> or C<next>
-
-=item an overloaded C<< <> >> operator
-
-This should return the next item.
-
-=item an overloaded C<< &{} >> operator
-
-This should return a subroutine which returns the next item.
-
-=back
-
-Additionally, if the object has the following methods, they are used
+If the object has the following methods, they are used
 by the constructed iterator:
 
 =over
@@ -472,8 +462,7 @@ sub construct_from_object ( $CLASS, $obj, %attr ) {
     }
 
     elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-        require Iterator::Flex::Array;
-        return Iterator::Flex::Array->new( $code->( $obj ) );
+        return $CLASS->construct_from_array( $code->( $obj ) );
     }
 
     for my $method ( 'prev', 'current' ) {
