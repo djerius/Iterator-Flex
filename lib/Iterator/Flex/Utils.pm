@@ -53,6 +53,8 @@ our @EXPORT = @{ $EXPORT_TAGS{default} };
 our @EXPORT_OK = ( qw(
       create_class_with_roles
       _can_meth
+      has_native_exhaustion_policy
+      has_output_exhaustion_policy
       ),
     map { @{$_} } values %EXPORT_TAGS,
 );
@@ -75,7 +77,12 @@ sub create_class_with_roles ( $base, @roles ) {
     return $class;
 }
 
+sub has_native_exhaustion_policy ( $attr ) {
+    return !! grep { exists $attr->{$_} } @ImportedExhaustionActions;
+}
 
+sub has_output_exhaustion_policy ( $attr ) {
+    return !! grep { exists $attr->{$_} } @ExhaustionActions;
 }
 
 1;
