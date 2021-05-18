@@ -25,7 +25,8 @@ sub _load_module {
         return $module if eval { Module::Runtime::require_module( $module ) };
     }
 
-    $class->_croak(
+    require Iterator::Flex::Failure;
+    Iterator::Flex::Failure::parameter->throw(
         "unable to find a module for ",
         join( "::", @hierarchy, $module ),
         " in @{[ join( ', ', $class->_namespaces ) ]}"
@@ -40,7 +41,8 @@ sub _load_role {
         return $module if eval { Module::Runtime::require_module( $module ) };
     }
 
-    $class->_croak(
+    require Iterator::Flex::Failure;
+    Iterator::Flex::Failure::parameter->throw(
         "unable to find a module for role '$role' in @{[ join( ',', $class->_namespaces ) ]}"
     );
 }

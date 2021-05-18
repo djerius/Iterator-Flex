@@ -18,8 +18,8 @@ use Module::Runtime;
 use Safe::Isa;
 
 use Iterator::Flex::Base;
-use Iterator::Flex::Failure;
-use Iterator::Flex::Utils qw[ _croak _can_meth
+use Iterator::Flex::Utils qw[
+  _can_meth
   :ImportedExhaustionActions
   :ExhaustionActions
 ];
@@ -194,8 +194,11 @@ The iterator will signal its exhaustion by returning the undefined value.
 
 sub construct ( $CLASS, $iattr ) {
 
-    _croak( "attributes must be passed as a hashref\n" )
-      unless is_hashref( $_[-1] );
+    unless ( Ref::Util::is_hashref( $iattr ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "attribute parameter must be a hashref" );
+    }
 
     my %iattr = (
         class => 'Iterator::Flex::Base',
@@ -206,27 +209,45 @@ sub construct ( $CLASS, $iattr ) {
     my %attr;
     my @roles;
 
-    defined( my $class = delete $iattr{class} )
-      or _croak( "missing or undefined 'class' attribute" );
+    my $class;
 
-    !is_ref( $class )
-      or _croak( "'class' attribute must be a string" );
+    unless ( defined( $class = delete $iattr{class} ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "missing or undefined 'class' attribute" );
+    }
 
-    Module::Runtime::require_module( $class )
-      or _croak( "can't load class $class" );
+    if ( Ref::Util::is_ref( $class ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "'class' attribute must be a string" );
+    }
+
+    if ( !Module::Runtime::require_module( $class ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "can't load class $class" );
+    }
 
     if ( defined( $attr = delete $iattr{name} ) ) {
-        !is_ref( $attr )
-          or _croak( "'name' attribute value must be a string\n" );
+        if ( Ref::Util::is_ref( $attr ) ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "'name' attribute value must be a string\n" );
+        }
         $attr{name} = $attr;
     }
 
     # close over self
     push @roles, [ Next => 'NoSelf' ];
 
-    _croak( "specify only one native exhaustion action" )
-      if 1 < ( my ( $exhaustion_action )
-          = grep { exists $iattr{$_} } @ImportedExhaustionActions );
+    my ( $exhaustion_action, @rest )
+      = grep { exists $iattr{$_} } @ImportedExhaustionActions;
+
+    if ( @rest ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "specify only one native exhaustion action" );
+    }
 
     my $has_output_exhaustion_policy
       = grep { exists $iattr{$_} } @ExhaustionActions;
@@ -261,8 +282,11 @@ sub construct ( $CLASS, $iattr ) {
 
         next unless defined( my $code = delete $iattr{$method} );
 
-        is_coderef $code
-          or _croak( "'$method' attribute value must be a code reference\n" );
+        unless ( Ref::Util::is_coderef $code ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "'$method' attribute value must be a code reference\n" );
+        }
 
         # if $class can't perform the required method, add a role
         # which can
@@ -271,23 +295,32 @@ sub construct ( $CLASS, $iattr ) {
 
         $attr{$method} = $code;
     }
-    defined( $attr{next} )
-      or _croak( "missing or undefined 'next' attribute" );
+
+    if ( !defined( $attr{next} ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "missing or undefined 'next' attribute" );
+    }
 
     if ( defined( $attr = delete $iattr{methods} ) ) {
 
-        is_hashref( $attr )
-          or _croak( "value for methods attribute must be a hash reference\n" );
+        unless ( Ref::Util::is_hashref( $attr ) ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "value for methods attribute must be a hash reference\n" );
+        }
 
         $attr{methods} = {};
         for my $name ( keys %{$attr} ) {
 
             my $code = $attr->{$name};
 
-            !is_coderef( $code )
-              and _croak(
-                "value for 'methods' attribute key '$name' must be a code reference"
-              );
+            unless ( Ref::Util::is_coderef( $code ) ) {
+                require Iterator::Flex::Failure;
+                Iterator::Flex::Failure::parameter->throw(
+                    "value for 'methods' attribute key '$name' must be a code reference"
+                );
+            }
 
             my $cap_name = ucfirst( $name );
 
@@ -307,8 +340,11 @@ sub construct ( $CLASS, $iattr ) {
         }
     }
 
-    keys %iattr
-      and _croak( "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" );
+    if ( keys %iattr ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" );
+    }
 
     $attr{_roles} = \@roles;
 
@@ -365,7 +401,10 @@ sub construct_from_iterable ( $CLASS, $obj, %attr ) {
         return $CLASS->construct( %attr, next => sub { scalar <$obj> } );
     }
 
-    _croak sprintf "'%s' object is not iterable", ( ref( $obj ) || 'SCALAR' );
+    require Iterator::Flex::Failure;
+    Iterator::Flex::Failure::parameter->throw(
+        sprintf "'%s' object is not iterable",
+        ( ref( $obj ) || 'SCALAR' ) );
 }
 
 =class_method construct_from_object

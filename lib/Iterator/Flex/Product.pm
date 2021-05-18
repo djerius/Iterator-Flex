@@ -60,8 +60,10 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
-    $class->_croak( "state must be a HASH reference" )
-      unless Ref::Util::is_hashref( $state );
+    unless ( Ref::Util::is_hashref( $state ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "state must be a HASH reference" );
+}
 
     my ( $iterators, $value ) = @{$state}{qw[ iterators value ]};
 
@@ -88,9 +90,11 @@ sub construct_from_state {
     }
 
     # can only work if the iterators support a rwind method
-    $class->_croak( "all iteratables must provide a rewind method\n" )
-      unless @iterator == grep { defined }
-      map { $class->_can_meth( $_, 'rewind' ) } @iterator;
+    unless ( @iterator == grep { defined }
+             map { $class->_can_meth( $_, 'rewind' ) } @iterator ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "all iteratables must provide a rewind method\n" );
+}
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
@@ -196,9 +200,11 @@ sub new_from_state {
 
     if ( @$keys ) {
 
-        @$keys == @$iterators
-          or
-          $class->_croak( "number of keys not equal to number of iterators\n" );
+        unless ( @$keys == @$iterators ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "number of keys not equal to number of iterators\n" );
+        }
 
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }

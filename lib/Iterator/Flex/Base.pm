@@ -24,13 +24,6 @@ use namespace::clean;
 
 use overload ( '<>' => 'next', fallback => 1 );
 
-sub _croak {
-    my $class = ref $_[0] || $_[0];
-    shift;
-    require Carp;
-    Carp::croak( "$class: ", @_ );
-}
-
 sub new {
     my $class = shift;
     return $class->new_from_attrs( $class->construct( @_ ) );
@@ -51,12 +44,20 @@ sub new_from_attrs {
     $class->_validate_attrs( \%attr );
 
     my $roles = delete( $attr{_roles} ) // [];
-    $class->_croak( "_roles must be an arrayref" )
-      unless Ref::Util::is_arrayref( $roles );
+    unless ( Ref::Util::is_arrayref( $roles ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "_roles must be an arrayref" );
+    }
 
-    $class->_croak( "specify only one output exhaustion action" )
-      if 1 < ( my ( $exhaustion_action )
-          = grep { exists $attr{$_} } @ExhaustionActions );
+    my ( $exhaustion_action, @rest )
+              = grep { exists $attr{$_} } @ExhaustionActions;
+
+    if ( @rest ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "specify only one output exhaustion action" );
+    }
 
     # default to returning undef on exhaustion
     if ( !defined $exhaustion_action ) {
@@ -89,10 +90,12 @@ sub new_from_attrs {
     my $self = bless $class->_construct_next( \%attr ), $class;
 
 
-    $self->_croak(
-        "attempt to register an iterator subroutine which has already been registered."
-    ) if exists $REGISTRY{ refaddr $self };
-
+    if ( exists $REGISTRY{ refaddr $self } ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "attempt to register an iterator subroutine which has already been registered."
+        );
+    }
     $REGISTRY{ refaddr $self } = \%attr;
 
     $self->_reset_exhausted if $self->can( '_reset_exhausted' );
@@ -115,11 +118,16 @@ sub _validate_attrs {
         $attrs->{depends} = $attr;
 
 # FIXME: this is too restrictive. It should allow simple coderefs, or things with a next or __next__ .
-        $class->_croak( "dependency #$_ is not an iterator object\n" )
-          for grep {
-            !( Scalar::Util::blessed( $attr->[$_] )
-                && $attr->[$_]->isa( __PACKAGE__ ) )
-          } 0 .. $#{$attr};
+        if (
+            grep {
+                !( Scalar::Util::blessed( $attr->[$_] )
+                    && $attr->[$_]->isa( __PACKAGE__ ) )
+            } 0 .. $#{$attr} )
+        {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "dependency #$_ is not an iterator object\n" );
+        }
     }
 
     return;

@@ -35,11 +35,13 @@ sub reset {
     if ( defined $attributes->{depends} ) {
 
         # first check if dependencies can reset.
-        my $cant = List::Util::first { !$_->can( 'reset' ) }
-        @{ $attributes->{depends} };
-        $obj->_croak(
-            "dependency: @{[ $cant->{name} ]} does not have a 'reset' method\n"
-        ) if $cant;
+        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $attributes->{depends} };
+        if ( $cant ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "dependency: @{[ $cant->{name} ]} does not have a 'reset' method\n"
+            );
+        }
 
         # now reset them
         $_->reset foreach @{ $attributes->{depends} };

@@ -46,8 +46,10 @@ sub construct {
 
     my $class = shift;
 
-    $class->_croak( "incorrect number of arguments for sequence" )
-      if @_ < 1 || @_ > 3;
+    if ( @_ < 1 || @_ > 3 ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "incorrect number of arguments for sequence" );
+    }
 
     my %state;
     $state{step}  = pop if @_ == 3;
@@ -64,9 +66,11 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
-    $class->_croak( "$class: arguments must be numbers\n" )
-      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) }
-    values %$state;
+    if ( List::Util::first { !Scalar::Util::looks_like_number( $_ ) } ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "$class: arguments must be numbers\n" );
+    }
 
     my ( $begin, $end, $step, $iter, $next, $current, $prev )
       = @{$state}{qw[ begin end step iter next current prev ]};
@@ -110,11 +114,14 @@ sub construct_from_state {
 
     else {
 
-        $class->_croak(
-            "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
-          )
-          if ( $begin < $end && $step <= 0 )
-          || ( $begin > $end && $step >= 0 );
+        if (   ( $begin < $end && $step <= 0 )
+            || ( $begin > $end && $step >= 0 ) )
+        {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "sequence will be inifinite as \$step is zero or has the incorrect sign\n"
+            );
+        }
 
         $next = $begin unless defined $next;
         $iter = 0      unless defined $iter;

@@ -30,8 +30,11 @@ sub rewind {
 
     if ( defined $attributes->{depends} ) {
 
-        $obj->_croak( "a dependency is not rewindable\n" )
-          unless $obj->_may_meth( 'rewind', $attributes );
+        if ( ! $obj->_may_meth( 'rewind', $attributes ) ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "a dependency is not rewindable\n" );
+        }
 
         # now rewind them
         $_->rewind foreach @{ $attributes->{depends} };

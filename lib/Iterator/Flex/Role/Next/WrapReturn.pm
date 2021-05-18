@@ -22,8 +22,10 @@ around _construct_next => sub {
     # this will be weakened latter.
     my $wsub;
 
-    Iterator::Flex::Utils::_croak( "internal error: no sentinel " )
-      unless exists $attr->{ +RETURNS_ON_EXHAUSTION };
+    if ( ! exists $attr->{ +RETURNS_ON_EXHAUSTION } ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "internal error: no sentinel " );
+  }
 
     my $sentinel = $attr->{ +RETURNS_ON_EXHAUSTION };
 

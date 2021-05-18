@@ -26,8 +26,10 @@ sub _construct_next {
     my $class      = shift;
     my $attributes = shift;
 
-    my $sub = $attributes->{next}
-      // $class->_croak( "Missing 'next' attribute" );
+    my $sub = $attributes->{next} // do {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "Missing 'next' attribute" );
+    };
 
     Scalar::Util::weaken $attributes->{next};
 
@@ -37,7 +39,9 @@ sub _construct_next {
         Scalar::Util::weaken $$ref;
     }
     else {
-        $class->_croak( "Missing ability to set self" );
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "Missing ability to set self" );
     }
 
     return $sub;

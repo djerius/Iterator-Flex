@@ -17,11 +17,6 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 use Ref::Util qw[ is_arrayref is_hashref is_ref ];
 use Module::Runtime qw[ require_module ];
 
-sub _croak {
-    require Carp;
-    Carp::croak( @_ );
-}
-
 =sub iterator
 
   $iter = iterator { CODE } ?%params;
@@ -379,8 +374,10 @@ sub thaw {
 
     my $step = shift;
 
-    _croak( "thaw: too many args\n" )
-      if @_;
+    if ( @_ ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "thaw: too many args\n" );
+    }
 
     my @steps = @$step;
 
@@ -392,14 +389,21 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
-    _croak(
-        "state argument for $package constructor must be a HASH or ARRAY reference "
-    ) unless is_hashref( $state ) || is_arrayref( $state );
+    unless ( is_hashref( $state ) || is_arrayref( $state ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "state argument for $package constructor must be a HASH or ARRAY reference "
+        );
+    }
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
-      or _croak(
-        "unable to thaw: $package doesn't provide 'new_from_state' method\n" );
+      or do {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "unable to thaw: $package doesn't provide 'new_from_state' method\n"
+        );
+      };
 
     if ( @depends ) {
 

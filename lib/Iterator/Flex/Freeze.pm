@@ -47,19 +47,28 @@ sub construct {
 
     my ( $class, $serialize, $src ) = ( shift, shift, shift );
 
-    $class->_croak( "'serialize' must be a CODE reference" )
-      unless Ref::Util::is_coderef( $serialize );
+    if ( ! Ref::Util::is_coderef( $serialize ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "'serialize' must be a CODE reference" );
+    }
 
     $src = Iterator::Flex::Factory->to_iterator( $src,
         on_exhaustion_return => undef );
 
-    $class->_croak( "'src' iterator must provide a freeze method" )
-      unless $class->_can_meth( $src, 'freeze' );
+    unless ( $class->_can_meth( $src, 'freeze' ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "'src' iterator must provide a freeze method" );
+    }
 
-    $class->_croak(
-        "'src' iterator must provide set_exhausted/is_exhausted methods" )
-      unless $class->_can_meth( $src, 'set_exhausted' )
-      && $class->_can_meth( $src, 'is_exhausted' );
+    unless ( $class->_can_meth( $src, 'set_exhausted' )
+        && $class->_can_meth( $src, 'is_exhausted' ) )
+    {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "'src' iterator must provide set_exhausted/is_exhausted methods" );
+    }
 
     my $self;
     my %params = (

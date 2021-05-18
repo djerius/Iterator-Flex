@@ -20,8 +20,10 @@ around _construct_next => sub {
     my $attr = $_[-1];
     my $next = $orig->( @_ );
 
-    Iterator::Flex::Utils::_croak( "internal error: no exception comparison" )
-      unless exists $attr->{ +THROWS_ON_EXHAUSTION };
+    if ( ! exists $attr->{ +THROWS_ON_EXHAUSTION } ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw( "internal error: no exception comparison" );
+  }
 
     my $exception = $attr->{ +THROWS_ON_EXHAUSTION };
 

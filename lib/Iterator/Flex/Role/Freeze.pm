@@ -36,9 +36,11 @@ sub freeze {
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
         @{ $attributes->{depends} };
-        $obj->_croak(
-            "dependency: @{[ $cant->{name} ]} is not serializeable\n" )
-          if $cant;
+        if ( $cant ) {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "dependency: @{[ $cant->{name} ]} is not serializeable\n" );
+        }
 
         # now freeze them
         @freeze = map $_->freeze, @{ $attributes->{depends} };
