@@ -7,15 +7,16 @@ our $VERSION = '0.12';
 
 use Iterator::Flex::Utils;
 use Package::Variant importing => qw[ Role::Tiny ];
-use Iterator::Flex::Failure 'RoleExists';
 
 sub make_variant_package_name {
     my ( $class, $package ) = @_;
 
     $package = "Iterator::Flex::Role::Method::$package";
 
-    Iterator::Flex::Failure::RoleExists->throw( { payload => $package } )
-      if Role::Tiny->is_role( $package );
+    if ( Role::Tiny->is_role( $package ) ) {
+        use Iterator::Flex::Failure;
+        Iterator::Flex::Failure::RoleExists->throw( { payload => $package } );
+    }
 
     return $package;
 }
