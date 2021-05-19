@@ -186,7 +186,7 @@ sub construct_from_state {
 
     return {
         %params,
-        name      => 'iproduct'
+        _name      => 'iproduct'
     };
 }
 

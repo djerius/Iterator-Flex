@@ -85,7 +85,7 @@ sub new_from_attrs {
     $class
       = Iterator::Flex::Utils::create_class_with_roles( $class, @{$roles} );
 
-    $attr{name} = delete $attr{name} // $class;
+    $attr{_name} = delete $attr{_name} // $class;
 
     my $self = bless $class->_construct_next( \%attr ), $class;
 

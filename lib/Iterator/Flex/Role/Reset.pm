@@ -39,7 +39,7 @@ sub reset {
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
-                "dependency: @{[ $cant->{name} ]} does not have a 'reset' method\n"
+                "dependency: @{[ $cant->{_name} ]} does not have a 'reset' method\n"
             );
         }
 
@@ -48,7 +48,7 @@ sub reset {
     }
 
     $attributes->{reset}->( $obj );
-    $attributes->{is_exhausted} = 0;
+    $attributes->{_is_exhausted} = 0;
 
     return;
 }

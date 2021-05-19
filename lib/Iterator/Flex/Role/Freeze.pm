@@ -39,14 +39,14 @@ sub freeze {
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
-                "dependency: @{[ $cant->{name} ]} is not serializeable\n" );
+                "dependency: @{[ $cant->{_name} ]} is not serializeable\n" );
         }
 
         # now freeze them
         @freeze = map $_->freeze, @{ $attributes->{_depends} };
     }
 
-    push @freeze, $attributes->{freeze}->( $obj ), $attributes->{is_exhausted};
+    push @freeze, $attributes->{freeze}->( $obj ), $attributes->{_is_exhausted};
 
     return \@freeze;
 }

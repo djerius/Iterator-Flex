@@ -72,7 +72,7 @@ sub construct {
 
     my $self;
     my %params = (
-        name => 'freeze',
+        _name => 'freeze',
 
         _self => \$self,
 

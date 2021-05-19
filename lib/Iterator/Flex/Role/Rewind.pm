@@ -41,7 +41,7 @@ sub rewind {
     }
 
     $attributes->{rewind}->( $obj );
-    $attributes->{is_exhausted} = 0;
+    $attributes->{_is_exhausted} = 0;
 
     return;
 }

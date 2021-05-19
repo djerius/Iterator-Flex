@@ -46,7 +46,7 @@ sub construct {
     my $self;
 
     return {
-        name => 'imap',
+        _name => 'imap',
 
         _self => \$self,
 

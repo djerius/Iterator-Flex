@@ -22,12 +22,12 @@ Set the iterator's state to exhausted
 
 sub set_exhausted {
     my $attributes = $REGISTRY{ refaddr $_[0] };
-    $attributes->{is_exhausted} = 1;
+    $attributes->{_is_exhausted} = 1;
 }
 
 sub _reset_exhausted {
     my $attributes = $REGISTRY{ refaddr $_[0] };
-    $attributes->{is_exhausted} = 0;
+    $attributes->{_is_exhausted} = 0;
 }
 
 
@@ -50,7 +50,7 @@ will switch the iterator state to I<exhausted>.
 
 sub is_exhausted {
     my $attributes = $REGISTRY{ refaddr $_[0] };
-    !!$attributes->{is_exhausted};
+    !!$attributes->{_is_exhausted};
 }
 
 

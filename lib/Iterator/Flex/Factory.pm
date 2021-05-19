@@ -210,13 +210,13 @@ sub construct ( $CLASS, $iattr ) {
         Iterator::Flex::Failure::parameter->throw( "can't load class $class" );
     }
 
-    if ( defined( $attr = delete $iattr{name} ) ) {
+    if ( defined( $attr = delete $iattr{_name} ) ) {
         if ( Ref::Util::is_ref( $attr ) ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
-                "'name' attribute value must be a string\n" );
+                "'_name' attribute value must be a string\n" );
         }
-        $attr{name} = $attr;
+        $attr{_name} = $attr;
     }
 
     # don't close over self
