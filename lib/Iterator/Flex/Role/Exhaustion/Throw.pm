@@ -10,7 +10,6 @@ our $VERSION = '0.12';
 use Role::Tiny;
 use Iterator::Flex::Utils qw( :default ON_EXHAUSTION_THROW );
 use Ref::Util qw( is_coderef );
-use Iterator::Flex::Failure;
 
 use namespace::clean;
 
@@ -32,6 +31,7 @@ sub signal_exhaustion {
 
     $exception->() if is_coderef( $exception );
 
+    require Iterator::Flex::Failure;
     Iterator::Flex::Failure::Exhausted->throw;
 }
 
