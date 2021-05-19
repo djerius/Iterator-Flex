@@ -33,8 +33,8 @@ sub _construct_next {
 
     Scalar::Util::weaken $attributes->{next};
 
-    if ( exists $attributes->{self} ) {
-        my $ref = $attributes->{self};
+    if ( exists $attributes->{_self} ) {
+        my $ref = $attributes->{_self};
         $$ref = $sub;
         Scalar::Util::weaken $$ref;
     }

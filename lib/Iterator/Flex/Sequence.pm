@@ -187,7 +187,7 @@ sub construct_from_state {
             $iter = 0;
         },
 
-        self => \$self,
+        _self => \$self,
     };
 
 }

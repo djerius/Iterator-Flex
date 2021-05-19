@@ -8,7 +8,6 @@ use warnings;
 our $VERSION = '0.12';
 
 use Role::Tiny;
-use Iterator::Flex::Failure;
 
 use namespace::clean;
 
@@ -29,6 +28,7 @@ sub signal_exhaustion {
     $self->set_exhausted;
 
     die( @_ ) if @_;
+    require Iterator::Flex::Failure;
     Iterator::Flex::Failure::Exhausted->throw;
 }
 

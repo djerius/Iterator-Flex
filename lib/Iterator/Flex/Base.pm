@@ -112,10 +112,10 @@ sub _validate_attrs {
     my %iattr = %$attrs;
     my $attr;
 
-    if ( defined( $attr = delete $iattr{depends} ) ) {
+    if ( defined( $attr = delete $iattr{_depends} ) ) {
 
         $attr = [$attr] unless Ref::Util::is_arrayref( $attr );
-        $attrs->{depends} = $attr;
+        $attrs->{_depends} = $attr;
 
 # FIXME: this is too restrictive. It should allow simple coderefs, or things with a next or __next__ .
         if (
@@ -181,8 +181,8 @@ sub _may_meth {
     my $pred = "_may_$meth";
 
     $attributes->{$pred} //=
-      defined $attributes->{depends}
-      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{depends} }
+      defined $attributes->{_depends}
+      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{_depends} }
       : 1;
 
     return $attributes->{$pred};

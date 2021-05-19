@@ -28,7 +28,7 @@ sub rewind {
     my $obj        = $_[0];
     my $attributes = $REGISTRY{ refaddr $obj };
 
-    if ( defined $attributes->{depends} ) {
+    if ( defined $attributes->{_depends} ) {
 
         if ( ! $obj->_may_meth( 'rewind', $attributes ) ) {
             require Iterator::Flex::Failure;
@@ -37,7 +37,7 @@ sub rewind {
         }
 
         # now rewind them
-        $_->rewind foreach @{ $attributes->{depends} };
+        $_->rewind foreach @{ $attributes->{_depends} };
     }
 
     $attributes->{rewind}->( $obj );

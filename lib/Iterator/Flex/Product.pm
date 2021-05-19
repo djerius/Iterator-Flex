@@ -102,7 +102,7 @@ sub construct_from_state {
     my $self;
     my %params = (
 
-        self => \$self,
+        _self => \$self,
 
         next => sub {
             return undef if $self->is_exhausted;
@@ -168,7 +168,7 @@ sub construct_from_state {
         },
         reset  => sub { @value = () },
         rewind => sub { @value = () },
-        depends => \@iterator,
+        _depends => \@iterator,
     );
 
     # can only freeze if the iterators support a prev method

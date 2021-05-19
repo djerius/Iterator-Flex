@@ -66,7 +66,7 @@ sub construct_from_state {
 
     return {
 
-        self => \$self,
+        _self => \$self,
 
         reset => sub {
             $prev = $current = undef;
@@ -101,7 +101,7 @@ sub construct_from_state {
             return [ $class, { prev => $prev, current => $current } ];
         },
 
-        depends => $src,
+        _depends => $src,
 
         exhausted => 'predicate',
     };

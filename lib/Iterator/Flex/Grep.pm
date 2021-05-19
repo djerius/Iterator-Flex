@@ -48,7 +48,7 @@ sub construct {
     return {
         name => 'igrep',
 
-        self => \$self,
+        _self => \$self,
 
         next => sub {
 
@@ -61,7 +61,7 @@ sub construct {
             return $self->signal_exhaustion;
         },
         reset   => sub { },
-        depends => $src,
+        _depends => $src,
     };
 }
 

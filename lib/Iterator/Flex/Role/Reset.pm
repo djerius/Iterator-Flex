@@ -32,10 +32,10 @@ sub reset {
 
     my $attributes = $REGISTRY{ refaddr $obj };
 
-    if ( defined $attributes->{depends} ) {
+    if ( defined $attributes->{_depends} ) {
 
         # first check if dependencies can reset.
-        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $attributes->{depends} };
+        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $attributes->{_depends} };
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
@@ -44,7 +44,7 @@ sub reset {
         }
 
         # now reset them
-        $_->reset foreach @{ $attributes->{depends} };
+        $_->reset foreach @{ $attributes->{_depends} };
     }
 
     $attributes->{reset}->( $obj );

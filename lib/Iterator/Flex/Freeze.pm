@@ -74,9 +74,9 @@ sub construct {
     my %params = (
         name => 'freeze',
 
-        self => \$self,
+        _self => \$self,
 
-        depends => $src,
+        _depends => $src,
         next    => sub {
             my $value = $src->();
             local $_ = $src->freeze;

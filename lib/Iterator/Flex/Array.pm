@@ -94,7 +94,7 @@ sub construct_from_state {
 
     return {
 
-        self => \$self,
+        _self => \$self,
 
         reset => sub {
             $prev = $current = undef;

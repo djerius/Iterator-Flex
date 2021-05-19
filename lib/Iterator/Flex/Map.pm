@@ -48,7 +48,7 @@ sub construct {
     return {
         name => 'imap',
 
-        self => \$self,
+        _self => \$self,
 
         next => sub {
             my $value = $src->();
@@ -59,7 +59,7 @@ sub construct {
             return $code->();
         },
         reset     => sub { },
-        depends   => $src,
+        _depends   => $src,
         exhausted => 'predicate',
     };
 }

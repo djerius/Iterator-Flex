@@ -31,11 +31,11 @@ sub freeze {
 
     my @freeze;
 
-    if ( defined $attributes->{depends} ) {
+    if ( defined $attributes->{_depends} ) {
 
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
-        @{ $attributes->{depends} };
+        @{ $attributes->{_depends} };
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
@@ -43,7 +43,7 @@ sub freeze {
         }
 
         # now freeze them
-        @freeze = map $_->freeze, @{ $attributes->{depends} };
+        @freeze = map $_->freeze, @{ $attributes->{_depends} };
     }
 
     push @freeze, $attributes->{freeze}->( $obj ), $attributes->{is_exhausted};
