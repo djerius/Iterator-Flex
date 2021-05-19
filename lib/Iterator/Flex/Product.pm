@@ -186,7 +186,6 @@ sub construct_from_state {
 
     return {
         %params,
-        exhausted => 'predicate',
         name      => 'iproduct'
     };
 }

@@ -60,7 +60,6 @@ sub construct {
         },
         reset     => sub { },
         _depends   => $src,
-        exhausted => 'predicate',
     };
 }
 

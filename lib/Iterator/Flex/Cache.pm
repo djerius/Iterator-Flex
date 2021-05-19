@@ -102,8 +102,6 @@ sub construct_from_state {
         },
 
         _depends => $src,
-
-        exhausted => 'predicate',
     };
 }
 
