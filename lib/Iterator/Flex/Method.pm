@@ -7,6 +7,7 @@ our $VERSION = '0.12';
 
 use Iterator::Flex::Utils;
 use Package::Variant importing => qw[ Role::Tiny ];
+use Module::Runtime;
 
 sub make_variant_package_name {
     my ( $class, $package ) = @_;
@@ -18,6 +19,7 @@ sub make_variant_package_name {
         Iterator::Flex::Failure::RoleExists->throw( { payload => $package } );
     }
 
+    $INC{Module::Runtime::module_notional_filename( $package )} = undef;
     return $package;
 }
 

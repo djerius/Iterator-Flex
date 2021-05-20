@@ -101,13 +101,13 @@ sub construct_from_state {
             "state 'object' argument must be a blessed reference" );
     }
 
-    $length //= _can_meth( $obj, 'length' ) // _can_meth( $obj, 'len' ) // do {
+    $length //= $class->_can_meth( $obj, 'length', 'len' ) // do {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
             "no 'length' method defined or discovered" );
     };
 
-    $at //= _can_meth( $obj, 'at' ) // _can_meth( $obj, 'getitem' ) // do {
+    $at //= $class->_can_meth( $obj, 'at', 'getitem' ) // do {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
             "no 'at' method defined or discovered" );
@@ -177,7 +177,7 @@ sub construct_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
-      Next::ClosedSelf
+      ::Next::ClosedSelf
       Next
       Rewind
       Reset

@@ -144,7 +144,7 @@ sub construct_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
-      Next::ClosedSelf
+      ::Next::ClosedSelf
       Next
       Rewind
       Reset

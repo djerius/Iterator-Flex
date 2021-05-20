@@ -71,7 +71,7 @@ sub create_class_with_roles ( $base, @roles ) {
         map { $base->_load_module( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
 
     Iterator::Flex::Failure::class->throw(
-            "class '$class' does not provide the required _construct_next method\n" )
+            "Constructed class '$class' does not provide the required _construct_next method\n" )
         unless  $class->can( '_construct_next' );
 
     return $class;
