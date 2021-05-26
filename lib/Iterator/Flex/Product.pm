@@ -105,7 +105,7 @@ sub construct_from_state {
         _self => \$self,
 
         next => sub {
-            return undef if $self->is_exhausted;
+            return $self->signal_exhaustion if $self->is_exhausted;
 
             # first time through
             if ( !@value ) {
@@ -156,7 +156,8 @@ sub construct_from_state {
         },
 
         current => sub {
-            return undef if !@value || $self->is_exhausted;
+            return undef if !@value;
+            return $self->signal_exhaustion if $self->is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
