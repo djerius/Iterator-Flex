@@ -11,6 +11,7 @@ our $VERSION = '0.12';
 
 use Scalar::Util;
 use Ref::Util;
+use List::Util;
 use Role::Tiny       ();
 use Role::Tiny::With ();
 use Module::Runtime  ();
@@ -108,22 +109,11 @@ sub _validate_attrs {
     my $class = shift;
     my $attrs = shift;
 
-    # FIXME - don't copy until it's actually needed.
-    my %iattr = %$attrs;
-    my $attr;
+    if ( defined( my $attr = $attrs->{_depends} ) ) {
 
-    if ( defined( $attr = delete $iattr{_depends} ) ) {
+        $attrs->{_depends} = $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
 
-        $attr = [$attr] unless Ref::Util::is_arrayref( $attr );
-        $attrs->{_depends} = $attr;
-
-# FIXME: this is too restrictive. It should allow simple coderefs, or things with a next or __next__ .
-        if (
-            grep {
-                !( Scalar::Util::blessed( $attr->[$_] )
-                    && $attr->[$_]->isa( __PACKAGE__ ) )
-            } 0 .. $#{$attr} )
-        {
+        unless ( List::Util::all { $class->_is_iterator( $_ ) } $attr->@* ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "dependency #$_ is not an iterator object\n" );
@@ -141,6 +131,29 @@ sub DESTROY {
 }
 
 
+=method _is_iterator
+
+  $class->_is_iterator( $obj  );
+
+Returns true if an object is an iterator, where iterator is defined as
+
+=over
+
+=item *
+
+An object which inherits from L<Iterator::Flex::Base>.
+
+=back
+
+=cut
+
+# TODO: this is too restrictive. It should allow simple coderefs, or
+# things with a next or __next__.
+
+sub _is_iterator {
+    my ( $class, $obj ) = @_;
+    return Ref::Util::is_blessed_ref( $obj ) && $obj->isa( __PACKAGE__ );
+}
 
 =method __iter__
 
