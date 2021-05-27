@@ -447,11 +447,18 @@ returns the new value.
 
 =item *
 
-Iterators provide an C<is_exhausted> method.
+The C<next> method indicates exhaustion either by C<next> returning a
+sentinel (e.g. C<undef>) or by throwing an exception.
 
 =item *
 
-The C<next> method indicates exhaustion either by C<next> returning a sentinel (e.g. C<undef>) or by throwing an exception.
+The C<is_exhausted> method returns true if the iterator is exhausted.
+In general, an iterator cannot know if it is exhausted until after a
+call to L</next> has signalled exhaustion.
+
+For example, if an iterator is reading lines from a stream, it cannot
+know that it is at the last line.  It must attempt to read a line,
+then fail, before it knows it is exhausted.
 
 =item I<reset>
 
