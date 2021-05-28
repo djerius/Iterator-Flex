@@ -8,6 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use parent 'Iterator::Flex::Base';
+use Iterator::Flex::Utils qw( IS_EXHAUSTED );
 use Iterator::Flex::Factory;
 use Scalar::Util;
 
@@ -63,10 +64,13 @@ sub construct_from_state {
     $src = Iterator::Flex::Factory->to_iterator( $src );
 
     my $self;
+    my $is_exhausted;
 
     return {
 
         _self => \$self,
+
+        IS_EXHAUSTED, => \$is_exhausted,
 
         reset => sub {
             $prev = $current = undef;
@@ -85,8 +89,8 @@ sub construct_from_state {
 
         next => sub {
 
-            return undef
-              if $self->is_exhausted;
+            return $current
+              if $is_exhausted;
 
             $prev    = $current;
             $current = $src->();
@@ -117,6 +121,7 @@ sub new_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Closure
       ::Next::ClosedSelf
       Next
       Rewind

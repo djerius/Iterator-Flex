@@ -8,6 +8,8 @@ use warnings;
 our $VERSION = '0.12';
 
 use Iterator::Flex::Factory;
+use Iterator::Flex::Utils qw[ THROW IS_EXHAUSTED EXHAUSTION ];
+use Ref::Util;
 use parent 'Iterator::Flex::Base';
 
 =method new
@@ -39,33 +41,53 @@ sub construct {
     # my $class =
     shift;
 
-    my ( $code, $src ) = @_;
+    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "incorrect type or number of arguments" );
+    }
+
+    my ( $code, $src ) = @{ $_[0] };
+
     $src = Iterator::Flex::Factory->to_iterator( $src,
-        on_exhaustion_return => undef );
+        { EXHAUSTION, => THROW } );
 
     my $self;
+    my $is_exhausted;
 
     return {
         _name => 'igrep',
 
         _self => \$self,
 
-        next => sub {
+        IS_EXHAUSTED, => \$is_exhausted,
 
-            foreach ( ; ; ) {
-                my $rv = $src->();
-                last if $src->is_exhausted;
-                local $_ = $rv;
-                return $rv if $code->();
+        next => sub {
+            return $self->signal_exhaustion
+              if $is_exhausted;
+
+            my $ret = eval {
+                foreach ( ; ; ) {
+                    my $rv = $src->();
+                    local $_ = $rv;
+                    return $rv if $code->();
+                }
+            };
+            if ( $@ ne '' ) {
+                die $@
+                  unless Ref::Util::is_blessed_ref( $@ )
+                  && $@->isa( 'Iterator::Flex::Failure::Exhausted' );
+                return $self->signal_exhaustion;
             }
-            return $self->signal_exhaustion;
+            return $ret;
         },
-        reset   => sub { },
+        reset    => sub { },
         _depends => $src,
     };
 }
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Closure
       ::Next::ClosedSelf
       Next
       Rewind

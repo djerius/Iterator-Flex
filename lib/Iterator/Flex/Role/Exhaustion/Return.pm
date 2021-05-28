@@ -8,25 +8,36 @@ use warnings;
 our $VERSION = '0.12';
 
 use Scalar::Util();
-use Iterator::Flex::Utils qw[ :default ON_EXHAUSTION_RETURN ];
+use Iterator::Flex::Utils qw[ :default :RegistryKeys ];
 use Role::Tiny;
 
 use namespace::clean;
 
+=method sentinel
+
+  $sentinel = $iterator->sentinel
+
+returns the sentinel which the iterator will return to signal exhaustion
+
+=cut
+
+sub sentinel {
+    return $REGISTRY{ refaddr $_[0] }{+GENERAL}{+EXHAUSTION}[1];
+}
+
 =method signal_exhaustion
 
-   $iterator->signal_exhaustion;
+   $sentinel = $iterator->signal_exhaustion;
 
-Signal that the iterator is exhausted.  This version simply sets the
-iterator's exhausted flag.
-
+Signal that the iterator is exhausted, by setting the iterators I<exhausted> flag
+and returning the iterator's sentinel value.
 
 =cut
 
 sub signal_exhaustion {
     my $self = shift;
     $self->set_exhausted;
-    return $REGISTRY{ refaddr $self }{ +ON_EXHAUSTION_RETURN };
+    return $self->sentinel;
 }
 
 requires 'set_exhausted';

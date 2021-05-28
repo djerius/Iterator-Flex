@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Exhausted;
+package Iterator::Flex::Role::Exhausted::Registry;
 
 # ABSTRACT: Role for iterator which handles set_exhausted and is_exhausted predicate.
 
@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use Role::Tiny;
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default IS_EXHAUSTED ITERATOR );
 
 use namespace::clean;
 
@@ -21,13 +21,11 @@ Set the iterator's state to exhausted
 =cut
 
 sub set_exhausted {
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-    $attributes->{_is_exhausted} = 1;
+    $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+IS_EXHAUSTED} = 1;
 }
 
 sub _reset_exhausted {
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-    $attributes->{_is_exhausted} = 0;
+    $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+IS_EXHAUSTED} = 0;
 }
 
 
@@ -49,8 +47,7 @@ will switch the iterator state to I<exhausted>.
 =cut
 
 sub is_exhausted {
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-    !!$attributes->{_is_exhausted};
+    !! $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+IS_EXHAUSTED};
 }
 
 

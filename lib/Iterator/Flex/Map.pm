@@ -7,7 +7,9 @@ use warnings;
 
 our $VERSION = '0.12';
 
+use Iterator::Flex::Utils qw( IS_EXHAUSTED THROW EXHAUSTION );
 use Iterator::Flex::Factory;
+use Ref::Util;
 use parent 'Iterator::Flex::Base';
 
 =method new
@@ -34,37 +36,54 @@ The iterator supports the following methods:
 =cut
 
 sub construct {
-
     # my $class =
     shift;
 
-    my ( $code, $src ) = @_;
+    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "incorrect type or number of arguments" );
+    }
+
+    my ( $code, $src ) = @{ $_[0] };
 
     $src = Iterator::Flex::Factory->to_iterator( $src,
-        on_exhaustion_return => undef );
+        { EXHAUSTION, => THROW } );
 
     my $self;
+    my $is_exhausted;
 
     return {
         _name => 'imap',
 
         _self => \$self,
 
+        IS_EXHAUSTED, => \$is_exhausted,
+
         next => sub {
-            my $value = $src->();
-            if ( $src->is_exhausted ) {
+            return $self->signal_exhaustion if $is_exhausted;
+
+            my $ret = eval {
+                my $value = $src->();
+                local $_ = $value;
+                $code->();
+            };
+            if ( $@ ne '' ) {
+                die $@
+                  unless Ref::Util::is_blessed_ref( $@ )
+                  && $@->isa( 'Iterator::Flex::Failure::Exhausted' );
                 return $self->signal_exhaustion;
             }
-            local $_ = $value;
-            return $code->();
+            return $ret;
         },
-        reset     => sub { },
-        _depends   => $src,
+        reset    => sub { },
+        _depends => $src,
     };
 }
 
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Closure
       ::Next::ClosedSelf
       Next
       Rewind

@@ -13,8 +13,6 @@ Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
 use Ref::Util;
 
-=for stopwords attr
-
 =method new
 
   $iterator = Iterator::Flex::ArrayLike->new( $obj, %args );
@@ -136,6 +134,7 @@ sub construct_from_state {
     }
 
     my $self;
+    my $is_exhausted;
 
     return {
 
@@ -177,6 +176,7 @@ sub construct_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Registry
       ::Next::ClosedSelf
       Next
       Rewind

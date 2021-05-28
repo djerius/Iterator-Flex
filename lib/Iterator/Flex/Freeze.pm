@@ -8,6 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use Iterator::Flex::Factory;
+use Iterator::Flex::Utils qw( RETURN EXHAUSTION );
 use parent 'Iterator::Flex::Base';
 use Scalar::Util;
 use Ref::Util;
@@ -45,7 +46,16 @@ If C<$iterator> provides a C<prev> method.
 
 sub construct {
 
-    my ( $class, $serialize, $src ) = ( shift, shift, shift );
+    my $class = shift;
+
+    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "incorrect type or number of arguments" );
+    }
+
+    my ( $serialize, $src ) = @{$_[0]};
+
 
     if ( ! Ref::Util::is_coderef( $serialize ) ) {
         require Iterator::Flex::Failure;
@@ -53,8 +63,7 @@ sub construct {
             "'serialize' must be a CODE reference" );
     }
 
-    $src = Iterator::Flex::Factory->to_iterator( $src,
-        on_exhaustion_return => undef );
+    $src = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION ,=> RETURN } );
 
     unless ( $class->_can_meth( $src, 'freeze' ) ) {
         require Iterator::Flex::Failure;
@@ -103,6 +112,7 @@ sub construct {
 }
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Registry
       ::Next::ClosedSelf
       Next
 ] );

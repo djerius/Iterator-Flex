@@ -16,10 +16,10 @@ sub _construct_next {
 
     # my $class = shift;
     shift;
-    my $attributes = shift;
+    my $ipar = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $next = $attributes->{next};
+    my $next = $ipar->{next};
     Scalar::Util::weaken $next;
 
     my $sub;

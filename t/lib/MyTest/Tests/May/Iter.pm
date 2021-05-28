@@ -20,11 +20,12 @@ sub construct_from_state {
         _name   => 'prev',
         next   => sub { ++$x },
         rewind => sub { ++$x },
-        ( @_ ? ( _depends => [@_] ) : () ),
+        ( defined $_[0] && @{$_[0]} ? ( _depends => $_[0] ) : () ),
     };
 }
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Registry
       ::Next::NoSelf
       Next
       Rewind

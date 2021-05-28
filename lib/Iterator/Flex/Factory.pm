@@ -2,11 +2,11 @@ package Iterator::Flex::Factory;
 
 # ABSTRACT: Create on-the-fly Iterator::Flex classes/objects
 
-use 5.10.0;
+use 5.25.0;
 use strict;
 use warnings;
 
-use experimental 'signatures';
+use experimental qw( signatures declared_refs );
 
 our $VERSION = '0.12';
 
@@ -19,19 +19,19 @@ use Safe::Isa;
 use Iterator::Flex::Base;
 use Iterator::Flex::Utils qw[
   _can_meth
-  has_output_exhaustion_policy
-  has_native_exhaustion_policy
-  :ImportedExhaustionActions
   :ExhaustionActions
+  :default
+  :RegistryKeys
 ];
 
 use Iterator::Flex::Method;
 
 =class_method to_iterator
 
-  $iter = Iterator::Flex::Factory->to_iterator( $iterable, %attributes );
+  $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%gpar );
 
-Construct an iterator from an iterable thing. The iterator will
+Construct an iterator from an iterable thing. The C<%gpar> parameter
+may contain 
 return C<undef> upon exhaustion.
 
  An iterable thing is
@@ -75,10 +75,10 @@ The coderef must return the next element in the iteration.
 
 =cut
 
-sub to_iterator ( $CLASS, @args ) {
-    return @args
-      ? $CLASS->construct_from_iterable( @args )
-      : $CLASS->construct( next => sub { return } );
+sub to_iterator ( $CLASS, $iterable = undef, $pars = {} ) {
+    return defined $iterable
+      ? $CLASS->construct_from_iterable( $iterable, $pars )
+      : $CLASS->construct( { next => sub { return } }  );
 }
 
 
@@ -145,162 +145,167 @@ two classes: I<native> exhaustion and I<output> exhaustion.  I<Native> exhaustio
 how the I<next> method expresses exhaustion, while I<output> exhaustion describes how the
 generated iterator should express exhaustion.
 
-Native exhaustion is specified via one of the following parameters
+=over
+
+=item native_exhaustion => I<spec>
+
+I<spec> can be one of the following:
 
 =over
 
-=item C<throws_on_exhaustion> => C<1>
+=item C<throw>
+
+=item [ C<throw> => I<exception string or object> ]
 
 The iterator will natively signal its exhaustion by throwing an exception.
 
-=item C<returns_on_exhaustion> => I<sentinel value>
+=item C<return>
 
-The iterator will signal its exhaustion by returning the specified
-sentinel value, which is typically C<undef>.
+=item [ C<return> => I<sentinel value> ]
+
+The iterator will signal its exhaustion by returning a sentinel value.
+If not specified, it is C<undef>.
 
 =back
 
-Output exhaustion:
+=item exhaustion => i<spec>
+
+I<spec> can be one of the following:
 
 =over
 
-=item C<on_exhaustion_throw>
+=item C<throw>
 
-=item C<on_exhaustion_return>
+=item [ C<throw> => I<exception string or object> ]
 
-=item C<on_exhaustion_passthrough>
+=item C<return>
+
+=item [ C<return> => I<sentinel value> ]
+
+=item C<passthrough>
 
 =back
 
 =cut
 
-sub construct ( $CLASS, $iattr ) {
+sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
 
-    unless ( Ref::Util::is_hashref( $iattr ) ) {
+    unless ( Ref::Util::is_hashref( $in_ipar ) ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
-            "attribute parameter must be a hashref" );
+            "iterator attribute parameter must be a hashref" );
     }
 
-    my %iattr = (
-        class => 'Iterator::Flex::Base',
-        $iattr->%*,
-    );
+    unless ( Ref::Util::is_hashref( $in_gpar ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "general attribute parameter must be a hashref" );
+    }
 
-    my $attr;
-    my %attr;
+    my %ipar = $in_ipar->%*;
+    my %ipar_k;
+    @ipar_k{ keys %ipar } = ();
+    my %gpar = $in_gpar->%*;
+    my %gpar_k;
+    @gpar_k{ keys %gpar } = ();
+
+    my $par;
     my @roles;
 
-    my $class;
-
-    unless ( defined( $class = delete $iattr{class} ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "missing or undefined 'class' attribute" );
-    }
+    my $class = $ipar{class} // 'Iterator::Flex::Base';
+    delete $ipar_k{class};
 
     if ( Ref::Util::is_ref( $class ) ) {
-        require Iterator::Flex::Failure;
+        Require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
-            "'class' attribute must be a string" );
+            "'class' parameter must be a string" );
     }
 
-    if ( !Module::Runtime::require_module( $class ) ) {
+    if ( $class ne 'Iterator::Flex::Base'
+        && !Module::Runtime::require_module( $class ) )
+    {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw( "can't load class $class" );
     }
 
-    if ( defined( $attr = delete $iattr{_name} ) ) {
-        if ( Ref::Util::is_ref( $attr ) ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "'_name' attribute value must be a string\n" );
-        }
-        $attr{_name} = $attr;
+    delete $ipar_k{_name};
+    if ( defined( $par = $ipar{_name} ) && Ref::Util::is_ref( $par ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "'_name' parameter value must be a string\n" );
     }
 
     # don't close over self
-    push @roles, [ Next => 'NoSelf' ];
+    push @roles, [ Next => 'NoSelf'], [ Exhausted => 'Registry' ];
 
-    my ( $native_exhaustion_action, @rest )
-      = grep { exists $iattr{$_} } @ImportedExhaustionActions;
+    delete $gpar_k{ +IMPORTED_EXHAUSTION };
+    my $imported_exhaustion = $gpar{ +IMPORTED_EXHAUSTION }
+      // [ RETURN, => undef ];
 
-    if ( @rest ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "specify only one native exhaustion action" );
-    }
+    my @imported_exhaustion
+      = Ref::Util::is_arrayref( $imported_exhaustion )
+      ? ( $imported_exhaustion->@* )
+      : ( $imported_exhaustion );
 
-    my $has_output_exhaustion_policy = has_output_exhaustion_policy( \%iattr );
+    delete $gpar_k{ +EXHAUSTION };
+    my $has_output_exhaustion_policy = defined $gpar{ +EXHAUSTION };
 
-    # default to returning undef on exhaustion
-    if ( !defined $native_exhaustion_action ) {
-        $native_exhaustion_action = RETURNS_ON_EXHAUSTION;
-        $iattr{ +RETURNS_ON_EXHAUSTION } = undef;
-    }
-
-    if ( $native_exhaustion_action eq RETURNS_ON_EXHAUSTION ) {
+    if ( $imported_exhaustion[0] eq RETURN ) {
         push @roles, [ Exhaustion => 'ImportedReturn' ],
           [ Next => 'WrapReturn' ];
-        $attr{ +RETURNS_ON_EXHAUSTION }
-          = delete $iattr{ +RETURNS_ON_EXHAUSTION };
-
-        $attr{ +ON_EXHAUSTION_RETURN } = $attr{ +RETURNS_ON_EXHAUSTION }
+        push $imported_exhaustion->@*, undef if @imported_exhaustion == 1;
+        $gpar{ +IMPORTED_EXHAUSTION } = \@imported_exhaustion;
+        $gpar{ +EXHAUSTION }          = $gpar{ +IMPORTED_EXHAUSTION }
           unless $has_output_exhaustion_policy;
     }
-    elsif ( $native_exhaustion_action eq THROWS_ON_EXHAUSTION ) {
+
+    elsif ( $imported_exhaustion[0] eq +THROW ) {
         push @roles, [ Exhaustion => 'ImportedThrow' ], [ Next => 'WrapThrow' ];
-        $attr{ +THROWS_ON_EXHAUSTION } = delete $iattr{ +THROWS_ON_EXHAUSTION };
-
-        $attr{ +ON_EXHAUSTION_THROW } = ON_EXHAUSTION_PASSTHROUGH
+        $gpar{ +IMPORTED_EXHAUSTION } = \@imported_exhaustion;
+        $gpar{ +EXHAUSTION }          = [ THROW ,=> PASSTHROUGH ]
           unless $has_output_exhaustion_policy;
     }
-
-    # copy over any output exhaustion policy specifications
-    $attr{$_} = delete $iattr{$_}
-      for grep { exists $iattr{$_} } @ExhaustionActions;
 
     for my $method ( qw[ next rewind reset prev current ] ) {
 
-        next unless defined( my $code = delete $iattr{$method} );
+        delete $ipar_k{$method};
+        next unless defined( my $code = $ipar{$method} );
 
         unless ( Ref::Util::is_coderef $code ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
-                "'$method' attribute value must be a code reference\n" );
+                "'$method' parameter value must be a code reference\n" );
         }
 
         # if $class can't perform the required method, add a role
         # which can
         push @roles, $class->_module_name( 'Role' => ucfirst( $method ) )
           unless $class->can( $method );
-
-        $attr{$method} = $code;
     }
 
-    if ( !defined( $attr{next} ) ) {
+    if ( !defined( $ipar{next} ) ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
-            "missing or undefined 'next' attribute" );
+            "missing or undefined 'next' parameter" );
     }
 
-    if ( defined( $attr = delete $iattr{methods} ) ) {
+    delete $ipar_k{methods};
+    if ( defined( my $par = $ipar{methods} ) ) {
 
-        unless ( Ref::Util::is_hashref( $attr ) ) {
+        unless ( Ref::Util::is_hashref( $par ) ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
-                "value for methods attribute must be a hash reference\n" );
+                "value for methods paribute must be a hash reference\n" );
         }
 
-        $attr{methods} = {};
-        for my $name ( keys %{$attr} ) {
+        for my $name ( keys $par->%* ) {
 
-            my $code = $attr->{$name};
+            my $code = $par->{$name};
 
             unless ( Ref::Util::is_coderef( $code ) ) {
                 require Iterator::Flex::Failure;
                 Iterator::Flex::Failure::parameter->throw(
-                    "value for 'methods' attribute key '$name' must be a code reference"
+                    "value for 'methods' parameter key '$name' must be a code reference"
                 );
             }
 
@@ -318,24 +323,27 @@ sub construct ( $CLASS, $iattr ) {
             }
 
             push @roles, $role;
-            $attr{methods}{$name} = $code;
         }
     }
 
-    if ( keys %iattr ) {
+    if ( !!%ipar_k || !!%gpar_k ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
-            "unknown attributes: @{[ join( ', ', keys %iattr ) ]}\n" );
+            "unknown iterator parameters: @{[ join( ', ', keys %ipar ) ]}\n" )
+          if %ipar_k;
+        Iterator::Flex::Failure::parameter->throw(
+            "unknown iterator parameters: @{[ join( ', ', keys %gpar ) ]}\n" )
+          if %gpar_k;
     }
 
-    $attr{_roles} = \@roles;
+    $ipar{_roles} = \@roles;
 
-    return $class->new_from_attrs( \%attr );
+    return $class->new_from_attrs( \%ipar, \%gpar );
 }
 
 =class_method construct_from_iterable
 
-  $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, %attributes );
+  $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, %parameters );
 
 Construct an iterator from an
 L<Iterator::Flex::Manual::Glossary/iterable thing>.  The returned
@@ -364,22 +372,25 @@ a globref, the arguments are passed to L</construct>.
 =cut
 
 
-sub construct_from_iterable ( $CLASS, $obj, %attr ) {
+sub construct_from_iterable ( $CLASS, $obj, $pars = {} ) {
+
+    my ( $ipars, $gpars ) = $CLASS->_parse_pars( $pars );
+
 
     if ( Ref::Util::is_blessed_ref($obj) ) {
-        return $CLASS->construct_from_object( $obj, %attr );
+        return $CLASS->construct_from_object( $obj, $ipars, $gpars );
     }
 
     elsif ( Ref::Util::is_arrayref( $obj ) ) {
-        return $CLASS->construct_from_array( $obj, %attr );
+        return $CLASS->construct_from_array( $obj, $gpars );
     }
 
     elsif ( Ref::Util::is_coderef( $obj ) ) {
-        return $CLASS->construct( %attr, next => $obj );
+        return $CLASS->construct( { $ipars->%*, next => $obj }, $gpars );
     }
 
     elsif ( Ref::Util::is_globref( $obj ) ) {
-        return $CLASS->construct( %attr, next => sub { scalar <$obj> } );
+        return $CLASS->construct( { $ipars->%*, next => sub { scalar <$obj> } }, $gpars );
     }
 
     require Iterator::Flex::Failure;
@@ -392,14 +403,14 @@ sub construct_from_iterable ( $CLASS, $obj, %attr ) {
 
 =cut
 
-sub construct_from_array ( $CLASS, $obj, %attr ) {
+sub construct_from_array ( $CLASS, $obj, $gpars ) {
     require Iterator::Flex::Array;
-    return Iterator::Flex::Array->new( $obj, %attr );
+    return Iterator::Flex::Array->new( $obj, $gpars );
 }
 
 =class_method construct_from_object
 
-  $iter = Iterator::Flex::Factory->construct_from_object( $object, %attributes );
+  $iter = Iterator::Flex::Factory->construct_from_object( $object, %parameters );
 
 Construct an iterator from an L<Iterator::Flex::Manual::Glossary/iterable object>.
 Normal use is to call L</to_iterator>, L</construct_from_iterable> or
@@ -419,42 +430,125 @@ by the constructed iterator:
 =cut
 
 
-sub construct_from_object ( $CLASS, $obj, %attr ) {
+sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
 
-    return $obj if $obj->isa( 'Iterator::Flex::Base' );
+    return construct_from_iterator_flex( $CLASS, $obj, $ipar, $gpar )
+      if $obj->isa( 'Iterator::Flex::Base' );
 
-    if ( !has_native_exhaustion_policy( \%attr ) ) {
-        $attr{ +RETURNS_ON_EXHAUSTION } = undef;
-    }
+    my %ipar = $ipar->%*;
+    my %gpar = $gpar->%*;
 
-    if ( !exists $attr{next} ) {
+    $gpar{+IMPORTED_EXHAUSTION} //= [ RETURN, => undef ];
+
+    if ( !exists $ipar{next} ) {
         my $code;
         if ( $code = _can_meth( $obj, 'iter' ) ) {
-            $attr{next} = $code->( $obj );
+            $ipar{next} = $code->( $obj );
         }
         elsif ( $code = _can_meth( $obj, 'next' )
             || overload::Method( $obj, '<>' ) )
         {
-            $attr{next} = sub { $code->( $obj ) };
+            $ipar{next} = sub { $code->( $obj ) };
         }
 
         elsif ( $code = overload::Method( $obj, '&{}' ) ) {
-            $attr{next} = $code->( $obj );
+            $ipar{next} = $code->( $obj );
         }
 
         elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-            return $CLASS->construct_from_array( $code->( $obj ) );
+            return $CLASS->construct_from_array( $code->( $obj ), $ipar, \%gpar );
         }
 
     }
 
-    for my $method ( grep { !exists $attr{$_} } 'prev', 'current' ) {
+    for my $method ( grep { !exists $ipar{$_} } 'prev', 'current' ) {
         my $code = _can_meth( $obj, $method );
-        $attr{$method} = sub { $code->( $obj ) }
+        $ipar{$method} = sub { $code->( $obj ) }
           if $code;
     }
 
-    return construct( %attr );
+    return $CLASS->construct( \%ipar, \%gpar );
+}
+
+sub construct_from_iterator_flex ( $CLASS, $obj, $ipar, $gpar ) {
+
+    my @exhaustion = do {
+        my $exhaustion = $gpar->{ +EXHAUSTION };
+        return $obj unless defined $exhaustion;
+
+        Ref::Util::is_arrayref( $exhaustion )
+          ? ( $exhaustion->@* )
+          : ( $exhaustion );
+    };
+
+    my \%registry
+      = exists $REGISTRY{ refaddr $obj }
+      ? $REGISTRY{ refaddr $obj }{ +GENERAL }
+      : do {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::internal->throw(
+            "non-registered Iterator::Flex iterator" );
+      };
+
+
+    # multiple different output exhaustion roles may have been
+    # applied, so the object may claim to support both roles,
+    # Exhaustion::Throw and Exhaustion::Return, although only the
+    # latest one applied will work.  So, use what's in the registry to
+    # figure out what it actually does.
+
+    my $existing_exhaustion = $registry{+EXHAUSTION}[0] // do {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::internal->throw(
+            "registered Iterator::Flex iterator doesn't have a registered exhaustion" );
+    };
+
+    if ( $exhaustion[0] eq RETURN ) {
+
+        if ( $existing_exhaustion eq THROW ) {
+            Role::Tiny->apply_roles_to_object( $obj,
+                $obj->_load_role( Exhaustion => 'Return' ) );
+        }
+    }
+
+    elsif ( $exhaustion[0] eq THROW ) {
+
+        if ( $existing_exhaustion eq THROW ) {
+            Role::Tiny->apply_roles_to_object( $obj,
+                $obj->_load_role( Exhaustion => 'Return' ) );
+        }
+
+        if ( $existing_exhaustion eq RETURN ) {
+            Role::Tiny->apply_roles_to_object( $obj,
+                $obj->_load_role( Exhaustion => 'Throw' ) );
+        }
+    }
+
+    else {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::internal->throw(
+            "unexpected exhaustion action: $exhaustion[0]" );
+    }
+
+    $registry{+EXHAUSTION}->@* = @exhaustion;
+    return $obj;
+}
+
+=method _parse_pars
+
+  ( \%iter_pars, \%general_pars ) = $class->_parse_pars( \%pars );
+
+=cut
+
+sub _parse_pars( $CLASS, $pars ) {
+
+    my %ipars = $pars->%*;
+    # move  general parsibutes into their own hash
+    my %gpars = delete %ipars{ EXHAUSTION, IMPORTED_EXHAUSTION };
+
+    delete %gpars{ grep { ! defined $gpars{$_} } keys %gpars };
+
+    return \%ipars, \%gpars;
 }
 
 1;

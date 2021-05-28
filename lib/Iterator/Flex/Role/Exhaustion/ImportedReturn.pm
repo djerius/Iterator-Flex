@@ -8,12 +8,20 @@ use warnings;
 our $VERSION = '0.12';
 
 use Role::Tiny;
-use Iterator::Flex::Utils qw( :default :ImportedExhaustionActions );
+use Iterator::Flex::Utils qw( :default :RegistryKeys );
 
 use namespace::clean;
 
-sub sentinel {
-    return $REGISTRY{ refaddr $_[0] }{ +RETURNS_ON_EXHAUSTION };
+=method isentinel
+
+  $sentinel = $iterator->sentinel
+
+returns the sentinel which the iterator will return to signal exhaustion
+
+=cut
+
+sub imported_sentinel {
+    return $REGISTRY{ refaddr $_[0] }{+GENERAL}{ +IMPORTED_EXHAUSTION }[1];
 }
 
 1;

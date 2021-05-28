@@ -100,6 +100,26 @@ subtest "rewind" => sub {
 
 };
 
+subtest "only one" => sub {
+
+    my $iter = iproduct( [ 1 ], [ 2, 3 ] );
+
+    my @values = map { [ $iter->current, $iter->next ] } 1 .. 3;
+
+            is(
+                \@values,
+               array {
+                   item [ undef, [ 1, 2] ];
+                   item [ [1,2], [ 1, 3] ];
+                   item [ [1,3], undef ];
+                   end;
+               },
+                "values are correct"
+            ) or diag pp( \@values );
+
+
+};
+
 subtest "freeze" => sub {
 
     my $freeze;
@@ -172,6 +192,5 @@ subtest "freeze" => sub {
 
 
 };
-
 
 done_testing;

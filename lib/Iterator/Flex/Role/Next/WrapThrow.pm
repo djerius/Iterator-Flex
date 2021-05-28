@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( THROWS_ON_EXHAUSTION );
+use Iterator::Flex::Utils qw( :RegistryKeys IMPORTED_EXHAUSTION );
 use Scalar::Util;
 use Ref::Util qw( is_regexpref is_arrayref is_coderef );
 use Role::Tiny;
@@ -16,16 +16,17 @@ use namespace::clean;
 
 around _construct_next => sub {
 
-    my $orig = shift;
-    my $attr = $_[-1];
-    my $next = $orig->( @_ );
+    my $orig  = shift;
+    my $gpar = $_[-1];
+    my $next  = $orig->( @_ );
 
-    if ( ! exists $attr->{ +THROWS_ON_EXHAUSTION } ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "internal error: no exception comparison" );
-  }
-
-    my $exception = $attr->{ +THROWS_ON_EXHAUSTION };
+    my $exception = (
+        $gpar->{ +IMPORTED_EXHAUSTION } // do {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "internal error: input exhaustion policy was not registered" );
+          }
+    )->[1];
 
     my $wsub;
 

@@ -9,7 +9,7 @@ our $VERSION = '0.12';
 
 use custom::failures qw/Exhausted RoleExists/;
 
-use custom::failures qw/ class parameter /;
+use custom::failures qw/ class parameter internal /;
 
 1;
 

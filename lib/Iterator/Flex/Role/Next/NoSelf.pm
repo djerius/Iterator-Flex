@@ -29,11 +29,11 @@ sub _construct_next {
 
     # my $class = shift;
     shift;
-    my $attributes = shift;
+    my $ipar = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $sub = $attributes->{next};
-    Scalar::Util::weaken $attributes->{next};
+    my $sub = $ipar->{next};
+    Scalar::Util::weaken $ipar->{next};
     return $sub;
 }
 

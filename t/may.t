@@ -7,7 +7,7 @@ use aliased 'MyTest::Tests::May::Iter';
 
 my @depends = map Iter->new, 1 .. 3;
 
-my $iter = Iter->new( @depends );
+my $iter = Iter->new( \@depends );
 
 ok( $iter->may( 'rewind' ), "may rewind" );
 

@@ -11,7 +11,7 @@ use Scalar::Util;
 use List::Util;
 
 use Iterator::Flex::Base ();
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default ITERATOR );
 use Role::Tiny;
 
 use namespace::clean;
@@ -30,12 +30,12 @@ sub reset {
 
     my $obj = $_[0];
 
-    my $attributes = $REGISTRY{ refaddr $obj };
+    my $ipar = $REGISTRY{ refaddr $obj }{+ITERATOR};
 
-    if ( defined $attributes->{_depends} ) {
+    if ( defined $ipar->{_depends} ) {
 
         # first check if dependencies can reset.
-        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $attributes->{_depends} };
+        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $ipar->{_depends} };
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
@@ -44,11 +44,11 @@ sub reset {
         }
 
         # now reset them
-        $_->reset foreach @{ $attributes->{_depends} };
+        $_->reset foreach @{ $ipar->{_depends} };
     }
 
-    $attributes->{reset}->( $obj );
-    $attributes->{_is_exhausted} = 0;
+    $ipar->{reset}->( $obj );
+    $obj->_reset_exhausted;
 
     return;
 }
@@ -56,6 +56,7 @@ sub reset {
 
 around may => Iterator::Flex::Base->_wrap_may( 'reset' );
 
+requires '_reset_exhausted';
 1;
 
 # COPYRIGHT

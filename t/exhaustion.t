@@ -12,14 +12,14 @@ use Test2::V0;
 use Iterator::Flex 'iterator';
 use Scalar::Util 'refaddr';
 
-subtest 'sentinel' => sub {
+subtest 'return' => sub {
 
     subtest 'undef => 10' => sub {
 
         my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data }
-        on_exhaustion_return => 11;
+        -pars => { exhaustion => [ return => 11 ] };
 
         while ( ( my $data = $iter->next ) != 11 ) { push @got, $data }
 
@@ -46,7 +46,8 @@ subtest 'sentinel' => sub {
 
         my @data = ( 1 .. 10 );
         my @got;
-        my $iter = iterator { shift @data; } returns_on_exhaustion => 10;
+        my $iter = iterator { shift @data; }
+        -pars => { imported_exhaustion => [ return => 10 ] };
 
         while ( ( my $data = $iter->next ) != 10 ) { push @got, $data }
 
@@ -59,7 +60,8 @@ subtest 'sentinel' => sub {
 
         my @data = ( 1 .. 10 );
         my @got;
-        my $iter = iterator { shift @data // 'A' } returns_on_exhaustion => 'A';
+        my $iter = iterator { shift @data // 'A' }
+        -pars => { imported_exhaustion => [ return => 'A' ] };
 
         while ( ( my $data = $iter->next ) ne 'A' ) { push @got, $data }
 
@@ -72,8 +74,8 @@ subtest 'sentinel' => sub {
         my @data = ( 1 .. 10 );
         my @got;
         my $ref = [];
-        my $iter
-          = iterator { shift @data // $ref } returns_on_exhaustion => $ref;
+        my $iter = iterator { shift @data // $ref }
+        -pars => { imported_exhaustion => [ return => $ref ] };
 
         my $data;
         while ( $data = $iter->next
@@ -95,7 +97,7 @@ subtest 'sentinel' => sub {
         my $iter = iterator {
             shift @data;
         }
-        on_exhaustion_throw => 1;
+          -pars => { exhaustion => 'throw' } ;
 
         isa_ok(
             dies {
@@ -122,8 +124,10 @@ subtest 'throw' => sub {
             die( "exhausted" ) if $data[0] == 9;
             shift @data;
         }
-        throws_on_exhaustion   => 1,
-          on_exhaustion_return => undef;
+        -pars => {
+            imported_exhaustion => 'throw',
+            exhaustion          => 'return'
+        };
 
         ok(
             lives {
@@ -145,7 +149,7 @@ subtest 'throw' => sub {
             die( "exhausted" ) if $data[0] == 9;
             shift @data;
         }
-        throws_on_exhaustion => 1;
+        -pars => { imported_exhaustion => 'throw' };
 
         like(
             dies {
@@ -169,8 +173,10 @@ subtest 'throw' => sub {
                 die( "exhausted" ) if $data[0] == 9;
                 shift @data;
             }
-            throws_on_exhaustion  => qr/exhausted/,
-              on_exhaustion_throw => 1;
+            -pars => {
+                imported_exhaustion => [ throw => qr/exhausted/ ],
+                exhaustion          => 'throw'
+            };
 
             isa_ok(
                 dies {
@@ -195,8 +201,10 @@ subtest 'throw' => sub {
                 die( "died" ) if $data[0] == 9;
                 shift @data;
             }
-            throws_on_exhaustion  => qr/exhausted/,
-              on_exhaustion_throw => 1;
+            -pars => {
+                imported_exhaustion => [ throw => qr/exhausted/ ],
+                exhaustion          => 'throw'
+            };
 
             like(
                 dies {
@@ -225,8 +233,11 @@ subtest 'throw' => sub {
                 die( "exhausted" ) if $data[0] == 9;
                 shift @data;
             }
-            throws_on_exhaustion  => sub { $_[0] =~ 'exhausted' },
-              on_exhaustion_throw => 1;
+            -pars => {
+                imported_exhaustion =>
+                  [ throw => sub { $_[0] =~ 'exhausted' } ],
+                exhaustion => 'throw'
+            };
 
             isa_ok(
                 dies {
@@ -251,8 +262,11 @@ subtest 'throw' => sub {
                 die( "died" ) if $data[0] == 9;
                 shift @data;
             }
-            throws_on_exhaustion  => sub { $_[0] =~ 'exhausted' },
-              on_exhaustion_throw => 1;
+            -pars => {
+                imported_exhaustion =>
+                  [ throw => sub { $_[0] =~ 'exhausted' } ],
+                exhaustion => 'throw'
+            };
 
             like(
                 dies {

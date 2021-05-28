@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( :default RETURNS_ON_EXHAUSTION );
+use Iterator::Flex::Utils qw( :default IMPORTED_EXHAUSTION );
 use Scalar::Util;
 use Role::Tiny;
 
@@ -15,19 +15,20 @@ use namespace::clean;
 
 around _construct_next => sub {
 
-    my $orig = shift;
-    my $attr = $_[-1];
-    my $next = $orig->( @_ );
+    my $orig  = shift;
+    my $gpar = $_[-1];
+    my $next  = $orig->( @_ );
 
     # this will be weakened latter.
     my $wsub;
 
-    if ( ! exists $attr->{ +RETURNS_ON_EXHAUSTION } ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "internal error: no sentinel " );
-  }
-
-    my $sentinel = $attr->{ +RETURNS_ON_EXHAUSTION };
+    my $sentinel = (
+        $gpar->{ +IMPORTED_EXHAUSTION } // do {
+            require Iterator::Flex::Failure;
+            Iterator::Flex::Failure::parameter->throw(
+                "internal error: input exhaustion policy was not registered" );
+          }
+    )->[1];
 
     # undef
     if ( !defined $sentinel ) {

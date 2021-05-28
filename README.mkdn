@@ -238,7 +238,7 @@ Restore an iterator that has been frozen.  See ["Serialization of
 Iterators"](#serialization-of-iterators) for more information.
 
 This module provides a generic generator for iterators (["iterator"](#iterator)) as
-well as friendly interfaces to special purpose iterators.  To create 
+well as friendly interfaces to special purpose iterators.  To create
 
 ## Serialization of Iterators
 

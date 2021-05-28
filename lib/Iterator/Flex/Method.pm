@@ -5,7 +5,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default ITERATOR METHODS );
 use Package::Variant importing => qw[ Role::Tiny ];
 use Module::Runtime;
 
@@ -27,7 +27,7 @@ sub make_variant {
     my ( $class, $target_package, $package, %arg ) = @_;
     my $name = $arg{name};
     install $name => sub {
-        return $REGISTRY{ refaddr $_[0] }{methods}{$name}->( @_ );
+        return $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+METHODS}{$name}->( @_ );
     };
 }
 

@@ -8,8 +8,8 @@ use warnings;
 our $VERSION = '0.12';
 
 use Role::Tiny;
-use Iterator::Flex::Utils qw( :default ON_EXHAUSTION_THROW );
-use Ref::Util qw( is_coderef );
+use Iterator::Flex::Utils qw( :default :RegistryKeys );
+use Ref::Util;
 
 use namespace::clean;
 
@@ -27,9 +27,9 @@ sub signal_exhaustion {
     my $self = shift;
     $self->set_exhausted;
 
-    my $exception = $REGISTRY{ refaddr $self}{ +ON_EXHAUSTION_THROW };
+    my $exception = $REGISTRY{refaddr $self}{+GENERAL}{+EXHAUSTION}[1];
 
-    $exception->() if is_coderef( $exception );
+    $exception->() if Ref::Util::is_coderef( $exception );
 
     require Iterator::Flex::Failure;
     Iterator::Flex::Failure::Exhausted->throw;

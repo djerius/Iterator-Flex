@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default ITERATOR );
 use Role::Tiny;
 
 use namespace::clean;
@@ -23,10 +23,7 @@ Returns the current value.
 =cut
 
 sub current {
-
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-
-    $attributes->{current}->( $_[0] );
+    $REGISTRY{ refaddr $_[0] }{+ITERATOR}{current}->( $_[0] );
 }
 *__current__ = \&current;
 

@@ -5,12 +5,15 @@ package Iterator::Flex::Sequence;
 use strict;
 use warnings;
 
+use experimental qw( postderef );
+
 our $VERSION = '0.12';
 
 use Scalar::Util;
 use List::Util;
 
 use parent 'Iterator::Flex::Base';
+use Iterator::Flex::Utils qw( IS_EXHAUSTED );
 
 =method new
 
@@ -46,15 +49,17 @@ sub construct {
 
     my $class = shift;
 
-    if ( @_ < 1 || @_ > 3 ) {
+    my @args = $_[0]->@*;
+
+    if ( @args < 1 || @args > 3 ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw( "incorrect number of arguments for sequence" );
     }
 
     my %state;
-    $state{step}  = pop if @_ == 3;
-    $state{end}   = pop;
-    $state{begin} = shift;
+    $state{step}  = pop @args if @args == 3;
+    $state{end}   = pop @args;
+    $state{begin} = pop @args;
 
     $class->construct_from_state( \%state );
 }
@@ -76,6 +81,7 @@ sub construct_from_state {
       = @{$state}{qw[ begin end step iter next current prev ]};
 
     my $self;
+    my $is_exhausted;
 
     my %params;
 
@@ -188,11 +194,14 @@ sub construct_from_state {
         },
 
         _self => \$self,
+
+        IS_EXHAUSTED ,=> \$is_exhausted,
     };
 
 }
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Closure
       ::Next::ClosedSelf
       Next
       Rewind

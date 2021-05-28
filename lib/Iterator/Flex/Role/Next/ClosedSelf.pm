@@ -23,18 +23,18 @@ use namespace::clean;
 
 sub _construct_next {
 
-    my $class      = shift;
-    my $attributes = shift;
+    my $class = shift;
+    my $ipar = shift;
 
-    my $sub = $attributes->{next} // do {
+    my $sub = $ipar->{next} // do {
         require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "Missing 'next' attribute" );
+        Iterator::Flex::Failure::parameter->throw( "Missing 'next' parameter" );
     };
 
-    Scalar::Util::weaken $attributes->{next};
+    Scalar::Util::weaken $ipar->{next};
 
-    if ( exists $attributes->{_self} ) {
-        my $ref = $attributes->{_self};
+    if ( exists $ipar->{_self} ) {
+        my $ref = $ipar->{_self};
         $$ref = $sub;
         Scalar::Util::weaken $$ref;
     }

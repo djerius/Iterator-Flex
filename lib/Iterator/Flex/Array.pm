@@ -10,8 +10,6 @@ our $VERSION = '0.12';
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
 
-=for stopwords attr
-
 =method new
 
   $iterator = Iterator::Flex::Array->new( $array_ref );
@@ -144,6 +142,7 @@ sub construct_from_state {
 
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Registry
       ::Next::ClosedSelf
       Next
       Rewind

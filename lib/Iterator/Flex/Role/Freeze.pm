@@ -9,7 +9,7 @@ our $VERSION = '0.12';
 
 use List::Util;
 
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default ITERATOR );
 use Iterator::Flex::Base;
 use Role::Tiny;
 
@@ -27,15 +27,15 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 sub freeze {
 
     my $obj        = $_[0];
-    my $attributes = $REGISTRY{ refaddr $obj };
+    my $ipar = $REGISTRY{ refaddr $obj }{+ITERATOR};
 
     my @freeze;
 
-    if ( defined $attributes->{_depends} ) {
+    if ( defined $ipar->{_depends} ) {
 
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
-        @{ $attributes->{_depends} };
+        @{ $ipar->{_depends} };
         if ( $cant ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
@@ -43,13 +43,15 @@ sub freeze {
         }
 
         # now freeze them
-        @freeze = map $_->freeze, @{ $attributes->{_depends} };
+        @freeze = map $_->freeze, @{ $ipar->{_depends} };
     }
 
-    push @freeze, $attributes->{freeze}->( $obj ), $attributes->{_is_exhausted};
+    push @freeze, $ipar->{freeze}->( $obj ), $obj->is_exhausted;
 
     return \@freeze;
 }
+
+requires 'is_exhausted';
 
 1;
 

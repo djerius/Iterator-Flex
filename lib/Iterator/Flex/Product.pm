@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
+use Iterator::Flex::Utils qw( RETURN IS_EXHAUSTED EXHAUSTION );
 use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
@@ -53,7 +54,13 @@ sub construct {
 
     my $class = shift;
 
-    $class->construct_from_state( { iterators => [@_] } );
+    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
+        require Iterator::Flex::Failure;
+        Iterator::Flex::Failure::parameter->throw(
+            "incorrect type or number of arguments" );
+    }
+
+    $class->construct_from_state( { iterators => $_[0] } );
 }
 
 sub construct_from_state {
@@ -76,16 +83,14 @@ sub construct_from_state {
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
         @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_,
-                on_exhaustion_return => undef )
+            Iterator::Flex::Factory->to_iterator( $_,{ EXHAUSTION ,=> RETURN } )
         } @$iterators;
     }
 
     else {
         @keys     = List::Util::pairkeys @$iterators;
         @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_,
-                on_exhaustion_return => undef )
+            Iterator::Flex::Factory->to_iterator( $_, { EXHAUSTION ,=> RETURN } )
         } List::Util::pairvalues @$iterators;
     }
 
@@ -94,18 +99,21 @@ sub construct_from_state {
              map { $class->_can_meth( $_, 'rewind' ) } @iterator ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw( "all iteratables must provide a rewind method\n" );
-}
+    }
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
 
     my $self;
+    my $is_exhausted;
     my %params = (
 
         _self => \$self,
 
+        IS_EXHAUSTED, => \$is_exhausted,
+
         next => sub {
-            return $self->signal_exhaustion if $self->is_exhausted;
+            return $self->signal_exhaustion if $is_exhausted;
 
             # first time through
             if ( !@value ) {
@@ -157,7 +165,7 @@ sub construct_from_state {
 
         current => sub {
             return undef if !@value;
-            return $self->signal_exhaustion if $self->is_exhausted;
+            return $self->signal_exhaustion if $is_exhausted;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -217,6 +225,7 @@ sub new_from_state {
 }
 
 __PACKAGE__->_add_roles( qw[
+      ::Exhausted::Closure
       ::Next::ClosedSelf
       Next
       Current

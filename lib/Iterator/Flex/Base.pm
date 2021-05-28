@@ -7,6 +7,8 @@ use 5.10.0;
 use strict;
 use warnings;
 
+use experimental qw( signatures declared_refs );
+
 our $VERSION = '0.12';
 
 use Scalar::Util;
@@ -18,78 +20,81 @@ use Module::Runtime  ();
 
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Utils qw ( :default :ExhaustionActions );
+use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys );
 use Iterator::Flex::Failure;
 
 use namespace::clean;
 
 use overload ( '<>' => 'next', fallback => 1 );
 
-sub new {
-    my $class = shift;
-    return $class->new_from_attrs( $class->construct( @_ ) );
+# We separate constructor parameters into two categories:
+#
+#  1. those that are used to construct the iterator
+#  2. those that specify what happens when the iterator signals exhaustion
+#
+#  Category #2 may be expanded. Category #2 parameters are *not* passed
+#  to the iterator class construct* routines
+
+
+sub new ( $class, $construct = undef, $general = {} ){
+    return $class->new_from_attrs( $class->construct( $construct ), $general );
 }
 
 sub new_from_state {
-    my $class = shift;
-    return $class->new_from_attrs( $class->construct_from_state( @_ ) );
+    my ( $class, $state, $general ) = @_;
+    return $class->new_from_attrs( $class->construct_from_state( $state ), $general );
 }
 
-sub new_from_attrs {
+sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
-    my ( $class, $attrs ) = ( shift, shift );
+    my %ipar = $in_ipar->%*;
+    my %gpar = $in_gpar->%*;
 
-    # copy attrs as we may change it
-    my %attr = ( _roles => [], %$attrs );
+    $class->_validate_pars( \%ipar );
 
-    $class->_validate_attrs( \%attr );
+    my $roles = delete($ipar{_roles}) // [];
 
-    my $roles = delete( $attr{_roles} ) // [];
     unless ( Ref::Util::is_arrayref( $roles ) ) {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
             "_roles must be an arrayref" );
     }
 
-    my ( $exhaustion_action, @rest )
-              = grep { exists $attr{$_} } @ExhaustionActions;
+    my @roles = ( $roles->@* );
 
-    if ( @rest ) {
+    my $exhaustion_action = $gpar{ +EXHAUSTION } // [ RETURN, => undef ];
+
+    my @exhaustion_action
+      = Ref::Util::is_arrayref( $exhaustion_action )
+      ? ( $exhaustion_action->@* )
+      : ( $exhaustion_action );
+
+    $gpar{+EXHAUSTION} = \@exhaustion_action;
+
+    if ( $exhaustion_action[0] eq RETURN ) {
+        push @roles, [ Exhaustion => 'Return' ];
+    }
+    elsif ( $exhaustion_action[0] eq THROW ) {
+
+        push @roles,
+          @exhaustion_action > 1 && $exhaustion_action[1] eq PASSTHROUGH
+          ? [ Exhaustion => 'PassthroughThrow' ]
+          : [ Exhaustion => 'Throw' ];
+    }
+    else {
         require Iterator::Flex::Failure;
         Iterator::Flex::Failure::parameter->throw(
-            "specify only one output exhaustion action" );
+            "unknown exhaustion action: $exhaustion_action[0]" );
     }
 
-    # default to returning undef on exhaustion
-    if ( !defined $exhaustion_action ) {
-        $exhaustion_action = ON_EXHAUSTION_RETURN;
-        $attr{ +ON_EXHAUSTION_RETURN } = undef;
-    }
-
-    if ( $exhaustion_action eq ON_EXHAUSTION_RETURN ) {
-        push @{$roles}, [ Exhaustion => 'Return' ];
-        $attr{ +ON_EXHAUSTION_RETURN } = delete $attr{$exhaustion_action};
-    }
-    elsif ( $exhaustion_action eq ON_EXHAUSTION_THROW ) {
-
-        if ( $attr{ +ON_EXHAUSTION_THROW } eq ON_EXHAUSTION_PASSTHROUGH ) {
-            push @{$roles}, [ Exhaustion => 'PassthroughThrow' ];
-        }
-        else {
-            $attr{ +ON_EXHAUSTION_THROW } = delete $attr{$exhaustion_action};
-            push @{$roles}, [ Exhaustion => 'Throw' ];
-        }
-    }
-
-    push @{$roles}, 'Exhausted';
+    # push @roles, [ 'Exhausted', 'Registry' ];
 
     $class
-      = Iterator::Flex::Utils::create_class_with_roles( $class, @{$roles} );
+      = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
 
-    $attr{_name} = delete $attr{_name} // $class;
+    $ipar{_name} //= $class;
 
-    my $self = bless $class->_construct_next( \%attr ), $class;
-
+    my $self = bless $class->_construct_next( \%ipar, \%gpar ), $class;
 
     if ( exists $REGISTRY{ refaddr $self } ) {
         require Iterator::Flex::Failure;
@@ -97,23 +102,23 @@ sub new_from_attrs {
             "attempt to register an iterator subroutine which has already been registered."
         );
     }
-    $REGISTRY{ refaddr $self } = \%attr;
+    $REGISTRY{ refaddr $self } = { ITERATOR, => \%ipar, GENERAL, => \%gpar };
 
     $self->_reset_exhausted if $self->can( '_reset_exhausted' );
 
     return $self;
 }
 
-sub _validate_attrs {
+sub _validate_pars {
 
     my $class = shift;
-    my $attrs = shift;
+    my $pars = shift;
 
-    if ( defined( my $attr = $attrs->{_depends} ) ) {
+    if ( defined( my $par = $pars->{_depends} ) ) {
 
-        $attrs->{_depends} = $attr = [ $attr ] unless Ref::Util::is_arrayref( $attr );
+        $pars->{_depends} = $par = [ $par ] unless Ref::Util::is_arrayref( $par );
 
-        unless ( List::Util::all { $class->_is_iterator( $_ ) } $attr->@* ) {
+        unless ( List::Util::all { $class->_is_iterator( $_ ) } $par->@* ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "dependency #$_ is not an iterator object\n" );
@@ -164,8 +169,7 @@ Returns the subroutine which returns the next value from the iterator.
 =cut
 
 sub __iter__ {
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-    $attributes->{next};
+    return $REGISTRY{ refaddr $_[0] }{+ITERATOR}{next};
 }
 
 =method may

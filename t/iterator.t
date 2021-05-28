@@ -24,7 +24,7 @@ subtest 'attr => rewind' => sub {
     my @data = ( 1 .. 10 );
     my @got;
     my $iterator = iterator { shift @data }
-    ( rewind => sub { @data = ( 1 .. 10 ) } );
+      -pars => { rewind => sub { @data = ( 1 .. 10 ) } };
 
     while ( my $data = $iterator->next ) { push @got, $data }
 

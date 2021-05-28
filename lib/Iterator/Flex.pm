@@ -6,6 +6,8 @@ use 5.10.0;
 use strict;
 use warnings;
 
+use experimental 'postderef';
+
 our $VERSION = '0.12';
 
 use Exporter 'import';
@@ -14,12 +16,46 @@ our @EXPORT_OK
   = qw[ iterator iter iarray icycle icache igrep imap iproduct iseq ifreeze thaw ];
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-use Ref::Util qw[ is_arrayref is_hashref is_ref ];
+use Ref::Util qw[ is_arrayref is_hashref is_ref is_globref ];
 use Module::Runtime qw[ require_module ];
+
+sub _croak {
+    require Iterator::Flex::Failure;
+    my $type  = join( '::', 'Iterator::Flex::Failure', shift );
+    $type->throw( { msg => shift, trace => Iterator::Flex::Failure->croak_trace } );
+}
+
+
+=sub _parse_params
+
+     \%pars = _parse_params( \@_ );
+
+Scans the passed arrayref for trailing C<< -pars => \%pars >> entries.  If found,
+removes them from the passed array and returns C<\%pars>.
+
+=cut
+
+sub _parse_params {
+    my ( $args ) = @_;
+
+    my $pars = {};
+    # look for a -pars => \%pars at the end of the argument list
+    if (   $args->@* > 2
+        && is_hashref( $args->[-1] )
+        && !( is_ref( $args->[-2] ) || is_globref( \( $args->[-2] ) ) )
+        && $args->[-2] eq '-pars' )
+    {
+        $pars = pop $args->@*;
+        # get rid of '-pars'
+        pop $args->@*;
+    }
+
+    return $pars;
+}
 
 =sub iterator
 
-  $iter = iterator { CODE } ?%params;
+  $iter = iterator { CODE } ?\%params;
 
 Construct an iterator from code. The code will have access to the
 iterator object through C<$_[0]>.  The optional parameters are any of
@@ -31,14 +67,16 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 =cut
 
 sub iterator(&@) {
+    my $pars = _parse_params( \@_ );
+    @_ >1 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Factory;
-    Iterator::Flex::Factory->construct( { next => shift, @_ } );
+    Iterator::Flex::Factory->construct_from_iterable( $_[0], $pars );
 }
 
 
 =sub iter
 
-  $iter = iter( $iterable );
+  $iter = iter( $iterable, ?\%params );
 
 Construct an iterator from an iterable thing. The iterator will
 return C<undef> upon exhaustion.
@@ -96,14 +134,16 @@ The coderef must return the next element in the iteration.
 =cut
 
 sub iter {
+    my $pars = _parse_params( \@_ );
+    @_ > 1 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Factory;
-    Iterator::Flex::Factory->to_iterator( @_ );
+    Iterator::Flex::Factory->to_iterator( $_[0], $pars );
 }
 
 
 =sub iarray
 
-  $iterator = iarray( $array_ref );
+  $iterator = iarray( $array_ref, ?\%params );
 
 Wrap an array in an iterator.
 
@@ -128,13 +168,15 @@ The returned iterator supports the following methods:
 =cut
 
 sub iarray {
+    my $pars = _parse_params( \@_ );
+    @_ > 1 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Array;
-    return Iterator::Flex::Array->new( @_ );
+    return Iterator::Flex::Array->new( $_[0], $pars );
 }
 
 =sub icache
 
-  $iterator = icache( $iterable );
+  $iterator = icache( $iterable, ?\%params );
 
 The iterator caches the current and previous values of the passed iterator,
 
@@ -159,13 +201,15 @@ The returned iterator supports the following methods:
 =cut
 
 sub icache {
+    my $pars = _parse_params( \@_ );
+    @_ > 1 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Cache;
-    Iterator::Flex::Cache->new( shift, undef, undef );
+    Iterator::Flex::Cache->new( $_[0], $pars );
 }
 
 =sub icycle
 
-  $iterator = icycle( $array_ref );
+  $iterator = icycle( $array_ref, ?\%params );
 
 Wrap an array in an iterator.  The iterator will continuously cycle through the array's values.
 
@@ -188,14 +232,16 @@ Wrap an array in an iterator.  The iterator will continuously cycle through the 
 =cut
 
 sub icycle {
+    my $pars = _parse_params( \@_ );
+    @_ > 1 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Cycle;
-    return Iterator::Flex::Cycle->new( $_[0] );
+    return Iterator::Flex::Cycle->new( $_[0], $pars );
 }
 
 
 =sub igrep
 
-  $iterator = igrep { CODE } $iterable;
+  $iterator = igrep { CODE } $iterable, ?\%params;
 
 Returns an iterator equivalent to running L<grep> on C<$iterable> with the specified code.
 C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
@@ -213,14 +259,16 @@ The iterator supports the following methods:
 =cut
 
 sub igrep(&$) {
+    my $pars = _parse_params( \@_ );
+    @_ > 2 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Grep;
-    Iterator::Flex::Grep->new( @_ );
+    Iterator::Flex::Grep->new( \@_, $pars );
 }
 
 
 =sub imap
 
-  $iterator = imap { CODE } $iteraable;
+  $iterator = imap { CODE } $iterable, ?\%params;
 
 Returns an iterator equivalent to running L<map> on C<$iterable> with the specified code.
 C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
@@ -238,16 +286,17 @@ The iterator supports the following methods:
 =cut
 
 sub imap(&$) {
-
+    my $pars = _parse_params( \@_ );
+    @_ > 2 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Map;
-    Iterator::Flex::Map->new( @_ );
+    Iterator::Flex::Map->new( \@_, $pars );
 }
 
 
 =sub iproduct
 
-  $iterator = iproduct( $iterable1, $iterable2, ... );
-  $iterator = iproduct( key1 => $iterable1, key2 => iterable2, ... );
+  $iterator = iproduct( $iterable1, $iterable2, ..., ?\%params );
+  $iterator = iproduct( key1 => $iterable1, key2 => iterable2, ..., ?\%params );
 
 Returns an iterator which produces a Cartesian product of the input iterables.
 If the input to B<iproduct> is a list of iterables, C<$iterator> will return an
@@ -280,9 +329,9 @@ C<prev> or C<__prev__> method.
 =cut
 
 sub iproduct {
-
+    my $pars = _parse_params( \@_ );
     require Iterator::Flex::Product;
-    return Iterator::Flex::Product->new( @_ );
+    return Iterator::Flex::Product->new( \@_, $pars );
 }
 
 =sub iseq
@@ -317,14 +366,15 @@ The iterator supports the following methods:
 
 
 sub iseq {
+    my $pars = _parse_params( \@_ );
     require Iterator::Flex::Sequence;
-    Iterator::Flex::Sequence->new( @_ );
+    Iterator::Flex::Sequence->new( \@_, $pars );
 }
 
 
 =sub ifreeze
 
-  $iter = ifreeze { CODE } $iterator;
+  $iter = ifreeze { CODE } $iterator, ?\%params;
 
 Construct a pass-through iterator which freezes the input iterator
 after every call to C<next>.  C<CODE> will be passed the frozen state
@@ -354,15 +404,17 @@ If C<$iterator> provides a C<prev> method.
 =cut
 
 sub ifreeze (&$) {
+    my $pars = _parse_params( \@_ );
+    @_ > 2 && _croak( parameter => 'extra_argument' );
     require Iterator::Flex::Freeze;
-    Iterator::Flex::Freeze->new( @_ );
+    Iterator::Flex::Freeze->new( \@_, $pars );
 }
 
 
 =sub thaw
 
    $frozen = $iterator->freeze;
-   $iterator = thaw( $frozen );
+   $iterator = thaw( $frozen, ?\%params );
 
 Restore an iterator that has been frozen.  See L</Serialization of
 Iterators> for more information.
@@ -371,15 +423,10 @@ Iterators> for more information.
 =cut
 
 sub thaw {
+    my $pars = _parse_params( \@_ );
+    @_ > 1 && _croak( parameter => 'extra_argument' );
 
-    my $step = shift;
-
-    if ( @_ ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "thaw: too many args\n" );
-    }
-
-    my @steps = @$step;
+    my @steps = @{$_[0]};
 
     # parent data and iterator state is last
     my $exhausted = pop @steps;
@@ -416,7 +463,7 @@ sub thaw {
         }
     }
 
-    my $iter = $package->$new_from_state( $state );
+    my $iter = $package->$new_from_state( $state, $pars );
     $exhausted ? $iter->set_exhausted : $iter->_reset_exhausted;
     return $iter;
 }

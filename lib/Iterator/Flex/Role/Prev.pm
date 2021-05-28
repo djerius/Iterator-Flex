@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils;
+use Iterator::Flex::Utils qw( :default ITERATOR );
 use Role::Tiny;
 
 use namespace::clean;
@@ -23,10 +23,7 @@ Returns the previous value.
 =cut
 
 sub prev {
-
-    my $attributes = $REGISTRY{ refaddr $_[0] };
-
-    $attributes->{prev}->( $_[0] );
+     $REGISTRY{ refaddr $_[0] }{+ITERATOR}{prev}->( $_[0] );
 }
 *__prev__ = \&prev;
 
