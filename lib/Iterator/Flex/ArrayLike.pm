@@ -134,7 +134,6 @@ sub construct_from_state {
     }
 
     my $self;
-    my $is_exhausted;
 
     return {
 

@@ -12,7 +12,7 @@ use Iterator::Flex::Utils qw( :default :RegistryKeys );
 
 use namespace::clean;
 
-=method isentinel
+=method imported_sentinel
 
   $sentinel = $iterator->sentinel
 

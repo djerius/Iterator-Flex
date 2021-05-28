@@ -31,7 +31,7 @@ use Iterator::Flex::Method;
   $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%gpar );
 
 Construct an iterator from an iterable thing. The C<%gpar> parameter
-may contain 
+may contain
 return C<undef> upon exhaustion.
 
  An iterable thing is
@@ -157,7 +157,7 @@ I<spec> can be one of the following:
 
 =item [ C<throw> => I<exception string or object> ]
 
-The iterator will natively signal its exhaustion by throwing an exception.
+The iterator will signal its exhaustion by throwing an exception.
 
 =item C<return>
 
@@ -186,9 +186,11 @@ I<spec> can be one of the following:
 
 =back
 
+=back
+
 =cut
 
-sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
+sub construct ( $, $in_ipar = {}, $in_gpar = {} ) {
 
     unless ( Ref::Util::is_hashref( $in_ipar ) ) {
         require Iterator::Flex::Failure;
@@ -369,6 +371,8 @@ a coderef, the arguments are passed to L</construct>.
 
 a globref, the arguments are passed to L</construct>.
 
+=back
+
 =cut
 
 
@@ -399,11 +403,13 @@ sub construct_from_iterable ( $CLASS, $obj, $pars = {} ) {
         ( ref( $obj ) || 'SCALAR' ) );
 }
 
-=class_method construct_from_object
+=class_method construct_from_array
+
+  $iter = Iterator::Flex::Factory->construct_from_array( $array_ref, %parameters );
 
 =cut
 
-sub construct_from_array ( $CLASS, $obj, $gpars ) {
+sub construct_from_array ( $, $obj, $gpars ) {
     require Iterator::Flex::Array;
     return Iterator::Flex::Array->new( $obj, $gpars );
 }
@@ -470,7 +476,7 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
     return $CLASS->construct( \%ipar, \%gpar );
 }
 
-sub construct_from_iterator_flex ( $CLASS, $obj, $ipar, $gpar ) {
+sub construct_from_iterator_flex ( $, $obj, $, $gpar ) {
 
     my @exhaustion = do {
         my $exhaustion = $gpar->{ +EXHAUSTION };
@@ -534,13 +540,13 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $ipar, $gpar ) {
     return $obj;
 }
 
-=method _parse_pars
+=class_method _parse_pars
 
   ( \%iter_pars, \%general_pars ) = $class->_parse_pars( \%pars );
 
 =cut
 
-sub _parse_pars( $CLASS, $pars ) {
+sub _parse_pars( $, $pars ) {
 
     my %ipars = $pars->%*;
     # move  general parsibutes into their own hash

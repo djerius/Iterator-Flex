@@ -15,6 +15,8 @@ use List::Util;
 use parent 'Iterator::Flex::Base';
 use Iterator::Flex::Utils qw( IS_EXHAUSTED );
 
+use namespace::clean;
+
 =method new
 
   # integer sequence starting at 0, incrementing by 1, ending at $end

@@ -13,6 +13,8 @@ use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util;
 
+use namespace::clean;
+
 =method new
 
   $iterator = Iterator::Flex::Product->new( $iterable1, $iterable2, ... );

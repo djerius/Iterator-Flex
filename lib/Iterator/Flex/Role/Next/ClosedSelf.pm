@@ -23,7 +23,8 @@ use namespace::clean;
 
 sub _construct_next {
 
-    my $class = shift;
+    # my $class = shift;
+    shift;
     my $ipar = shift;
 
     my $sub = $ipar->{next} // do {

@@ -12,6 +12,8 @@ use Iterator::Flex::Factory;
 use Ref::Util;
 use parent 'Iterator::Flex::Base';
 
+use namespace::clean;
+
 =method new
 
   $iterator = Ierator::Flex::Map->new( $coderef, $iterable );

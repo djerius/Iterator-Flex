@@ -12,6 +12,8 @@ use Iterator::Flex::Utils qw( IS_EXHAUSTED );
 use Iterator::Flex::Factory;
 use Scalar::Util;
 
+use namespace::clean;
+
 =method new
 
   $iterator = Iterator::Flex::Cache->new( $iterable );

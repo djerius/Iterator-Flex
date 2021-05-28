@@ -507,6 +507,8 @@ For example, if an iterator is reading lines from a stream, it cannot
 know that it is at the last line.  It must attempt to read a line,
 then fail, before it knows it is exhausted.
 
+=back
+
 =item I<reset>
 
 Iterators may optionally be reset to their initial state.
@@ -532,7 +534,7 @@ Iterators may be chained, and an iterator's dependencies are frozen automaticall
 
 =back
 
-=had2 This Module
+=head2 This Module
 
 This module provides a generic generator for iterators (L</iterator>) as
 well as friendly interfaces to special purpose iterators.  To create

@@ -190,7 +190,7 @@ sub _can_meth {
 
 =head1 DESCRIPTION
 
-This is a C<Role::Tiny> role which adds a variety of utiliy methods to
+This is a C<Role::Tiny> role which adds a variety of utility methods to
 a class.  They are structured that way so that they may be overridden
-if necessary.  (Well, technically I<underridden> if they already exist before
+if necessary.  (Well, technically I<under-ridden> if they already exist before
 this role is applied).

@@ -12,6 +12,8 @@ use Iterator::Flex::Utils qw[ THROW IS_EXHAUSTED EXHAUSTION ];
 use Ref::Util;
 use parent 'Iterator::Flex::Base';
 
+use namespace::clean;
+
 =method new
 
   $iterator = Ierator::Flex::Grep->new( $coderef, $iterable );

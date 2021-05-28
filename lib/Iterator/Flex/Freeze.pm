@@ -13,6 +13,8 @@ use parent 'Iterator::Flex::Base';
 use Scalar::Util;
 use Ref::Util;
 
+use namespace::clean;
+
 =method construct
 
   $iter = Iterator::Flex::Freeze->new( $coderef, $iterator );
