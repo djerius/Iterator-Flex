@@ -6,7 +6,9 @@ subtest '_module_name' => sub {
 
     package My::T::Test::Role::Utils {
         use Test2::V0;
-        use parent 'Iterator::Flex::Base';
+        use Role::Tiny::With;
+        with 'Iterator::Flex::Role::Utils';
+
 
         subtest 'user package' => sub {
             is( __PACKAGE__->_module_name( qw( foo bar bas ) ),
@@ -24,7 +26,8 @@ subtest '_module_name' => sub {
 
     package Iterator::Flex::Test::Foo {
         use Test2::V0;
-        use parent 'Iterator::Flex::Base';
+        use Role::Tiny::With;
+        with 'Iterator::Flex::Role::Utils';
 
         subtest 'Iterator::Flex::...' => sub {
             is( __PACKAGE__->_module_name( qw( foo bar bas ) ),
@@ -57,7 +60,8 @@ subtest '_module_name' => sub {
 
     package Iterator::Flexibility {
         use Test2::V0;
-        use parent 'Iterator::Flex::Base';
+        use Role::Tiny::With;
+        with 'Iterator::Flex::Role::Utils';
 
         subtest 'Iterator::Flexibility' => sub {
             is( __PACKAGE__->_module_name( qw( foo bar bas ) ),
