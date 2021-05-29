@@ -205,6 +205,56 @@ sub _can_meth {
     return undef;
 }
 
+=for stopwords
+fallbacks
+
+=cut
+
+=method _resolve_meth
+
+  $code = $obj->_resolve_meth( $target, $method, @fallbacks );
+
+Return a coderef to the specified method or one of the fallbacks.
+
+If C<$method> is a coderef, it is returned.
+
+If C<$method> is defined and is not a coderef, it is checked for directly via C<$target->can>.
+If it does not exist, a C<Iterator::Flex::Failure::parameter> error is thrown.
+
+If C<$method> is not defined, then C<< $obj->_can_meth( $target, @fallbacks ) >> is returned.
+
+=cut
+
+sub _resolve_meth {
+    my ( $obj, $target, $method, @fallbacks ) = @_;
+
+    my $code = do {
+
+        if ( defined $method ) {
+            Ref::Util::is_coderef( $method )
+              ? $method
+              : $target->can( $method )
+              // $obj->_throw( parameter =>
+                  qq{method '$method' is not provided by the object} );
+        }
+
+        else {
+            $obj->_can_meth( $target, @fallbacks );
+        }
+    };
+
+    return $code;
+}
+
+=method _throw
+
+  $obj->_throw( $type => $message );
+
+Throw an exception object of class C<Iterator::Flex::Failure::$type> with the given message.
+
+=cut
+
+
 sub _throw {
     shift;
     require Iterator::Flex::Failure;

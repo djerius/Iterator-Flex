@@ -88,19 +88,15 @@ sub construct_from_state {
       unless Ref::Util::is_hashref( $state );
 
     my ( $obj, $prev, $current, $next, $length, $at )
-      = @{$state}{qw[ object prev current next ]};
+      = @{$state}{qw[ object prev current next length at ]};
 
     $class->_throw(
         parameter => "state 'object' argument must be a blessed reference" )
       unless Ref::Util::is_blessed_ref( $obj );
 
+    $length = $class->_resolve_meth( $obj, $length, 'length', 'len' );
 
-    $length //= $class->_can_meth( $obj, 'length', 'len' )
-      // $class->_throw(
-        parameter => "no 'length' method defined or discovered" );
-
-    $at //= $class->_can_meth( $obj, 'at', 'getitem' )
-      // $class->_throw( parameter => "no 'at' method defined or discovered" );
+    $at = $class->_resolve_meth( $obj, $at, 'at', 'getitem' );
 
     my $len = $obj->$length;
 
