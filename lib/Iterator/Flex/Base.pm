@@ -84,6 +84,42 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     # push @roles, [ 'Exhausted', 'Registry' ];
 
+    if ( defined( my $par = $ipar{+METHODS} ) ) {
+
+        state $loaded = do {
+            require Iterator::Flex::Method;
+            Iterator::Flex::Method->import;
+        };
+
+        $class->_throw( parameter =>
+                        "value for methods paribute must be a hash reference" )
+          unless Ref::Util::is_hashref( $par );
+
+        for my $name ( keys $par->%* ) {
+
+            my $code = $par->{$name};
+
+            $class->_throw( parameter =>
+                  "value for 'methods' parameter key '$name' must be a code reference"
+            ) unless Ref::Util::is_coderef( $code );
+
+            my $cap_name = ucfirst( $name );
+
+            # create role for the method
+            my $role = eval { Method( $cap_name, name => $name ) };
+
+            if ( $@ ne '' ) {
+                my $error = $@;
+                die $error
+                  unless Ref::Util::is_blessed_ref( $error )
+                  && $error->isa( 'Iterator::Flex::Failure::RoleExists' );
+                $role = $error->payload;
+            }
+
+            push @roles, $role;
+        }
+    }
+
     $class = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
 
     $ipar{_name} //= $class;

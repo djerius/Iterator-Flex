@@ -25,8 +25,6 @@ use Iterator::Flex::Utils qw[
 
 Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Method;
-
 =class_method to_iterator
 
   $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%gpar );
@@ -277,37 +275,8 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )
       if !defined( $ipar{next} );
 
+    # add on methods are dealt with in the iterator constructor.
     delete $ipar_k{methods};
-    if ( defined( my $par = $ipar{methods} ) ) {
-
-        $CLASS->_throw(
-            "value for methods paribute must be a hash reference\n" )
-          unless Ref::Util::is_hashref( $par );
-
-        for my $name ( keys $par->%* ) {
-
-            my $code = $par->{$name};
-
-            $CLASS->_throw( parameter =>
-                  "value for 'methods' parameter key '$name' must be a code reference"
-            ) unless Ref::Util::is_coderef( $code );
-
-            my $cap_name = ucfirst( $name );
-
-            # create role for the method
-            my $role = eval { Method( $cap_name, name => $name ) };
-
-            if ( $@ ne '' ) {
-                my $error = $@;
-                die $error
-                  unless $error->$_isa( 'Iterator::Flex::Failure::RoleExists' );
-
-                $role = $error->payload;
-            }
-
-            push @roles, $role;
-        }
-    }
 
     if ( !!%ipar_k || !!%gpar_k ) {
 
