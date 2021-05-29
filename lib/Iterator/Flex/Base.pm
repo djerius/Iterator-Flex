@@ -91,7 +91,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
         };
 
         $class->_throw( parameter =>
-                        "value for methods paribute must be a hash reference" )
+                        "value for methods parameter must be a hash reference" )
           unless Ref::Util::is_hashref( $par );
 
         for my $name ( keys $par->%* ) {
