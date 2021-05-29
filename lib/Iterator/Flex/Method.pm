@@ -15,7 +15,7 @@ sub make_variant_package_name {
     $package = "Iterator::Flex::Role::Method::$package";
 
     if ( Role::Tiny->is_role( $package ) ) {
-        use Iterator::Flex::Failure;
+        require Iterator::Flex::Failure;
         Iterator::Flex::Failure::RoleExists->throw( { payload => $package } );
     }
 

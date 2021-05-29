@@ -21,7 +21,6 @@ use Module::Runtime  ();
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
 use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys );
-use Iterator::Flex::Failure;
 
 use namespace::clean;
 
