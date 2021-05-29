@@ -11,7 +11,6 @@ use experimental qw( signatures declared_refs );
 
 our $VERSION = '0.12';
 
-use Scalar::Util;
 use Ref::Util;
 use List::Util;
 use Role::Tiny       ();
