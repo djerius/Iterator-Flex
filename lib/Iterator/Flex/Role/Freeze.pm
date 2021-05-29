@@ -26,8 +26,8 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 
 sub freeze {
 
-    my $obj        = $_[0];
-    my $ipar = $REGISTRY{ refaddr $obj }{+ITERATOR};
+    my $obj  = $_[0];
+    my $ipar = $REGISTRY{ refaddr $obj }{ +ITERATOR };
 
     my @freeze;
 
@@ -36,11 +36,9 @@ sub freeze {
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
         @{ $ipar->{_depends} };
-        if ( $cant ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "dependency: @{[ $cant->{_name} ]} is not serializeable\n" );
-        }
+        $obj->_throw( parameter =>
+              "dependency: @{[ $cant->{_name} ]} is not serializeable" )
+          if $cant;
 
         # now freeze them
         @freeze = map $_->freeze, @{ $ipar->{_depends} };

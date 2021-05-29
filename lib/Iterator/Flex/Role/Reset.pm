@@ -30,18 +30,16 @@ sub reset {
 
     my $obj = $_[0];
 
-    my $ipar = $REGISTRY{ refaddr $obj }{+ITERATOR};
+    my $ipar = $REGISTRY{ refaddr $obj }{ +ITERATOR };
 
     if ( defined $ipar->{_depends} ) {
 
         # first check if dependencies can reset.
-        my $cant = List::Util::first { !$_->can( 'reset' ) }  @{ $ipar->{_depends} };
-        if ( $cant ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "dependency: @{[ $cant->{_name} ]} does not have a 'reset' method\n"
-            );
-        }
+        my $cant
+          = List::Util::first { !$_->can( 'reset' ) } @{ $ipar->{_depends} };
+        $obj->_throw( parameter =>
+              "dependency: @{[ $cant->{_name} ]} does not have a 'reset' method"
+        ) if $cant;
 
         # now reset them
         $_->reset foreach @{ $ipar->{_depends} };

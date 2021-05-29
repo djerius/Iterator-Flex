@@ -39,10 +39,8 @@ The returned iterator supports the following methods:
 sub construct {
     my $class = shift;
 
-    unless ( Ref::Util::is_arrayref( $_[0] ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "argument must be an ARRAY reference" );
-    }
+    $class->_throw( parameter => "argument must be an ARRAY reference" )
+      unless Ref::Util::is_arrayref( $_[0] );
 
     $class->construct_from_state( { array => $_[0] } );
 }
@@ -51,42 +49,27 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
-    unless ( Ref::Util::is_hashref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state must be a HASH reference" );
-    }
+    $class->_throw( parameter => "'state' parameter must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
     my ( $arr, $prev, $current, $next )
       = @{$state}{qw[ array prev current next ]};
 
-    unless ( Ref::Util::is_arrayref( $arr ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state 'array' argument must be an ARRAY reference" );
-    }
+    $class->_throw( parameter => "state 'array' parameter must be a HASH reference" )
+      unless Ref::Util::is_arrayref( $arr );
 
     my $len = @$arr;
 
     $next = 0 unless defined $next;
 
-    if ( defined $prev && ( $prev < 0 || $prev >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'prev' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'prev' argument" )
+      if defined $prev && ( $prev < 0 || $prev >= $len );
 
-    if ( defined $current && ( $current < 0 || $current >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'current' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'current' argument" )
+      if defined $current && ( $current < 0 || $current >= $len );
 
-    if ( $next < 0 || $next > $len ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'next' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'next' argument" )
+      if $next < 0 || $next > $len;
 
     my $self;
 

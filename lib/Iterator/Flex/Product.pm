@@ -56,11 +56,8 @@ sub construct {
 
     my $class = shift;
 
-    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "incorrect type or number of arguments" );
-    }
+    $class->_throw( parameter => "incorrect type or number of arguments" )
+      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
 
     $class->construct_from_state( { iterators => $_[0] } );
 }
@@ -69,10 +66,8 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
-    unless ( Ref::Util::is_hashref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "state must be a HASH reference" );
-}
+    $class->_throw( parameter => "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
     my ( $iterators, $value ) = @{$state}{qw[ iterators value ]};
 
@@ -85,23 +80,23 @@ sub construct_from_state {
     if ( Ref::Util::is_ref( $iterators->[0] ) ) {
 
         @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_,{ EXHAUSTION ,=> RETURN } )
+            Iterator::Flex::Factory->to_iterator( $_,
+                { EXHAUSTION, => RETURN } )
         } @$iterators;
     }
 
     else {
         @keys     = List::Util::pairkeys @$iterators;
         @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_, { EXHAUSTION ,=> RETURN } )
+            Iterator::Flex::Factory->to_iterator( $_,
+                { EXHAUSTION, => RETURN } )
         } List::Util::pairvalues @$iterators;
     }
 
     # can only work if the iterators support a rwind method
-    unless ( @iterator == grep { defined }
-             map { $class->_can_meth( $_, 'rewind' ) } @iterator ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "all iteratables must provide a rewind method\n" );
-    }
+    $class->_throw( parameter => "all iterables must provide a rewind method" )
+      unless @iterator == grep { defined }
+      map { $class->_can_meth( $_, 'rewind' ) } @iterator;
 
     my @value = @$value;
     my @set   = ( 1 ) x @value;
@@ -195,10 +190,7 @@ sub construct_from_state {
         $params{_roles} = ['Freeze'];
     }
 
-    return {
-        %params,
-        _name      => 'iproduct'
-    };
+    return { %params, _name => 'iproduct' };
 }
 
 sub new_from_state {
@@ -210,11 +202,9 @@ sub new_from_state {
 
     if ( @$keys ) {
 
-        unless ( @$keys == @$iterators ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "number of keys not equal to number of iterators\n" );
-        }
+        $class->_throw(
+            parameter => "number of keys not equal to number of iterators\n" )
+          unless @$keys == @$iterators;
 
         $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
     }

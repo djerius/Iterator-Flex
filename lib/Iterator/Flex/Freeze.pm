@@ -50,36 +50,24 @@ sub construct {
 
     my $class = shift;
 
-    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "incorrect type or number of arguments" );
-    }
+    $class->_throw( parameter => "incorrect type or number of arguments" )
+      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
 
-    my ( $serialize, $src ) = @{$_[0]};
+    my ( $serialize, $src ) = @{ $_[0] };
 
+    $class->_throw( parameter => "'serialize' must be a CODE reference" )
+      unless Ref::Util::is_coderef( $serialize );
 
-    if ( ! Ref::Util::is_coderef( $serialize ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "'serialize' must be a CODE reference" );
-    }
+    $src
+      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => RETURN } );
 
-    $src = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION ,=> RETURN } );
+    $class->_throw( parameter => "'src' iterator must provide a freeze method" )
+      unless $class->_can_meth( $src, 'freeze' );
 
-    unless ( $class->_can_meth( $src, 'freeze' ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "'src' iterator must provide a freeze method" );
-    }
-
-    unless ( $class->_can_meth( $src, 'set_exhausted' )
-        && $class->_can_meth( $src, 'is_exhausted' ) )
-    {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "'src' iterator must provide set_exhausted/is_exhausted methods" );
-    }
+    $class->_throw( parameter =>
+          "'src' iterator must provide set_exhausted/is_exhausted methods" )
+      unless $class->_can_meth( $src, 'set_exhausted' )
+      && $class->_can_meth( $src, 'is_exhausted' );
 
     my $self;
     my %params = (
@@ -88,7 +76,7 @@ sub construct {
         _self => \$self,
 
         _depends => $src,
-        next    => sub {
+        next     => sub {
             my $value = $src->();
             local $_ = $src->freeze;
             &$serialize();

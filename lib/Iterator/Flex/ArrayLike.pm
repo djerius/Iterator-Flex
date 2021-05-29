@@ -84,54 +84,36 @@ sub construct_from_state {
 
     my ( $class, $state ) = @_;
 
-    unless ( Ref::Util::is_hashref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state must be a HASH reference" );
-    }
+    $class->_throw( parameter => "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
     my ( $obj, $prev, $current, $next, $length, $at )
       = @{$state}{qw[ object prev current next ]};
 
-    unless ( Ref::Util::is_blessed_ref( $obj ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state 'object' argument must be a blessed reference" );
-    }
+    $class->_throw(
+        parameter => "state 'object' argument must be a blessed reference" )
+      unless Ref::Util::is_blessed_ref( $obj );
 
-    $length //= $class->_can_meth( $obj, 'length', 'len' ) // do {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "no 'length' method defined or discovered" );
-    };
 
-    $at //= $class->_can_meth( $obj, 'at', 'getitem' ) // do {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "no 'at' method defined or discovered" );
-    };
+    $length //= $class->_can_meth( $obj, 'length', 'len' )
+      // $class->_throw(
+        parameter => "no 'length' method defined or discovered" );
+
+    $at //= $class->_can_meth( $obj, 'at', 'getitem' )
+      // $class->_throw( parameter => "no 'at' method defined or discovered" );
 
     my $len = $obj->$length;
 
     $next = 0 unless defined $next;
 
-    if ( defined $prev && ( $prev < 0 || $prev >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'prev' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'prev' argument" )
+      if defined $prev && ( $prev < 0 || $prev >= $len );
 
-    if ( defined $current && ( $current < 0 || $current >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'current' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'current' argument" )
+      if defined $current && ( $current < 0 || $current >= $len );
 
-    if ( $next < 0 || $next > $len ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for state 'next' argument" );
-    }
+    $class->_throw( parameter => "illegal value for state 'next' argument" )
+      if $next < 0 || $next > $len;
 
     my $self;
 

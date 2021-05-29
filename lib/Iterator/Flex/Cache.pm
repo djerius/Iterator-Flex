@@ -55,11 +55,8 @@ sub construct_from_state {
 
     my ( $class, $state ) = ( shift, shift );
 
-    unless ( Ref::Util::is_hashref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state must be a HASH reference" );
-    }
+    $class->throw( parameter => "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 

@@ -168,4 +168,26 @@ subtest '_can_meth' => sub {
 
 };
 
+subtest '_throw' => sub {
+
+    package My::T::Role::Utils::_throw;
+    use Test2::V0;
+    use Role::Tiny ();
+
+    subtest 'class' => sub {
+        my $pkg = ::Pkg;
+        Role::Tiny->apply_roles_to_package( $pkg->name, 'Iterator::Flex::Role::Utils' );
+
+        my $name = $pkg->name;
+
+        like (
+            dies { eval "package $name; __PACKAGE__->_throw( internal => 'foo' )"; die $@ if $@ ne '' },
+              qr|Failure caught at t/Role/Utils.t line \d+\.$|m,
+        );
+
+    };
+
+
+};
+
 done_testing;

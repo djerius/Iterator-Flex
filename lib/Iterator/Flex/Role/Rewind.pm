@@ -25,16 +25,13 @@ Resets the iterator to its initial value.
 
 sub rewind {
 
-    my $obj        = $_[0];
-    my $ipar = $REGISTRY{ refaddr $obj }{+ITERATOR};
+    my $obj  = $_[0];
+    my $ipar = $REGISTRY{ refaddr $obj }{ +ITERATOR };
 
     if ( defined $ipar->{_depends} ) {
 
-        if ( ! $obj->_may_meth( 'rewind', $ipar ) ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "a dependency is not rewindable\n" );
-        }
+        $obj->_throw( parameter => "a dependency is not rewindable\n" )
+          if !$obj->_may_meth( 'rewind', $ipar );
 
         # now rewind them
         $_->rewind foreach @{ $ipar->{_depends} };

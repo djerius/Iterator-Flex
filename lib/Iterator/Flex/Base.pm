@@ -51,13 +51,10 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     $class->_validate_pars( \%ipar );
 
-    my $roles = delete($ipar{_roles}) // [];
+    my $roles = delete( $ipar{_roles} ) // [];
 
-    unless ( Ref::Util::is_arrayref( $roles ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "_roles must be an arrayref" );
-    }
+    $class->throw( parameter => "_roles must be an arrayref" )
+      unless Ref::Util::is_arrayref( $roles );
 
     my @roles = ( $roles->@* );
 
@@ -68,7 +65,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
       ? ( $exhaustion_action->@* )
       : ( $exhaustion_action );
 
-    $gpar{+EXHAUSTION} = \@exhaustion_action;
+    $gpar{ +EXHAUSTION } = \@exhaustion_action;
 
     if ( $exhaustion_action[0] eq RETURN ) {
         push @roles, [ Exhaustion => 'Return' ];
@@ -81,26 +78,22 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
           : [ Exhaustion => 'Throw' ];
     }
     else {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "unknown exhaustion action: $exhaustion_action[0]" );
+        $class->_throw(
+            parameter => "unknown exhaustion action: $exhaustion_action[0]" );
     }
 
     # push @roles, [ 'Exhausted', 'Registry' ];
 
-    $class
-      = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
+    $class = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
 
     $ipar{_name} //= $class;
 
     my $self = bless $class->_construct_next( \%ipar, \%gpar ), $class;
 
-    if ( exists $REGISTRY{ refaddr $self } ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "attempt to register an iterator subroutine which has already been registered."
-        );
-    }
+    $class->_throw( parameter =>
+          "attempt to register an iterator subroutine which has already been registered."
+    ) if exists $REGISTRY{ refaddr $self };
+
     $REGISTRY{ refaddr $self } = { ITERATOR, => \%ipar, GENERAL, => \%gpar };
 
     $self->_reset_exhausted if $self->can( '_reset_exhausted' );
@@ -111,17 +104,13 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 sub _validate_pars {
 
     my $class = shift;
-    my $pars = shift;
+    my $pars  = shift;
 
     if ( defined( my $par = $pars->{_depends} ) ) {
 
-        $pars->{_depends} = $par = [ $par ] unless Ref::Util::is_arrayref( $par );
-
-        unless ( List::Util::all { $class->_is_iterator( $_ ) } $par->@* ) {
-            require Iterator::Flex::Failure;
-            Iterator::Flex::Failure::parameter->throw(
-                "dependency #$_ is not an iterator object\n" );
-        }
+        $pars->{_depends} = $par = [$par] unless Ref::Util::is_arrayref( $par );
+        $class->_throw( parameter => "dependency #$_ is not an iterator object" )
+          unless List::Util::all { $class->_is_iterator( $_ ) } $par->@*;
     }
 
     return;

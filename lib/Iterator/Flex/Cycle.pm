@@ -49,40 +49,28 @@ sub construct_from_state {
 
     my ( $class, $state ) = ( shift, shift );
 
-    unless ( Ref::Util::is_hashref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state must be a HASH reference" );
-    }
+    $class->_throw( parameter => "state must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
     my ( $arr, $prev, $current, $next )
       = @{$state}{qw[ array prev current next ]};
 
-    unless ( Ref::Util::is_arrayref( $arr ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "argument must be an ARRAY reference" );
-    }
+    $class->_throw( parameter => "argument must be an ARRAY reference" )
+      unless Ref::Util::is_arrayref( $arr );
 
     my $len = @$arr;
 
     $next = 0 unless defined $next;
 
-    if ( defined $prev && ( $prev < 0 || $prev >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "illegal value for 'prev'" );
-    }
+    $class->_throw( parameter => "illegal value for 'prev'" )
+      if defined $prev && ( $prev < 0 || $prev >= $len );
 
-    if ( defined $current && ( $current < 0 || $current >= $len ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "illegal value for 'current'" );
-    }
+    $class->_throw( parameter => "illegal value for 'current'" )
+      if defined $current && ( $current < 0 || $current >= $len );
 
-    if ( $next < 0 || $next > $len ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "illegal value for 'next'" );
-    }
+    $class->throw( parameter => "illegal value for 'next'" )
+      if $next < 0 || $next > $len;
+
 
     return {
 

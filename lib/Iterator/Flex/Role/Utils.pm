@@ -34,9 +34,8 @@ sub _load_module {
         return $module if eval { Module::Runtime::require_module( $module ) };
     }
 
-    require Iterator::Flex::Failure;
-    Iterator::Flex::Failure::class->throw(
-        join ' ',
+    $class->_throw(
+        class => join ' ',
         "unable to find a module for",
         join( "::", @path ),
         , "in @{[ join( ', ', $class->_namespaces ) ]}"
@@ -205,6 +204,15 @@ sub _can_meth {
 
     return undef;
 }
+
+sub _throw {
+    shift;
+    require Iterator::Flex::Failure;
+    local @Iterator::Flex::Role::Utils::CARP_NOT = scalar caller;
+    my $type  = join( '::', 'Iterator::Flex::Failure', shift );
+    $type->throw( { msg => shift, trace => Iterator::Flex::Failure->croak_trace } );
+}
+
 
 1;
 

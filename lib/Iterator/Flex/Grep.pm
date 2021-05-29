@@ -39,20 +39,15 @@ The iterator supports the following methods:
 
 
 sub construct {
+    my $class = shift;
 
-    # my $class =
-    shift;
-
-    unless ( @_ == 1 && Ref::Util::is_arrayref( $_[0] ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "incorrect type or number of arguments" );
-    }
+    $class->_throw( parameter => "incorrect type or number of arguments" )
+      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
 
     my ( $code, $src ) = @{ $_[0] };
 
-    $src = Iterator::Flex::Factory->to_iterator( $src,
-        { EXHAUSTION, => THROW } );
+    $src
+      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => THROW } );
 
     my $self;
     my $is_exhausted;

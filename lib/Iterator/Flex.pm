@@ -19,7 +19,7 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 use Ref::Util qw[ is_arrayref is_hashref is_ref is_globref ];
 use Module::Runtime qw[ require_module ];
 
-sub _croak {
+sub _throw {
     require Iterator::Flex::Failure;
     my $type  = join( '::', 'Iterator::Flex::Failure', shift );
     $type->throw( { msg => shift, trace => Iterator::Flex::Failure->croak_trace } );
@@ -68,7 +68,7 @@ the parameters recognized by L<Iterator::Flex::Base/construct>.
 
 sub iterator(&@) {
     my $pars = _parse_params( \@_ );
-    @_ >1 && _croak( parameter => 'extra_argument' );
+    @_ >1 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Factory;
     Iterator::Flex::Factory->construct_from_iterable( $_[0], $pars );
 }
@@ -135,7 +135,7 @@ The coderef must return the next element in the iteration.
 
 sub iter {
     my $pars = _parse_params( \@_ );
-    @_ > 1 && _croak( parameter => 'extra_argument' );
+    @_ > 1 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Factory;
     Iterator::Flex::Factory->to_iterator( $_[0], $pars );
 }
@@ -169,7 +169,7 @@ The returned iterator supports the following methods:
 
 sub iarray {
     my $pars = _parse_params( \@_ );
-    @_ > 1 && _croak( parameter => 'extra_argument' );
+    @_ > 1 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Array;
     return Iterator::Flex::Array->new( $_[0], $pars );
 }
@@ -202,7 +202,7 @@ The returned iterator supports the following methods:
 
 sub icache {
     my $pars = _parse_params( \@_ );
-    @_ > 1 && _croak( parameter => 'extra_argument' );
+    @_ > 1 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Cache;
     Iterator::Flex::Cache->new( $_[0], $pars );
 }
@@ -233,7 +233,7 @@ Wrap an array in an iterator.  The iterator will continuously cycle through the 
 
 sub icycle {
     my $pars = _parse_params( \@_ );
-    @_ > 1 && _croak( parameter => 'extra_argument' );
+    @_ > 1 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Cycle;
     return Iterator::Flex::Cycle->new( $_[0], $pars );
 }
@@ -260,7 +260,7 @@ The iterator supports the following methods:
 
 sub igrep(&$) {
     my $pars = _parse_params( \@_ );
-    @_ > 2 && _croak( parameter => 'extra_argument' );
+    @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Grep;
     Iterator::Flex::Grep->new( \@_, $pars );
 }
@@ -287,7 +287,7 @@ The iterator supports the following methods:
 
 sub imap(&$) {
     my $pars = _parse_params( \@_ );
-    @_ > 2 && _croak( parameter => 'extra_argument' );
+    @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Map;
     Iterator::Flex::Map->new( \@_, $pars );
 }
@@ -405,7 +405,7 @@ If C<$iterator> provides a C<prev> method.
 
 sub ifreeze (&$) {
     my $pars = _parse_params( \@_ );
-    @_ > 2 && _croak( parameter => 'extra_argument' );
+    @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Freeze;
     Iterator::Flex::Freeze->new( \@_, $pars );
 }
@@ -424,7 +424,7 @@ Iterators> for more information.
 
 sub thaw {
     my $pars = _parse_params( \@_ );
-    @_ > 1 && _croak( parameter => 'extra_argument' );
+    @_ > 1 && _throw( parameter => 'extra_argument' );
 
     my @steps = @{$_[0]};
 
@@ -436,21 +436,13 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
-    unless ( is_hashref( $state ) || is_arrayref( $state ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "state argument for $package constructor must be a HASH or ARRAY reference "
-        );
-    }
+    _throw( parameter => "state argument for $package constructor must be a HASH or ARRAY reference" )
+      unless is_hashref( $state ) || is_arrayref( $state );
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
-      or do {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "unable to thaw: $package doesn't provide 'new_from_state' method\n"
-        );
-      };
+      or 
+    _throw( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
 
     if ( @depends ) {
 
