@@ -391,6 +391,9 @@ by the constructed iterator:
 
 sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
 
+    $CLASS->_throw( parameter => q['$object' parameter is not a real object] )
+      unless Ref::Util::is_blessed_ref($obj);
+
     return construct_from_iterator_flex( $CLASS, $obj, $ipar, $gpar )
       if $obj->isa( 'Iterator::Flex::Base' );
 
