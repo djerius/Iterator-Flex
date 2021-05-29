@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-package My::T::Role::Utils { 
+package My::T::Role::Utils {
     use Package::Stash;
 
     sub ::Pkg {

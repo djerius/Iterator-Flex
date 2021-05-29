@@ -441,7 +441,7 @@ sub thaw {
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
-      or 
+      or
     _throw( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
 
     if ( @depends ) {

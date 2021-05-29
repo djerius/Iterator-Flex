@@ -511,7 +511,7 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
     }
 
     else {
-        $CLASS->_throw( internal => 
+        $CLASS->_throw( internal =>
             "unexpected exhaustion action: $exhaustion[0]" );
     }
 
