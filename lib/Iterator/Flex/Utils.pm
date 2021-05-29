@@ -42,7 +42,6 @@ our @EXPORT = @{ $EXPORT_TAGS{default} };
 
 our @EXPORT_OK = ( qw(
       create_class_with_roles
-      _can_meth
       ),
     map { @{$_} } values %EXPORT_TAGS,
 );

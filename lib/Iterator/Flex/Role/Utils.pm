@@ -156,28 +156,50 @@ sub _module_name {
 
 =method _can_meth
 
-  $class->_can_meth( @methods  );
-  $class->_can_meth( $obj, @method );
+  $code = $class->_can_meth( @methods, ?\%pars  );
+  $code = $class->_can_meth( $obj, @method, ?\%pars );
 
 Scans an object to see if it provides one of the specified
 methods. For each C<$method> in C<@methods>, it probes for
 C<__$method__>, then C<$method>.
 
-It returns a reference to the first method it finds, otherwise C<undef> if none was found.
+By default, it returns a reference to the first method it finds, otherwise C<undef> if none was found.
+
+The return value can be altered using C<%pars>.
+
+=over
+
+=item name
+
+return the name of the method.
+
+=item code
+
+return the coderef of the method. (Default)
+
+=back
+
+If both C<code> and C<name> are specified, both are returned as a list, C<name> first:
+
+  ($name, $code ) = $class->_can_meth( $obj, @method, {name => 1, code => 1 } );
 
 =cut
 
 
 sub _can_meth {
+    my $thing = shift;
+    my $par = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
+    $thing = shift if Ref::Util::is_blessed_ref( $_[0] );
 
-    my ( $class, $obj, @methods ) = @_;
-
-    return undef unless Ref::Util::is_blessed_ref( $obj );
-
-    for my $method ( @methods ) {
+    for my $method ( @_ ) {
         my $sub;
         foreach ( "__${method}__", $method ) {
-            return $sub if defined( $sub = $obj->can( $_ ) );
+            if ( defined( $sub = $thing->can( $_ ) ) ) {
+                my @ret = ( ( !!$par->{name} ? $_ : () ),
+                            ( !!$par->{code} ? $sub : () ) );
+                push @ret, $sub unless @ret;
+                return @ret > 1 ? @ret : $ret[0];
+            }
         }
     }
 
