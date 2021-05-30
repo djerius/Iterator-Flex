@@ -14,7 +14,6 @@ use Ref::Util        ();
 use Role::Tiny       ();
 use Role::Tiny::With ();
 use Module::Runtime;
-use Safe::Isa;
 
 use Iterator::Flex::Base;
 use Iterator::Flex::Utils qw[
