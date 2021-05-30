@@ -37,14 +37,27 @@ The iterator supports the following methods:
 
 =cut
 
+sub new {
+    my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
+
+    $class->_throw( parameter => 'not enough parameters' )
+      unless @_ > 1;
+
+    $class->_throw( parameter => "'code' parameter is not a coderef" )
+      unless Ref::Util::is_coderef( $_[0] );
+
+    $class->SUPER::new( { code => $_[0], src => $_[1] }, $gpar );
+}
+
 
 sub construct {
-    my $class = shift;
+    my ( $class, $state ) = @_;
 
-    $class->_throw( parameter => "incorrect type or number of arguments" )
-      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
+    $class->_throw( parameter => "'state' parameter must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
 
-    my ( $code, $src ) = @{ $_[0] };
+    my ( $code, $src ) = @{$state}{ qw[ code src ] };
 
     $src
       = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => THROW } );

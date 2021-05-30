@@ -15,13 +15,13 @@ use Ref::Util;
 
 =method new
 
-  $iterator = Iterator::Flex::ArrayLike->new( $obj, %args );
+  $iterator = Iterator::Flex::ArrayLike->new( $obj, %ipars, \%gpars );
 
 Wrap an array-like object in an iterator.  An array like object must
 provide two methods, one which returns the number of elements, and
 another which returns the element at a given index.
 
-The following arguments are available:
+The following parameters are available:
 
 =over
 
@@ -69,18 +69,20 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub construct {
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    unless ( Ref::Util::is_blessed_ref( $_[0] ) ) {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "argument must be a blessed reference" );
-    }
+    my ( $obj, %ipar ) = @_;
+    $ipar{ object } = $obj;
 
-    $class->construct_from_state( { object => @_ } );
+    $class->_croak( parameter => "argument must be a blessed reference" )
+      unless Ref::Util::is_blessed_ref( $obj );
+
+    $class->SUPER::new( \%ipar, $gpar );
 }
 
-sub construct_from_state {
+sub construct {
 
     my ( $class, $state ) = @_;
 

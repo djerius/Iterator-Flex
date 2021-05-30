@@ -34,13 +34,13 @@ use overload ( '<>' => 'next', fallback => 1 );
 #  to the iterator class construct* routines
 
 
-sub new ( $class, $construct = undef, $general = {} ){
-    return $class->new_from_attrs( $class->construct( $construct ), $general );
+sub new ( $class, $state = undef, $general = {} ){
+    return $class->new_from_state( $state, $general );
 }
 
 sub new_from_state {
     my ( $class, $state, $general ) = @_;
-    return $class->new_from_attrs( $class->construct_from_state( $state ), $general );
+    return $class->new_from_attrs( $class->construct( $state ), $general );
 }
 
 sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {

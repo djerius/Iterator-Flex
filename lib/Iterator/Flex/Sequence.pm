@@ -47,28 +47,23 @@ The iterator supports the following methods:
 
 =cut
 
-sub construct {
-
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    my @args = $_[0]->@*;
-
-    _throw( parameter => "incorrect number of arguments for sequence" )
-      if @args < 1 || @args > 3 ;
+    $class->_throw( parameter => "incorrect number of arguments for sequence" )
+      if @_ < 1 || @_ > 3 ;
 
     my %state;
-    $state{step}  = pop @args if @args == 3;
-    $state{end}   = pop @args;
-    $state{begin} = pop @args;
+    $state{step}  = pop if @_ == 3;
+    $state{end}   = pop;
+    $state{begin} = pop;
 
-    $class->construct_from_state( \%state );
+
+    $class->SUPER::new( \%state, $gpar );
 }
 
-
-# must be called with ( $next, $current, $prev) as last
-# three arguments.
-sub construct_from_state {
-
+sub construct {
     my ( $class, $state ) = @_;
 
     _throw( parameter => "$class: arguments must be numbers\n" )

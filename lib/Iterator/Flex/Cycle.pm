@@ -37,16 +37,17 @@ The returned iterator supports the following methods:
 
 =cut
 
-
-sub construct {
-
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    $class->construct_from_state( { array => $_[0] } );
+    $class->_throw( parameter => "argument must be an ARRAY reference" )
+      unless Ref::Util::is_arrayref( $_[0] );
+
+    $class->SUPER::new( { array => $_[0] }, $gpar );
 }
 
-sub construct_from_state {
-
+sub construct {
     my ( $class, $state ) = ( shift, shift );
 
     $class->_throw( parameter => "state must be a HASH reference" )
@@ -54,9 +55,6 @@ sub construct_from_state {
 
     my ( $arr, $prev, $current, $next )
       = @{$state}{qw[ array prev current next ]};
-
-    $class->_throw( parameter => "argument must be an ARRAY reference" )
-      unless Ref::Util::is_arrayref( $arr );
 
     my $len = @$arr;
 

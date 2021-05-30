@@ -43,24 +43,25 @@ The returned iterator supports the following methods:
 =cut
 
 
-sub construct {
-
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    $class->construct_from_state( { depends => $_[0] } );
+    $class->_throw( parameter => 'only one parameter' )
+      unless @_ == 1;
+
+    $class->SUPER::new( { depends => [ $_[0] ] }, $gpar );
 }
 
-
-sub construct_from_state {
-
-    my ( $class, $state ) = ( shift, shift );
+sub construct {
+    my ( $class, $state ) = @_;
 
     $class->throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};
 
-    $src = Iterator::Flex::Factory->to_iterator( $src );
+    $src = Iterator::Flex::Factory->to_iterator( $src->[0] );
 
     my $self;
     my $is_exhausted;
@@ -108,15 +109,6 @@ sub construct_from_state {
     };
 }
 
-sub new_from_state {
-
-    my $class = shift;
-
-    my $state = shift;
-    $state->{depends} = $state->{depends}[0];
-
-    $class->new_from_attrs( $class->construct_from_state( $state ) );
-}
 
 
 __PACKAGE__->_add_roles( qw[

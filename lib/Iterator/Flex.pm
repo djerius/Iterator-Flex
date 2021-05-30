@@ -262,7 +262,7 @@ sub igrep(&$) {
     my $pars = _parse_params( \@_ );
     @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Grep;
-    Iterator::Flex::Grep->new( \@_, $pars );
+    Iterator::Flex::Grep->new( @_, $pars );
 }
 
 
@@ -289,7 +289,7 @@ sub imap(&$) {
     my $pars = _parse_params( \@_ );
     @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Map;
-    Iterator::Flex::Map->new( \@_, $pars );
+    Iterator::Flex::Map->new( @_, $pars );
 }
 
 
@@ -331,7 +331,7 @@ C<prev> or C<__prev__> method.
 sub iproduct {
     my $pars = _parse_params( \@_ );
     require Iterator::Flex::Product;
-    return Iterator::Flex::Product->new( \@_, $pars );
+    return Iterator::Flex::Product->new( @_, $pars );
 }
 
 =sub iseq
@@ -368,7 +368,7 @@ The iterator supports the following methods:
 sub iseq {
     my $pars = _parse_params( \@_ );
     require Iterator::Flex::Sequence;
-    Iterator::Flex::Sequence->new( \@_, $pars );
+    Iterator::Flex::Sequence->new( @_, $pars );
 }
 
 
@@ -407,7 +407,7 @@ sub ifreeze (&$) {
     my $pars = _parse_params( \@_ );
     @_ > 2 && _throw( parameter => 'extra_argument' );
     require Iterator::Flex::Freeze;
-    Iterator::Flex::Freeze->new( \@_, $pars );
+    Iterator::Flex::Freeze->new( @_, $pars );
 }
 
 
@@ -436,24 +436,18 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
-    _throw( parameter => "state argument for $package constructor must be a HASH or ARRAY reference" )
-      unless is_hashref( $state ) || is_arrayref( $state );
+    _throw( parameter => "state argument for $package constructor must be a HASH  reference" )
+      unless is_hashref( $state );
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
       or
     _throw( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
 
-    if ( @depends ) {
+    $state->{depends} = \@depends
+      if @depends;
 
-        if ( is_hashref( $state ) ) {
-            $state->{depends} = \@depends;
-        }
-
-        elsif ( is_arrayref( $state ) ) {
-            push @$state, \@depends;
-        }
-    }
+    $state->{thaw} = 1;
 
     my $iter = $package->$new_from_state( $state, $pars );
     $exhausted ? $iter->set_exhausted : $iter->_reset_exhausted;

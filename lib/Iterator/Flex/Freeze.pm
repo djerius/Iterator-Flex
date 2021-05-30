@@ -46,14 +46,27 @@ If C<$iterator> provides a C<prev> method.
 =cut
 
 
-sub construct {
-
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    $class->_throw( parameter => "incorrect type or number of arguments" )
-      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
+    $class->_throw( parameter => 'not enough parameters' )
+      unless @_ == 2;
 
-    my ( $serialize, $src ) = @{ $_[0] };
+    $class->_throw( parameter => "'serialize' parameter is not a coderef" )
+      unless Ref::Util::is_coderef( $_[0] );
+
+    $class->SUPER::new( { serialize => $_[0], src => $_[1] }, $gpar );
+}
+
+
+sub construct {
+    my ( $class, $state ) = @_;
+
+    $class->_throw( parameter => "'state' parameter must be a HASH reference" )
+      unless Ref::Util::is_hashref( $state );
+
+    my ( $serialize, $src ) = @{$state}{ qw( serialize src ) };
 
     $class->_throw( parameter => "'serialize' must be a CODE reference" )
       unless Ref::Util::is_coderef( $serialize );

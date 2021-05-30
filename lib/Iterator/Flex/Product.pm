@@ -13,6 +13,8 @@ use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util;
 
+use experimental 'declared_refs';
+
 use namespace::clean;
 
 =method new
@@ -52,54 +54,60 @@ C<prev> or C<__prev__> method.
 =cut
 
 
-sub construct {
-
+sub new {
     my $class = shift;
+    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
 
-    $class->_throw( parameter => "incorrect type or number of arguments" )
-      unless @_ == 1 && Ref::Util::is_arrayref( $_[0] );
+    $class->_throw( parameter => 'not enough parameters' )
+      unless @_;
 
-    $class->construct_from_state( { iterators => $_[0] } );
+    my @iterators;
+    my @keys;
+
+    # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
+    if ( Ref::Util::is_ref( $_[0] ) ) {
+        @iterators = @_;
+    }
+    else {
+        $class->_throw( parameter => 'expected an even number of arguments' )
+          if  @_ % 2;
+
+        while ( @_ ) {
+            push @keys, shift;
+            push @iterators, shift;
+        }
+    };
+
+    # can only work if the iterators support a rewind method
+    $class->_throw( parameter => "all iterables must provide a rewind method" )
+      unless List::Util::all  { defined $class->_can_meth( $_, 'rewind' ) } @iterators;
+
+    $class->SUPER::new( { keys => \@keys, depends =>\@iterators, value => [] }, $gpar );
 }
 
-sub construct_from_state {
-
+sub construct {
     my ( $class, $state ) = @_;
 
     $class->_throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
-    my ( $iterators, $value ) = @{$state}{qw[ iterators value ]};
+    $state->{value} //= [];
 
-    $value = [] unless defined $value;
+    my ( \@depends, \@keys, \@value, $thaw )
+      = @{$state}{qw[ depends keys value thaw ]};
 
-    my @keys;
-    my @iterator;
+    $class->_throw(
+        parameter => "number of keys not equal to number of iterators" )
+      if @keys && @keys != @depends;
 
-# distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
-    if ( Ref::Util::is_ref( $iterators->[0] ) ) {
+    my @iterators = map {
+        Iterator::Flex::Factory->to_iterator( $_, { EXHAUSTION, => RETURN } )
+    } @depends;
 
-        @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_,
-                { EXHAUSTION, => RETURN } )
-        } @$iterators;
-    }
+    @value = map { $_->current } @iterators
+      if $thaw;
 
-    else {
-        @keys     = List::Util::pairkeys @$iterators;
-        @iterator = map {
-            Iterator::Flex::Factory->to_iterator( $_,
-                { EXHAUSTION, => RETURN } )
-        } List::Util::pairvalues @$iterators;
-    }
-
-    # can only work if the iterators support a rwind method
-    $class->_throw( parameter => "all iterables must provide a rewind method" )
-      unless @iterator == grep { defined }
-      map { $class->_can_meth( $_, 'rewind' ) } @iterator;
-
-    my @value = @$value;
-    my @set   = ( 1 ) x @value;
+    my @set = ( 1 ) x @value;
 
     my $self;
     my $is_exhausted;
@@ -115,7 +123,7 @@ sub construct_from_state {
             # first time through
             if ( !@value ) {
 
-                for my $iter ( @iterator ) {
+                for my $iter ( @iterators ) {
                     push @value, $iter->();
 
                     if ( $iter->is_exhausted ) {
@@ -128,13 +136,13 @@ sub construct_from_state {
 
             else {
 
-                $value[-1] = $iterator[-1]->();
-                if ( $iterator[-1]->is_exhausted ) {
+                $value[-1] = $iterators[-1]->();
+                if ( $iterators[-1]->is_exhausted ) {
                     $set[-1] = 0;
-                    my $idx = @iterator - 1;
+                    my $idx = @iterators - 1;
                     while ( --$idx >= 0 ) {
-                        $value[$idx] = $iterator[$idx]->();
-                        last unless $iterator[$idx]->is_exhausted;
+                        $value[$idx] = $iterators[$idx]->();
+                        last unless $iterators[$idx]->is_exhausted;
                         $set[$idx] = 0;
                     }
 
@@ -142,9 +150,9 @@ sub construct_from_state {
                         return $self->signal_exhaustion;
                     }
 
-                    while ( ++$idx < @iterator ) {
-                        $iterator[$idx]->rewind;
-                        $value[$idx] = $iterator[$idx]->();
+                    while ( ++$idx < @iterators ) {
+                        $iterators[$idx]->rewind;
+                        $value[$idx] = $iterators[$idx]->();
                         $set[$idx]   = 1;
                     }
                 }
@@ -174,13 +182,13 @@ sub construct_from_state {
         },
         reset  => sub { @value = () },
         rewind => sub { @value = () },
-        _depends => \@iterator,
+        _depends => \@iterators,
     );
 
-    # can only freeze if the iterators support a prev method
+    # can only freeze if the iterators support a current method
     if (
-        @iterator == grep { defined }
-        map { $class->_can_meth( $_, 'current' ) } @iterator
+        List::Util::all { defined $class->_can_meth( $_, 'current' ) }
+        @iterators
       )
     {
 
@@ -193,28 +201,6 @@ sub construct_from_state {
     return { %params, _name => 'iproduct' };
 }
 
-sub new_from_state {
-
-    my ( $class, $state ) = @_;
-
-    my ( $keys, $iterators ) = @{$state}{ 'keys', 'depends' };
-    my @value = map { $_->current } @$iterators;
-
-    if ( @$keys ) {
-
-        $class->_throw(
-            parameter => "number of keys not equal to number of iterators\n" )
-          unless @$keys == @$iterators;
-
-        $iterators = [ map { $keys->[$_], $iterators->[$_] } 0 .. @$keys - 1 ];
-    }
-
-    $class->new_from_attrs(
-        $class->construct_from_state( {
-                iterators => $iterators,
-                value     => \@value
-            } ) );
-}
 
 __PACKAGE__->_add_roles( qw[
       ::Exhausted::Closure
