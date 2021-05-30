@@ -85,10 +85,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     if ( defined( my $par = $ipar{+METHODS} ) ) {
 
-        state $loaded = do {
-            require Iterator::Flex::Method;
-            Iterator::Flex::Method->import;
-        };
+        require Iterator::Flex::Method;
 
         $class->_throw( parameter =>
                         "value for methods parameter must be a hash reference" )
@@ -105,7 +102,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
             my $cap_name = ucfirst( $name );
 
             # create role for the method
-            my $role = eval { Method( $cap_name, name => $name ) };
+            my $role = eval { Iterator::Flex::Method::Maker( $cap_name, name => $name ) };
 
             if ( $@ ne '' ) {
                 my $error = $@;
