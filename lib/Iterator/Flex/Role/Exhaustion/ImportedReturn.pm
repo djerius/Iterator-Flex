@@ -21,7 +21,7 @@ returns the sentinel which the iterator will return to signal exhaustion
 =cut
 
 sub imported_sentinel {
-    return $REGISTRY{ refaddr $_[0] }{+GENERAL}{ +IMPORTED_EXHAUSTION }[1];
+    return $REGISTRY{ refaddr $_[0] }{+GENERAL}{ +INPUT_EXHAUSTION }[1];
 }
 
 1;

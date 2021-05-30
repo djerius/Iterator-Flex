@@ -229,30 +229,30 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     # don't close over self
     push @roles, [ Next => 'NoSelf' ], [ Exhausted => 'Registry' ];
 
-    delete $gpar_k{ +IMPORTED_EXHAUSTION };
-    my $imported_exhaustion = $gpar{ +IMPORTED_EXHAUSTION }
+    delete $gpar_k{ +INPUT_EXHAUSTION };
+    my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }
       // [ RETURN, => undef ];
 
-    my @imported_exhaustion
-      = Ref::Util::is_arrayref( $imported_exhaustion )
-      ? ( $imported_exhaustion->@* )
-      : ( $imported_exhaustion );
+    my @input_exhaustion
+      = Ref::Util::is_arrayref( $input_exhaustion )
+      ? ( $input_exhaustion->@* )
+      : ( $input_exhaustion );
 
     delete $gpar_k{ +EXHAUSTION };
     my $has_output_exhaustion_policy = defined $gpar{ +EXHAUSTION };
 
-    if ( $imported_exhaustion[0] eq RETURN ) {
+    if ( $input_exhaustion[0] eq RETURN ) {
         push @roles, [ Exhaustion => 'ImportedReturn' ],
           [ Next => 'WrapReturn' ];
-        push $imported_exhaustion->@*, undef if @imported_exhaustion == 1;
-        $gpar{ +IMPORTED_EXHAUSTION } = \@imported_exhaustion;
-        $gpar{ +EXHAUSTION }          = $gpar{ +IMPORTED_EXHAUSTION }
+        push $input_exhaustion->@*, undef if @input_exhaustion == 1;
+        $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
+        $gpar{ +EXHAUSTION }          = $gpar{ +INPUT_EXHAUSTION }
           unless $has_output_exhaustion_policy;
     }
 
-    elsif ( $imported_exhaustion[0] eq +THROW ) {
+    elsif ( $input_exhaustion[0] eq +THROW ) {
         push @roles, [ Exhaustion => 'ImportedThrow' ], [ Next => 'WrapThrow' ];
-        $gpar{ +IMPORTED_EXHAUSTION } = \@imported_exhaustion;
+        $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
         $gpar{ +EXHAUSTION } = [ THROW, => PASSTHROUGH ]
           unless $has_output_exhaustion_policy;
     }
@@ -400,7 +400,7 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
     my %ipar = $ipar->%*;
     my %gpar = $gpar->%*;
 
-    $gpar{ +IMPORTED_EXHAUSTION } //= [ RETURN, => undef ];
+    $gpar{ +INPUT_EXHAUSTION } //= [ RETURN, => undef ];
 
     if ( !exists $ipar{next} ) {
         my $code;
@@ -501,7 +501,7 @@ sub _parse_pars ( $, $pars ) {
 
     my %ipars = $pars->%*;
     # move  general parsibutes into their own hash
-    my %gpars = delete %ipars{ EXHAUSTION, IMPORTED_EXHAUSTION };
+    my %gpars = delete %ipars{ EXHAUSTION, INPUT_EXHAUSTION };
 
     delete %gpars{ grep { !defined $gpars{$_} } keys %gpars };
 

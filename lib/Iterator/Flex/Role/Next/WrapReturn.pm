@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( :default IMPORTED_EXHAUSTION );
+use Iterator::Flex::Utils qw( :default INPUT_EXHAUSTION );
 use Scalar::Util;
 use Role::Tiny;
 
@@ -23,7 +23,7 @@ around _construct_next => sub {
     my $wsub;
 
     my $sentinel = (
-        $gpar->{ +IMPORTED_EXHAUSTION } // do {
+        $gpar->{ +INPUT_EXHAUSTION } // do {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "internal error: input exhaustion policy was not registered" );

@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( :RegistryKeys IMPORTED_EXHAUSTION );
+use Iterator::Flex::Utils qw( :RegistryKeys INPUT_EXHAUSTION );
 use Scalar::Util;
 use Ref::Util qw( is_regexpref is_arrayref is_coderef );
 use Role::Tiny;
@@ -21,7 +21,7 @@ around _construct_next => sub {
     my $next  = $orig->( @_ );
 
     my $exception = (
-        $gpar->{ +IMPORTED_EXHAUSTION } // do {
+        $gpar->{ +INPUT_EXHAUSTION } // do {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "internal error: input exhaustion policy was not registered" );

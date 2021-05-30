@@ -26,7 +26,7 @@ BEGIN {
 
     %RegistryKeys = (
         map { $_ => lc $_ }
-          qw[ IMPORTED_EXHAUSTION EXHAUSTION IS_EXHAUSTED ITERATOR GENERAL METHODS ] );
+          qw[ INPUT_EXHAUSTION EXHAUSTION IS_EXHAUSTED ITERATOR GENERAL METHODS ] );
 }
 
 use constant \%ExhaustionActions;

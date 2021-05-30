@@ -47,7 +47,7 @@ subtest 'return' => sub {
         my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data; }
-        -pars => { imported_exhaustion => [ return => 10 ] };
+        -pars => { input_exhaustion => [ return => 10 ] };
 
         while ( ( my $data = $iter->next ) != 10 ) { push @got, $data }
 
@@ -61,7 +61,7 @@ subtest 'return' => sub {
         my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data // 'A' }
-        -pars => { imported_exhaustion => [ return => 'A' ] };
+        -pars => { input_exhaustion => [ return => 'A' ] };
 
         while ( ( my $data = $iter->next ) ne 'A' ) { push @got, $data }
 
@@ -75,7 +75,7 @@ subtest 'return' => sub {
         my @got;
         my $ref = [];
         my $iter = iterator { shift @data // $ref }
-        -pars => { imported_exhaustion => [ return => $ref ] };
+        -pars => { input_exhaustion => [ return => $ref ] };
 
         my $data;
         while ( $data = $iter->next
@@ -125,7 +125,7 @@ subtest 'throw' => sub {
             shift @data;
         }
         -pars => {
-            imported_exhaustion => 'throw',
+            input_exhaustion => 'throw',
             exhaustion          => 'return'
         };
 
@@ -149,7 +149,7 @@ subtest 'throw' => sub {
             die( "exhausted" ) if $data[0] == 9;
             shift @data;
         }
-        -pars => { imported_exhaustion => 'throw' };
+        -pars => { input_exhaustion => 'throw' };
 
         like(
             dies {
@@ -174,7 +174,7 @@ subtest 'throw' => sub {
                 shift @data;
             }
             -pars => {
-                imported_exhaustion => [ throw => qr/exhausted/ ],
+                input_exhaustion => [ throw => qr/exhausted/ ],
                 exhaustion          => 'throw'
             };
 
@@ -202,7 +202,7 @@ subtest 'throw' => sub {
                 shift @data;
             }
             -pars => {
-                imported_exhaustion => [ throw => qr/exhausted/ ],
+                input_exhaustion => [ throw => qr/exhausted/ ],
                 exhaustion          => 'throw'
             };
 
@@ -234,7 +234,7 @@ subtest 'throw' => sub {
                 shift @data;
             }
             -pars => {
-                imported_exhaustion =>
+                input_exhaustion =>
                   [ throw => sub { $_[0] =~ 'exhausted' } ],
                 exhaustion => 'throw'
             };
@@ -263,7 +263,7 @@ subtest 'throw' => sub {
                 shift @data;
             }
             -pars => {
-                imported_exhaustion =>
+                input_exhaustion =>
                   [ throw => sub { $_[0] =~ 'exhausted' } ],
                 exhaustion => 'throw'
             };
