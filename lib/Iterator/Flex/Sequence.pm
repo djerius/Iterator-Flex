@@ -66,7 +66,7 @@ sub new {
 sub construct {
     my ( $class, $state ) = @_;
 
-    _throw( parameter => "$class: arguments must be numbers\n" )
+    $class->_throw( parameter => "$class: arguments must be numbers\n" )
       if List::Util::first { !Scalar::Util::looks_like_number( $_ ) };
 
     my ( $begin, $end, $step, $iter, $next, $current, $prev )
