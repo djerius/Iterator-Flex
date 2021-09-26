@@ -189,4 +189,32 @@ subtest "freeze" => sub {
 
 };
 
+subtest 'exhaustion' => sub {
+
+    my @array = ( 0, 1, 2 );
+
+    subtest 'return' => sub {
+
+        my $iter = iarray( [ @array ], -pars => { exhaustion => [ return => 22 ] } );
+
+        drain( $iter, 3, 22 );
+        ok ( $iter->is_exhausted, 'drained' );
+        is ( $iter->prev, 2, "prev value" );
+        is ( $iter->next, 22, "next value" );
+    };
+
+    subtest 'throw' => sub {
+
+        my $iter = iarray( [ @array ], -pars => { exhaustion => 'throw' } );
+
+        ok( dies { drain( $iter, 3 ) }, "threw" );
+
+        ok ( $iter->is_exhausted, 'drained' );
+        is ( $iter->prev, 2, "prev value" );
+
+        ok( dies { $iter->next }, "next throws" );
+    };
+
+};
+
 done_testing;

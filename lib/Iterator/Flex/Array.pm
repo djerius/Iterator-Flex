@@ -98,12 +98,10 @@ sub construct {
 
         next => sub {
             if ( $next == $len ) {
-                # if first time through, set current/prev
-                if ( !$self->is_exhausted ) {
-                    $prev    = $current;
-                    $current = $self->signal_exhaustion;
-                }
-                return $current;
+                # if first time through, set current
+                $prev = $current
+                  if ! $self->is_exhausted;
+                return $current = $self->signal_exhaustion;
             }
             $prev    = $current;
             $current = $next++;

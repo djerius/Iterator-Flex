@@ -11,11 +11,11 @@ package MyArray {
 
     sub new {
         my $class = shift;
-        return bless [ @_ ], $class;
+        return bless [@_], $class;
     }
 
-    sub __length__ { @{$_[0]} }
-    sub __at__ { $_[0][$_[1]] }
+    sub __length__ { @{ $_[0] } }
+    sub __at__     { $_[0][ $_[1] ] }
 }
 
 sub ArrayLike { Iterator::Flex::ArrayLike->new( MyArray->new( @_ ) ) }
@@ -164,5 +164,35 @@ subtest "rewind" => sub {
     };
 };
 
+subtest 'exhaustion' => sub {
+
+
+    my @array = ( 0, 1, 2 );
+
+    subtest 'return' => sub {
+
+        my $iter = Iterator::Flex::ArrayLike->new( MyArray->new( @array ),
+            { exhaustion => [ return => 22 ] } );
+
+        drain( $iter, 3, 22 );
+        ok( $iter->is_exhausted, 'drained' );
+        is( $iter->prev, 2,  "prev value" );
+        is( $iter->next, 22, "next value" );
+    };
+
+    subtest 'throw' => sub {
+
+        my $iter = Iterator::Flex::ArrayLike->new( MyArray->new( @array ),
+            { exhaustion => 'throw' } );
+
+        ok( dies { drain( $iter, 3 ) }, "threw" );
+
+        ok( $iter->is_exhausted, 'drained' );
+        is( $iter->prev, 2, "prev value" );
+
+        ok( dies { $iter->next }, "next throws" );
+    };
+
+};
 
 done_testing;
