@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex qw[ icycle thaw ];
+use Iterator::Flex::Common qw[ icycle thaw ];
 use Data::Dump 'pp';
 
 sub _test_values {

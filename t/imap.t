@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex qw[ imap iarray ];
+use Iterator::Flex::Common qw[ imap iarray ];
 
 subtest "basic" => sub {
 

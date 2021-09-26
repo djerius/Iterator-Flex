@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex qw[ iseq thaw ];
+use Iterator::Flex::Common qw[ iseq thaw ];
 
 my @tests = (
 

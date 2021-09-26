@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex qw[ igrep iarray ];
+use Iterator::Flex::Common qw[ igrep iarray ];
 
 subtest "basic" => sub {
 

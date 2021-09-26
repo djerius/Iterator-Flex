@@ -5,7 +5,7 @@ use Test::Lib;
 
 use MyTest::Utils qw[ drain ];
 
-use Iterator::Flex qw[ icache iarray thaw ];
+use Iterator::Flex::Common qw[ icache iarray thaw ];
 use Data::Dump 'pp';
 
 sub _test_values {

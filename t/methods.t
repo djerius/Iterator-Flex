@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex 'iterator';
+use Iterator::Flex::Common 'iterator';
 
 
 my @data = ( 0 .. 10 );

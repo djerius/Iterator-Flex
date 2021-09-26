@@ -5,7 +5,7 @@ use Test::Lib;
 
 use MyTest::Utils qw[ drain ];
 
-use Iterator::Flex qw[ iproduct thaw ];
+use Iterator::Flex::Common qw[ iproduct thaw ];
 use Data::Dump 'pp';
 
 sub _test_values {

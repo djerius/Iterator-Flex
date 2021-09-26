@@ -9,7 +9,7 @@ use 5.10.0;
 
 use Test2::V0;
 
-use Iterator::Flex 'iterator';
+use Iterator::Flex::Common 'iterator';
 use Scalar::Util 'refaddr';
 
 subtest 'return' => sub {

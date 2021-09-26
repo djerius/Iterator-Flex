@@ -1,4 +1,4 @@
-package Iterator::Flex;
+package Iterator::Flex::Common;
 
 # ABSTRACT: Iterators which can be rewound and serialized
 

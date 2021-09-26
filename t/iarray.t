@@ -4,7 +4,7 @@ use Test2::V0;
 use Test::Lib;
 use MyTest::Utils qw[ drain ];
 
-use Iterator::Flex qw[ iarray thaw ];
+use Iterator::Flex::Common qw[ iarray thaw ];
 use Data::Dump 'pp';
 
 sub _test_values {

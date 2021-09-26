@@ -3,7 +3,7 @@
 use Test2::V0;
 use Data::Dump 'pp';
 
-use Iterator::Flex qw[ igrep imap iarray ];
+use Iterator::Flex::Common qw[ igrep imap iarray ];
 
 subtest "basic" => sub {
 

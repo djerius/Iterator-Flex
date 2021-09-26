@@ -5,7 +5,7 @@ use warnings;
 
 use Test2::V0;
 
-use Iterator::Flex 'iterator';
+use Iterator::Flex::Common 'iterator';
 
 subtest 'no attr' => sub {
 

@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex qw[ iarray thaw ];
+use Iterator::Flex::Common qw[ iarray thaw ];
 
 my $iter = iarray( [ 0, 10 ] );
 
