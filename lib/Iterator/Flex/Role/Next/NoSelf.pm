@@ -12,6 +12,8 @@ use Role::Tiny;
 
 use namespace::clean;
 
+with 'Iterator::Flex::Role::Next';
+
 =method next
 
 =method __next__
