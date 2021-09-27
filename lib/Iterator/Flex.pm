@@ -3,6 +3,8 @@ package Iterator::Flex;
 # ABSTRACT: Iterators with flexible behaviors
 
 use 5.10.0;
+our $VERSION = '0.12';
+
 1;
 
 # COPYRIGHT
