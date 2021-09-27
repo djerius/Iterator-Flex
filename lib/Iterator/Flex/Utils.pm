@@ -53,7 +53,7 @@ with 'Iterator::Flex::Role::Utils';
 sub create_class_with_roles ( $base, @roles ) {
 
     my $class = Role::Tiny->create_class_with_roles( $base,
-        map { $base->_load_module( 'Role' => ref $_ ? @{$_} : $_ ) } @roles );
+        map { $base->_load_role( $_ ) } @roles );
 
     unless ( $class->can( '_construct_next' ) ) {
         require Iterator::Flex::Failure;

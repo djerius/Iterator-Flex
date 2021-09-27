@@ -226,7 +226,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
       if defined( $par = $ipar{_name} ) && Ref::Util::is_ref( $par );
 
     # don't close over self
-    push @roles, [ Next => 'NoSelf' ], [ Exhausted => 'Registry' ];
+    push @roles, 'Next::NoSelf' , 'Exhausted::Registry';
 
     delete $gpar_k{ +INPUT_EXHAUSTION };
     my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }
@@ -241,8 +241,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     my $has_output_exhaustion_policy = defined $gpar{ +EXHAUSTION };
 
     if ( $input_exhaustion[0] eq RETURN ) {
-        push @roles, [ Exhaustion => 'ImportedReturn' ],
-          [ Next => 'WrapReturn' ];
+        push @roles, 'Exhaustion::ImportedReturn','Next::WrapReturn';
         push $input_exhaustion->@*, undef if @input_exhaustion == 1;
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
         $gpar{ +EXHAUSTION }          = $gpar{ +INPUT_EXHAUSTION }
@@ -250,7 +249,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     }
 
     elsif ( $input_exhaustion[0] eq +THROW ) {
-        push @roles, [ Exhaustion => 'ImportedThrow' ], [ Next => 'WrapThrow' ];
+        push @roles,  'Exhaustion::ImportedThrow', 'Next::WrapThrow';
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
         $gpar{ +EXHAUSTION } = [ THROW, => PASSTHROUGH ]
           unless $has_output_exhaustion_policy;
@@ -267,8 +266,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
 
         # if $class can't perform the required method, add a role
         # which can
-        push @roles, $class->_module_name( 'Role' => ucfirst( $method ) )
-          unless $class->can( $method );
+        push @roles, ucfirst( $method ) unless $class->can( $method );
     }
 
     $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )
@@ -464,7 +462,7 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
 
         if ( $existing_exhaustion eq THROW ) {
             Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( Exhaustion => 'Return' ) );
+                $obj->_load_role( 'Exhaustion::Return' ) );
         }
     }
 
@@ -472,12 +470,12 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
 
         if ( $existing_exhaustion eq THROW ) {
             Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( Exhaustion => 'Return' ) );
+                $obj->_load_role( 'Exhaustion::Return' ) );
         }
 
         if ( $existing_exhaustion eq RETURN ) {
             Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( Exhaustion => 'Throw' ) );
+                $obj->_load_role( 'Exhaustion::Throw' ) );
         }
     }
 

@@ -26,19 +26,25 @@ the module (for whatever reason).
 
 sub _load_module {
 
-    my $class = shift;
-    my @path  = @_;
+    my ( $class, $path, $namespaces )  = @_;
 
-    for my $namespace ( $class->_namespaces ) {
-        my $module = $class->_module_name( $namespace, @path );
+    if ( substr( $path, 0, 1 ) eq '+' ) {
+        my $module = substr( $path, 1 );
         return $module if eval { Module::Runtime::require_module( $module ) };
+        $class->_throw( class => "unable to load $module" );
+    }
+    else {
+        $namespaces //= [ $class->_namespaces ];
+
+        for my $namespace ( @{ $namespaces} ) {
+            my $module = $namespace . '::' . $path;
+            return $module if eval { Module::Runtime::require_module( $module ) };
+        }
     }
 
     $class->_throw(
         class => join ' ',
-        "unable to find a module for",
-        join( "::", @path ),
-        , "in @{[ join( ', ', $class->_namespaces ) ]}"
+        "unable to find a module for '$path' in @{[ join( ', ', $class->_namespaces ) ]}"
     );
 }
 
@@ -52,104 +58,8 @@ Simply calls
 =cut
 
 sub _load_role {
-    my ( $class, @path ) = @_;
-    $class->_load_module( 'Role', @path );
-}
-
-=method _module_name
-
-  $module_name = $class->_module_name( @path );
-
-Transform C<@path> into a fully qualified module name, where
-C<@path> is one or more elements in a module name (e.g., the
-stuff between the C<::>).  The intent is to make it possible for
-a caller to specify a module path either relative to C<$class> or absolutely.
-
-Because C<_module_name> may be called by an internal routine which
-adds things to the beginning of the path, there must be some way for a
-downstream user to specify an absolute path with the part they
-control, namely the last element in the path.
-
-If the I<last> element in C<@path>
-
-=over
-
-=item *
-
-does I<not> begin withC<::>
-
-=item *
-
-contains a C<::>
-
-=back
-
-It is assumed to be an absolute path, and it is returned.  For example,
-
-  $class->_module_name( qw( foo bar bas::goo ) ) => 'bas::goo'
-
-while
-
-  $class->_module_name( qw( foo bar ::bas::goo ) ) => 'foo::bar::bas::goo'
-
-If the I<first> element in C<@path>
-
-=over
-
-=item *
-
-does not I<begin> withC<::>
-
-=item *
-
-contains a C<::>
-
-=back
-
-It is assumed to be an absolute path, and
-
-  join('::', @path)
-
-is returned.  Otherwise,
-
-  join('::', $class, @path )
-
-is returned.  I<However>, for internal use, if C<$class> is in the
-C<Iterator::Flex> namespace, C<$class> set to C<Iterator::Flex>.
-
-For example,
-
-  $class->_module_name( qw( foo bar goo ) ) => "$class::foo::bar::goo"
-
-while
-
-  $class->_module_name( qw( ::foo bar goo ) ) => 'foo::bar::goo'
-
-=cut
-
-
-sub _module_name {
-    my $class     = shift;
-    my @path = @_; # copy, as we may be making changes
-
-    my $idx;
-
-    $idx = index( $path[-1], '::' );
-    if (  $idx  > -1 ) {
-        return $path[-1] if $idx > 1;
-        substr( $path[-1], 0, 2, '' ) if $idx == 0;
-    }
-
-    $idx = index( $path[0], '::' );
-    if (  $idx  > -1 ) {
-        return join( '::', @path ) if $idx > 1;
-        substr( $path[0], 0, 2, '' ) if $idx == 0;
-    }
-
-    # make sure we don't match against Iterator::Flexible or some othe class
-    $class = 'Iterator::Flex' if $class =~ /^Iterator::Flex(?:::.*|$)/;
-
-    return join( '::', $class, @path );
+    my ( $class, $path ) = @_;
+    $class->_load_module( $path, [ $class->_role_namespaces ] );
 }
 
 

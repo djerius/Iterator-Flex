@@ -107,7 +107,8 @@ sub construct {
         $params{$meth} = sub {
             $src->$sub();
         };
-        push @{ $params{_roles} }, $class->_load_role( ucfirst $meth );
+        # need '+' as role names are fully qualified
+        push @{ $params{_roles} }, '+' . $class->_load_role( ucfirst $meth );
     }
 
 
@@ -115,8 +116,8 @@ sub construct {
 }
 
 __PACKAGE__->_add_roles( qw[
-      ::Exhausted::Registry
-      ::Next::ClosedSelf
+      Exhausted::Registry
+      Next::ClosedSelf
       Next
 ] );
 

@@ -67,21 +67,21 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
     $gpar{ +EXHAUSTION } = \@exhaustion_action;
 
     if ( $exhaustion_action[0] eq RETURN ) {
-        push @roles, [ Exhaustion => 'Return' ];
+        push @roles, 'Exhaustion::Return';
     }
     elsif ( $exhaustion_action[0] eq THROW ) {
 
         push @roles,
           @exhaustion_action > 1 && $exhaustion_action[1] eq PASSTHROUGH
-          ? [ Exhaustion => 'PassthroughThrow' ]
-          : [ Exhaustion => 'Throw' ];
+          ? 'Exhaustion::PassthroughThrow'
+          : 'Exhaustion::Throw';
     }
     else {
         $class->_throw(
             parameter => "unknown exhaustion action: $exhaustion_action[0]" );
     }
 
-    # push @roles, [ 'Exhausted', 'Registry' ];
+    # push @roles, 'Exhausted::Registry';
 
     if ( defined( my $par = $ipar{+METHODS} ) ) {
 
@@ -112,7 +112,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
                 $role = $error->payload;
             }
 
-            push @roles, $role;
+            push @roles, '+' . $role;  # need '+', as these are fully qualified role module names.
         }
     }
 
@@ -244,9 +244,11 @@ sub _wrap_may {
 }
 
 sub _namespaces {
-    my $class = shift;
-    ( my $namespace ) = $class =~ /(.*)::[^:]+$/;
-    return ( $namespace, 'Iterator::Flex' );
+    return 'Iterator::Flex';
+}
+
+sub _role_namespaces {
+    return 'Iterator::Flex::Role';
 }
 
 

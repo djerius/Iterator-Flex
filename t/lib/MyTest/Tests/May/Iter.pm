@@ -25,8 +25,8 @@ sub construct_from_state {
 }
 
 __PACKAGE__->_add_roles( qw[
-      ::Exhausted::Registry
-      ::Next::NoSelf
+      Exhausted::Registry
+      Next::NoSelf
       Next
       Rewind
 ] );
