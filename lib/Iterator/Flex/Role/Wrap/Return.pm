@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Next::WrapReturn;
+package Iterator::Flex::Role::Wrap::Return;
 
 # ABSTRACT: wrap imported iterator which returns a sentinel on exhaustion
 

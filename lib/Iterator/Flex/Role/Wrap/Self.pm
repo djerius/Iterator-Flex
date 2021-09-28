@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Next::WrapSelf;
+package Iterator::Flex::Role::Wrap::Self;
 
 # ABSTRACT: Construct a next() method for iterators which handle exhaustion
 

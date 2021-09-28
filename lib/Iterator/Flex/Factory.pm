@@ -240,7 +240,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     my $has_output_exhaustion_policy = defined $gpar{ +EXHAUSTION };
 
     if ( $input_exhaustion[0] eq RETURN ) {
-        push @roles, 'Exhaustion::ImportedReturn','Next::WrapReturn';
+        push @roles, 'Exhaustion::ImportedReturn','Wrap::Return';
         push $input_exhaustion->@*, undef if @input_exhaustion == 1;
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
         $gpar{ +EXHAUSTION }          = $gpar{ +INPUT_EXHAUSTION }
@@ -248,7 +248,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     }
 
     elsif ( $input_exhaustion[0] eq +THROW ) {
-        push @roles,  'Exhaustion::ImportedThrow', 'Next::WrapThrow';
+        push @roles,  'Exhaustion::ImportedThrow', 'Wrap::Throw';
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
         $gpar{ +EXHAUSTION } = [ THROW, => PASSTHROUGH ]
           unless $has_output_exhaustion_policy;

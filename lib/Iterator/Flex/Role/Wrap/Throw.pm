@@ -1,4 +1,4 @@
-package Iterator::Flex::Role::Next::WrapThrow;
+package Iterator::Flex::Role::Wrap::Throw;
 
 # ABSTRACT: Role to add throw on exhaustion to an iterator which sets is_exhausted.
 
