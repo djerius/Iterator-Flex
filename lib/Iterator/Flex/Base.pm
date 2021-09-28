@@ -209,42 +209,13 @@ will return true, but C<may> will return false.
 =cut
 
 sub may {
-    return undef;
-}
+    my ( $self, $meth, $attributes ) = @_;
+    $attributes //= $REGISTRY{ refaddr $self }{ +ITERATOR };
 
-sub _may_meth {
-
-    my $obj  = shift;
-    my $meth = shift;
-
-    my $attributes = shift // $REGISTRY{ refaddr $obj };
-
-    my $pred = "_may_$meth";
-
-    $attributes->{$pred} //=
+    return $attributes->{"_may_$meth"} //=
       defined $attributes->{_depends}
       ? !List::Util::first { !$_->may( $meth ) } $attributes->{_depends}->@*
       : 1;
-
-    return $attributes->{$pred};
-}
-
-sub _wrap_may {
-
-    # my $class  = shift;
-    shift;
-    my $meth = shift;
-
-    return sub {
-        my $orig = shift;
-        my ( $obj, $what ) = @_;
-
-        return $obj->_may_meth( $meth )
-          if $what eq $meth;
-
-        &$orig;
-    };
-
 }
 
 sub _namespaces {
@@ -276,7 +247,6 @@ sub _apply_method_to_depends {
         # now apply the method
         $_->$meth foreach $depends->@*;
     }
-
 }
 
 1;

@@ -33,7 +33,6 @@ around reset => sub {
 }
 *__reset__ = \&reset;
 
-around may => Iterator::Flex::Base->_wrap_may( 'reset' );
 
 requires 'reset';
 requires '_reset_exhausted';

@@ -101,7 +101,7 @@ sub construct {
     Scalar::Util::weaken $src;
     $params{_roles} = [];
     for my $meth ( 'prev', 'current', 'rewind', 'reset' ) {
-        next unless $src->_may_meth( $meth );
+        next unless $src->may( $meth );
         my $sub = $src->can( $meth );
         Scalar::Util::weaken $sub;
         $params{$meth} = sub {
