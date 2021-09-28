@@ -268,9 +268,17 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
           unless Ref::Util::is_coderef( $code );
 
         # if $class can't perform the required method, add a role
-        # which can.  Ignore a next method, as next must be a closure
-        push @roles, ucfirst( $method ) . '::Closure'
-          if $method eq 'next' || ! $class->can( $method );
+        # which can.
+        if ( $method eq NEXT ) {
+            # next is always a closure, but the caller may want to
+            # keep track of $self
+            push @roles, defined $ipar{+_SELF} ? 'Next::ClosedSelf' : 'Next::Closure';
+            delete $ipar_k{+_SELF};
+        }
+        else {
+            my $impl = $class->can( $method ) ?  'Method' : 'Closure';
+            push @roles, ucfirst( $method ) . '::' . $impl;
+        }
     }
 
     # these are dealt with in the iterator constructor.
