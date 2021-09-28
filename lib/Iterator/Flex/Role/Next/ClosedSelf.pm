@@ -10,6 +10,7 @@ our $VERSION = '0.12';
 use Ref::Util;
 use Scalar::Util;
 use Role::Tiny;
+use Iterator::Flex::Utils qw( NEXT _SELF );
 
 use namespace::clean;
 
@@ -25,13 +26,13 @@ sub _construct_next {
     my $class = shift;
     my $ipar = shift;
 
-    my $sub = $ipar->{next} // $class->_throw( parameter =>  "Missing 'next' parameter" );
-    Scalar::Util::weaken $ipar->{next};
+    my $sub = $ipar->{+NEXT} // $class->_throw( parameter =>  "Missing 'next' parameter" );
+    Scalar::Util::weaken $ipar->{+NEXT};
 
     $class->_throw( parameter =>  "Missing ability to set self" )
-      unless exists $ipar->{_self};
+      unless exists $ipar->{+_SELF};
 
-    my $ref = $ipar->{_self};
+    my $ref = $ipar->{+_SELF};
     $$ref = $sub;
     Scalar::Util::weaken $$ref;
     return $sub;

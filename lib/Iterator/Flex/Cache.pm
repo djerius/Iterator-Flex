@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use parent 'Iterator::Flex::Base';
-use Iterator::Flex::Utils qw( IS_EXHAUSTED );
+use Iterator::Flex::Utils qw( IS_EXHAUSTED :IterAttrs );
 use Iterator::Flex::Factory;
 use Scalar::Util;
 
@@ -68,26 +68,26 @@ sub construct {
 
     return {
 
-        _self => \$self,
+        _SELF ,=> \$self,
 
-        IS_EXHAUSTED, => \$is_exhausted,
+        IS_EXHAUSTED ,=> \$is_exhausted,
 
-        reset => sub {
+        RESET ,=> sub {
             $prev = $current = undef;
         },
 
-        rewind => sub {
+        REWIND ,=> sub {
         },
 
-        prev => sub {
+        PREV ,=> sub {
             return $prev;
         },
 
-        current => sub {
+        CURRENT ,=> sub {
             return $current;
         },
 
-        next => sub {
+        NEXT ,=> sub {
 
             return $current
               if $is_exhausted;
@@ -101,11 +101,11 @@ sub construct {
             return $current;
         },
 
-        freeze => sub {
-            return [ $class, { prev => $prev, current => $current } ];
+        FREEZE ,=> sub {
+            return [ $class, { (PREV, $prev), (CURRENT, $current) } ];
         },
 
-        _depends => $src,
+        _DEPENDS ,=> $src,
     };
 }
 

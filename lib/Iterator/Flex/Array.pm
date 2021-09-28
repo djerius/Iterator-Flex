@@ -7,8 +7,11 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use parent 'Iterator::Flex::Base';
+use Iterator::Flex::Utils ':IterAttrs';
 use Ref::Util;
+use namespace::clean;
+
+use parent 'Iterator::Flex::Base';
 
 =method new
 
@@ -77,26 +80,26 @@ sub construct {
 
     return {
 
-        _self => \$self,
+        _SELF ,=> \$self,
 
-        reset => sub {
+        RESET ,=> sub {
             $prev = $current = undef;
             $next = 0;
         },
 
-        rewind => sub {
+        REWIND ,=> sub {
             $next = 0;
         },
 
-        prev => sub {
+        PREV ,=> sub {
             return defined $prev ? $arr->[$prev] : undef;
         },
 
-        current => sub {
+        CURRENT ,=> sub {
             return defined $current ? $arr->[$current] : undef;
         },
 
-        next => sub {
+        NEXT ,=> sub {
             if ( $next == $len ) {
                 # if first time through, set current
                 $prev = $current
@@ -109,7 +112,7 @@ sub construct {
             return $arr->[$current];
         },
 
-        freeze => sub {
+        FREEZE ,=> sub {
             return [
                 $class,
                 {

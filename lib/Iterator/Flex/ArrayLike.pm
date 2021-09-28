@@ -7,11 +7,14 @@ use warnings;
 
 our $VERSION = '0.12';
 
+use Ref::Util;
+use Iterator::Flex::Utils ':IterAttrs';
+use namespace::clean;
+
 use parent 'Iterator::Flex::Base';
 use Role::Tiny::With ();
 Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
-use Ref::Util;
 
 =method new
 
@@ -117,26 +120,26 @@ sub construct {
 
     return {
 
-        _self => \$self,
+        _SELF ,=> \$self,
 
-        reset => sub {
+        RESET ,=> sub {
             $prev = $current = undef;
             $next = 0;
         },
 
-        rewind => sub {
+        REWIND ,=> sub {
             $next = 0;
         },
 
-        prev => sub {
+        PREV ,=> sub {
             return defined $prev ? $obj->$at( $prev ) : undef;
         },
 
-        current => sub {
+        CURRENT ,=> sub {
             return defined $current ? $obj->$at( $current ) : undef;
         },
 
-        next => sub {
+        NEXT ,=> sub {
             if ( $next == $len ) {
                 # if first time through, set current
                 $prev = $current

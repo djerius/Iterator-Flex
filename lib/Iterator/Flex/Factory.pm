@@ -20,6 +20,7 @@ use Iterator::Flex::Utils qw[
   :ExhaustionActions
   :default
   :RegistryKeys
+  :IterAttrs
 ];
 
 Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
@@ -78,7 +79,7 @@ sub to_iterator ( $CLASS, $iterable = undef, $pars = {} ) {
       defined $iterable
       ? $CLASS->construct_from_iterable( $iterable, $pars )
       : $CLASS->construct( {
-            next => sub { return }
+            NEXT,  sub { return }
         } );
 }
 
@@ -221,15 +222,15 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
       if $class ne 'Iterator::Flex::Base'
       && !Module::Runtime::require_module( $class );
 
-    delete $ipar_k{_name};
-    $CLASS->_throw( parameter => "'_name' parameter value must be a string\n" )
-      if defined( $par = $ipar{_name} ) && Ref::Util::is_ref( $par );
+    delete $ipar_k{+_NAME};
+    $CLASS->_throw( parameter => "'@{[ _NAME ]}' parameter value must be a string\n" )
+      if defined( $par = $ipar{+_NAME} ) && Ref::Util::is_ref( $par );
 
     push @roles, 'Exhausted::Registry';
 
     delete $gpar_k{ +INPUT_EXHAUSTION };
     my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }
-      // [ RETURN, => undef ];
+      // [ RETURN, undef ];
 
     my @input_exhaustion
       = Ref::Util::is_arrayref( $input_exhaustion )
@@ -243,18 +244,21 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
         push @roles, 'Exhaustion::ImportedReturn','Wrap::Return';
         push $input_exhaustion->@*, undef if @input_exhaustion == 1;
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
-        $gpar{ +EXHAUSTION }          = $gpar{ +INPUT_EXHAUSTION }
+        $gpar{ +EXHAUSTION }       = $gpar{ +INPUT_EXHAUSTION }
           unless $has_output_exhaustion_policy;
     }
 
-    elsif ( $input_exhaustion[0] eq +THROW ) {
+    elsif ( $input_exhaustion[0] eq THROW ) {
         push @roles,  'Exhaustion::ImportedThrow', 'Wrap::Throw';
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
-        $gpar{ +EXHAUSTION } = [ THROW, => PASSTHROUGH ]
+        $gpar{ +EXHAUSTION }       = [ THROW, => PASSTHROUGH ]
           unless $has_output_exhaustion_policy;
     }
 
-    for my $method ( qw[ next rewind reset prev current ] ) {
+    $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )
+      if !defined( $ipar{+NEXT} );
+
+    for my $method ( NEXT, REWIND, RESET, PREV, CURRENT  ) {
 
         delete $ipar_k{$method};
         next unless defined( my $code = $ipar{$method} );
@@ -269,11 +273,8 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
           if $method eq 'next' || ! $class->can( $method );
     }
 
-    $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )
-      if !defined( $ipar{next} );
-
-    # add on methods are dealt with in the iterator constructor.
-    delete $ipar_k{methods};
+    # these are dealt with in the iterator constructor.
+    delete $ipar_k{ +METHODS };
 
     if ( !!%ipar_k || !!%gpar_k ) {
 

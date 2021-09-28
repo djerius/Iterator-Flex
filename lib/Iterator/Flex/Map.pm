@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( IS_EXHAUSTED THROW EXHAUSTION );
+use Iterator::Flex::Utils qw( IS_EXHAUSTED THROW EXHAUSTION :IterAttrs );
 use Iterator::Flex::Factory;
 use Ref::Util;
 use parent 'Iterator::Flex::Base';
@@ -59,19 +59,19 @@ sub construct {
     my ( $code, $src ) = @{$state}{ qw[ code src ] };
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => THROW } );
+      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, THROW } );
 
     my $self;
     my $is_exhausted;
 
     return {
-        _name => 'imap',
+        _NAME, => 'imap',
 
-        _self => \$self,
+        _SELF, => \$self,
 
         IS_EXHAUSTED, => \$is_exhausted,
 
-        next => sub {
+        NEXT, => sub {
             return $self->signal_exhaustion if $is_exhausted;
 
             my $ret = eval {
@@ -87,8 +87,8 @@ sub construct {
             }
             return $ret;
         },
-        reset    => sub { },
-        _depends => $src,
+        RESET,   => sub { },
+        _DEPENDS, => $src,
     };
 }
 

@@ -9,6 +9,7 @@ our $VERSION = '0.12';
 
 use Scalar::Util;
 use Role::Tiny;
+use Iterator::Flex::Utils 'NEXT';
 
 use namespace::clean;
 
@@ -19,7 +20,7 @@ sub _construct_next {
     my $ipar = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $next = $ipar->{next};
+    my $next = $ipar->{+NEXT};
     Scalar::Util::weaken $next;
 
     my $sub;

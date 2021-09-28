@@ -7,6 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
+use Iterator::Flex::Utils 'NEXT';
 use Scalar::Util;
 use Role::Tiny;
 
@@ -30,8 +31,8 @@ sub _construct_next {
     my $ipar = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $sub = $ipar->{next} // $class->_throw( parameter =>  "Missing 'next' parameter" );
-    Scalar::Util::weaken $ipar->{next};
+    my $sub = $ipar->{+NEXT} // $class->_throw( parameter =>  "Missing 'next' parameter" );
+    Scalar::Util::weaken $ipar->{+NEXT};
     return $sub;
 }
 

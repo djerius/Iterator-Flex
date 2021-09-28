@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( RETURN IS_EXHAUSTED EXHAUSTION );
+use Iterator::Flex::Utils qw( RETURN IS_EXHAUSTED EXHAUSTION :IterAttrs );
 use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
@@ -113,11 +113,11 @@ sub construct {
     my $is_exhausted;
     my %params = (
 
-        _self => \$self,
+        _SELF, => \$self,
 
         IS_EXHAUSTED, => \$is_exhausted,
 
-        next => sub {
+        NEXT, => sub {
             return $self->signal_exhaustion if $is_exhausted;
 
             # first time through
@@ -168,7 +168,7 @@ sub construct {
             }
         },
 
-        current => sub {
+        CURRENT, => sub {
             return undef if !@value;
             return $self->signal_exhaustion if $is_exhausted;
             if ( @keys ) {
@@ -180,9 +180,9 @@ sub construct {
                 return [@value];
             }
         },
-        reset  => sub { @value = () },
-        rewind => sub { @value = () },
-        _depends => \@iterators,
+        RESET,  => sub { @value = () },
+        REWIND, => sub { @value = () },
+        _DEPENDS, => \@iterators,
     );
 
     # can only freeze if the iterators support a current method
@@ -192,13 +192,13 @@ sub construct {
       )
     {
 
-        $params{freeze} = sub {
+        $params{+FREEZE} = sub {
             return [ $class, { keys => \@keys } ];
         };
-        $params{_roles} = ['Freeze'];
+        $params{+_ROLES} = ['Freeze'];
     }
 
-    return { %params, _name => 'iproduct' };
+    return { %params, (_NAME, 'iproduct') };
 }
 
 

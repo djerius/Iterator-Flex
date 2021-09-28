@@ -13,7 +13,7 @@ use Scalar::Util;
 use List::Util;
 
 use parent 'Iterator::Flex::Base';
-use Iterator::Flex::Utils qw( IS_EXHAUSTED );
+use Iterator::Flex::Utils qw( IS_EXHAUSTED :IterAttrs );
 
 use namespace::clean;
 
@@ -83,7 +83,7 @@ sub construct {
         $next  = $begin unless defined $next;
 
         %params = (
-            next => sub {
+            NEXT, => sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
                         $prev    = $current;
@@ -95,7 +95,7 @@ sub construct {
                 $current = $next++;
                 return $current;
             },
-            freeze => sub {
+            FREEZE, => sub {
                 [
                     $class,
                     {
@@ -121,7 +121,7 @@ sub construct {
         $iter = 0      unless defined $iter;
 
         %params = (
-            freeze => sub {
+            FREEZE, => sub {
                 [
                     $class,
                     {
@@ -135,7 +135,7 @@ sub construct {
                     } ]
             },
 
-            next => $begin < $end
+            NEXT, => $begin < $end
             ? sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
@@ -169,22 +169,21 @@ sub construct {
 
     return {
         %params,
-        current => sub { $current },
-        prev    => sub { $prev },
-        rewind  => sub {
+        CURRENT, => sub { $current },
+        PREV,    => sub { $prev },
+        REWIND,  => sub {
             $next = $begin;
             $iter = 0;
         },
-        reset => sub {
+        RESET, => sub {
             $prev = $current = undef;
             $next = $begin;
             $iter = 0;
         },
 
-        _self => \$self,
+        _SELF, => \$self,
 
-        IS_EXHAUSTED,
-        => \$is_exhausted,
+        IS_EXHAUSTED, => \$is_exhausted,
     };
 
 }

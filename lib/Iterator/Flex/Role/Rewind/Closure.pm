@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use Iterator::Flex::Base ();
-use Iterator::Flex::Utils qw( :default ITERATOR );
+use Iterator::Flex::Utils qw( :default ITERATOR REWIND );
 use Role::Tiny;
 
 use namespace::clean;
@@ -29,7 +29,7 @@ sub rewind {
 
     $self->_apply_method_to_depends( 'rewind' );
 
-    $REGISTRY{ refaddr $self }{ +ITERATOR }{rewind}->( $self );
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{+REWIND}->( $self );
     $self->_reset_exhausted;
 
     return;

@@ -9,7 +9,7 @@ our $VERSION = '0.12';
 
 use List::Util;
 
-use Iterator::Flex::Utils qw( :default ITERATOR );
+use Iterator::Flex::Utils qw( :default ITERATOR :IterAttrs :RegistryKeys );
 use Iterator::Flex::Base;
 use Role::Tiny;
 
@@ -31,20 +31,20 @@ sub freeze {
 
     my @freeze;
 
-    if ( defined $ipar->{_depends} ) {
+    if ( defined $ipar->{+_DEPENDS} ) {
 
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
-        @{ $ipar->{_depends} };
+        @{ $ipar->{+_DEPENDS} };
         $obj->_throw( parameter =>
               "dependency: @{[ $cant->_name ]} is not serializeable" )
           if $cant;
 
         # now freeze them
-        @freeze = map $_->freeze, @{ $ipar->{_depends} };
+        @freeze = map $_->freeze, @{ $ipar->{+_DEPENDS} };
     }
 
-    push @freeze, $ipar->{freeze}->( $obj ), $obj->is_exhausted;
+    push @freeze, $ipar->{+FREEZE}->( $obj ), $obj->is_exhausted;
 
     return \@freeze;
 }

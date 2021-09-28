@@ -11,7 +11,7 @@ use Scalar::Util;
 use List::Util;
 
 use Iterator::Flex::Base ();
-use Iterator::Flex::Utils qw( :default ITERATOR );
+use Iterator::Flex::Utils qw( :default ITERATOR RESET );
 use Role::Tiny;
 
 use namespace::clean;
@@ -30,7 +30,7 @@ sub reset {
     my $self = shift;
     $self->_apply_method_to_depends( 'reset' );
 
-    $REGISTRY{ refaddr $self }{ +ITERATOR }{reset}->( $self );
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{+RESET}->( $self );
     $self->_reset_exhausted;
 
     return;

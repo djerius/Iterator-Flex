@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use Iterator::Flex::Factory;
-use Iterator::Flex::Utils qw( RETURN EXHAUSTION );
+use Iterator::Flex::Utils qw( RETURN EXHAUSTION :IterAttrs :Methods );
 use parent 'Iterator::Flex::Base';
 use Scalar::Util;
 use Ref::Util;
@@ -72,24 +72,24 @@ sub construct {
       unless Ref::Util::is_coderef( $serialize );
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => RETURN } );
+      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, RETURN } );
 
     $class->_throw( parameter => "'src' iterator (@{[ $src->_name ]}) must provide a freeze method" )
-      unless $class->_can_meth( $src, 'freeze' );
+      unless $class->_can_meth( $src, FREEZE );
 
     $class->_throw( parameter =>
           "'src' iterator must provide set_exhausted/is_exhausted methods" )
-      unless $class->_can_meth( $src, 'set_exhausted' )
-      && $class->_can_meth( $src, 'is_exhausted' );
+      unless $class->_can_meth( $src, SET_EXHAUSTED )
+      && $class->_can_meth( $src, IS_EXHAUSTED );
 
     my $self;
     my %params = (
-        _name => 'freeze',
+        _NAME ,=> 'freeze',
 
-        _self => \$self,
+        _SELF ,=> \$self,
 
-        _depends => $src,
-        next     => sub {
+        _DEPENDS, => $src,
+        NEXT,     => sub {
             my $value = $src->();
             local $_ = $src->freeze;
             &$serialize();
@@ -99,8 +99,8 @@ sub construct {
     );
 
     Scalar::Util::weaken $src;
-    $params{_roles} = [];
-    for my $meth ( 'prev', 'current', 'rewind', 'reset' ) {
+    $params{+_ROLES} = [];
+    for my $meth ( PREV, CURRENT, REWIND, RESET ) {
         next unless $src->may( $meth );
         my $sub = $src->can( $meth );
         Scalar::Util::weaken $sub;
@@ -125,7 +125,7 @@ sub construct {
 
 
         # need '+' as role names are fully qualified
-        push $params{_roles}->@*, '+' . $role;
+        push $params{+_ROLES}->@*, '+' . $role;
     }
 
 

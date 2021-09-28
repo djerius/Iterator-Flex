@@ -19,7 +19,7 @@ use Module::Runtime  ();
 
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys );
+use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys :IterAttrs );
 
 use namespace::clean;
 
@@ -57,7 +57,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     my @roles = ( $roles->@* );
 
-    my $exhaustion_action = $gpar{ +EXHAUSTION } // [ RETURN, => undef ];
+    my $exhaustion_action = $gpar{ +EXHAUSTION } // [ RETURN, undef ];
 
     my @exhaustion_action
       = Ref::Util::is_arrayref( $exhaustion_action )
@@ -126,7 +126,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
           "attempt to register an iterator subroutine which has already been registered."
     ) if exists $REGISTRY{ refaddr $self };
 
-    $REGISTRY{ refaddr $self } = { ITERATOR, => \%ipar, GENERAL, => \%gpar };
+    $REGISTRY{ refaddr $self } = { ITERATOR, \%ipar, GENERAL, \%gpar };
 
     $self->_reset_exhausted if $self->can( '_reset_exhausted' );
 
@@ -213,8 +213,8 @@ sub may {
     $attributes //= $REGISTRY{ refaddr $self }{ +ITERATOR };
 
     return $attributes->{"_may_$meth"} //=
-      defined $attributes->{_depends}
-      ? !List::Util::first { !$_->may( $meth ) } $attributes->{_depends}->@*
+      defined $attributes->{+_DEPENDS}
+      ? !List::Util::first { !$_->may( $meth ) } $attributes->{+_DEPENDS}->@*
       : 1;
 }
 
@@ -237,7 +237,7 @@ sub _add_roles {
 sub _apply_method_to_depends {
     my ( $self, $meth ) = @_;
 
-    if ( defined ( my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{_depends} ) ) {
+    if ( defined ( my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{+_DEPENDS} ) ) {
         # first check if dependencies have method
         my $cant = List::Util::first { !$_->can( $meth ) } $depends->@*;
         $self->_throw( parameter =>
