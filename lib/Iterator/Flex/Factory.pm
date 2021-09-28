@@ -278,10 +278,10 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     if ( !!%ipar_k || !!%gpar_k ) {
 
         $CLASS->_throw( parameter =>
-              "unknown iterator parameters: @{[ join( ', ', keys %ipar ) ]}" )
+              "unknown iterator parameters: @{[ join( ', ', keys %ipar_k ) ]}" )
           if %ipar_k;
         $CLASS->_throw( paramegter =>
-              "unknown iterator parameters: @{[ join( ', ', keys %gpar ) ]}" )
+              "unknown iterator parameters: @{[ join( ', ', keys %gpar_k ) ]}" )
           if %gpar_k;
     }
 
