@@ -7,7 +7,7 @@ use 5.10.0;
 use strict;
 use warnings;
 
-use experimental qw( signatures declared_refs );
+use experimental qw( signatures declared_refs postderef );
 
 our $VERSION = '0.12';
 
@@ -155,6 +155,10 @@ sub DESTROY {
     }
 }
 
+sub _name {
+    $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{_name};
+}
+
 
 =method _is_iterator
 
@@ -219,7 +223,7 @@ sub _may_meth {
 
     $attributes->{$pred} //=
       defined $attributes->{_depends}
-      ? !List::Util::first { !$_->may( $meth ) } @{ $attributes->{_depends} }
+      ? !List::Util::first { !$_->may( $meth ) } $attributes->{_depends}->@*
       : 1;
 
     return $attributes->{$pred};
@@ -257,6 +261,22 @@ sub _add_roles {
     my $class = shift;
     Role::Tiny->apply_roles_to_package( $class,
         map { $class->_load_role( $_ ) } @_ );
+}
+
+sub _apply_method_to_depends {
+    my ( $self, $meth ) = @_;
+
+    if ( defined ( my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{_depends} ) ) {
+        # first check if dependencies have method
+        my $cant = List::Util::first { !$_->can( $meth ) } $depends->@*;
+        $self->_throw( parameter =>
+              "dependency: @{[ $cant->_name ]} does not have a '$meth' method"
+        ) if $cant;
+
+        # now apply the method
+        $_->$meth foreach $depends->@*;
+    }
+
 }
 
 1;

@@ -37,7 +37,7 @@ sub freeze {
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
         @{ $ipar->{_depends} };
         $obj->_throw( parameter =>
-              "dependency: @{[ $cant->{_name} ]} is not serializeable" )
+              "dependency: @{[ $cant->_name ]} is not serializeable" )
           if $cant;
 
         # now freeze them

@@ -225,8 +225,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     $CLASS->_throw( parameter => "'_name' parameter value must be a string\n" )
       if defined( $par = $ipar{_name} ) && Ref::Util::is_ref( $par );
 
-    # don't close over self
-    push @roles, 'Next::NoSelf' , 'Exhausted::Registry';
+    push @roles, 'Exhausted::Registry';
 
     delete $gpar_k{ +INPUT_EXHAUSTION };
     my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }
@@ -265,8 +264,9 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
           unless Ref::Util::is_coderef( $code );
 
         # if $class can't perform the required method, add a role
-        # which can
-        push @roles, ucfirst( $method ) unless $class->can( $method );
+        # which can.  Ignore a next method, as next must be a closure
+        push @roles, ucfirst( $method ) . '::Closure'
+          if $method eq 'next' || ! $class->can( $method );
     }
 
     $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )

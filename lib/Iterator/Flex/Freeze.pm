@@ -74,7 +74,7 @@ sub construct {
     $src
       = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, => RETURN } );
 
-    $class->_throw( parameter => "'src' iterator must provide a freeze method" )
+    $class->_throw( parameter => "'src' iterator (@{[ $src->_name ]}) must provide a freeze method" )
       unless $class->_can_meth( $src, 'freeze' );
 
     $class->_throw( parameter =>
@@ -107,8 +107,25 @@ sub construct {
         $params{$meth} = sub {
             $src->$sub();
         };
+
+        # figure out which role was used to describe the capability
+        my $Umeth = ucfirst $meth;
+        my $role;
+        for my $suffix ( 'Closure', 'Method' ) {
+            $role = eval {
+                $class->_load_role( $suffix ? $Umeth . '::' . $suffix : $Umeth );
+            };
+            next if $@ ne '';
+            last if $src->does( $role );
+            undef $role;
+        };
+
+        $class->_throw( class => "unable to find role for '$meth' capability for @{[ $src->_name ]}" )
+          unless defined $role;
+
+
         # need '+' as role names are fully qualified
-        push @{ $params{_roles} }, '+' . $class->_load_role( ucfirst $meth );
+        push $params{_roles}->@*, '+' . $role;
     }
 
 

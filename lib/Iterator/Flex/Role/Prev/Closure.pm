@@ -1,6 +1,6 @@
-package Iterator::Flex::Role::Prev;
+package Iterator::Flex::Role::Prev::Closure;
 
-# ABSTRACT: Role to add prev method to an Iterator::Flex::Base
+# ABSTRACT: Implement C<prev> as a closure stored in the registry
 
 use strict;
 use warnings;

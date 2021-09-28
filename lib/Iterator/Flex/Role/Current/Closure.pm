@@ -1,6 +1,6 @@
-package Iterator::Flex::Role::Current;
+package Iterator::Flex::Role::Current::Closure;
 
-# ABSTRACT: Role to add current method to an Iterator::Flex::Base
+# ABSTRACT: Implement C<current> as a closure stored in the registry
 
 use strict;
 use warnings;

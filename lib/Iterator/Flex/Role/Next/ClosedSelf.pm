@@ -13,8 +13,6 @@ use Role::Tiny;
 
 use namespace::clean;
 
-with 'Iterator::Flex::Role::Next';
-
 =method next
 
 =method __next__
@@ -24,31 +22,23 @@ with 'Iterator::Flex::Role::Next';
 =cut
 
 sub _construct_next {
-
-    # my $class = shift;
-    shift;
+    my $class = shift;
     my $ipar = shift;
 
-    my $sub = $ipar->{next} // do {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw( "Missing 'next' parameter" );
-    };
-
+    my $sub = $ipar->{next} // $class->_throw( parameter =>  "Missing 'next' parameter" );
     Scalar::Util::weaken $ipar->{next};
 
-    if ( exists $ipar->{_self} ) {
-        my $ref = $ipar->{_self};
-        $$ref = $sub;
-        Scalar::Util::weaken $$ref;
-    }
-    else {
-        require Iterator::Flex::Failure;
-        Iterator::Flex::Failure::parameter->throw(
-            "Missing ability to set self" );
-    }
+    $class->_throw( parameter =>  "Missing ability to set self" )
+      unless exists $ipar->{_self};
 
+    my $ref = $ipar->{_self};
+    $$ref = $sub;
+    Scalar::Util::weaken $$ref;
     return $sub;
 }
+
+sub next { &{ $_[0] } }
+*__next__ = \&next;
 
 1;
 

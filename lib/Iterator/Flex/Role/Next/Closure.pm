@@ -1,6 +1,6 @@
-package Iterator::Flex::Role::Next::NoSelf;
+package Iterator::Flex::Role::Next::Closure;
 
-# ABSTRACT: Construct a next() method for iterators which handle exhaustion
+# ABSTRACT: Construct a next() method for iterators without closed over $self
 
 use strict;
 use warnings;
@@ -11,8 +11,6 @@ use Scalar::Util;
 use Role::Tiny;
 
 use namespace::clean;
-
-with 'Iterator::Flex::Role::Next';
 
 =method next
 
@@ -28,16 +26,17 @@ by a specific L<Iterator::Flex::Role::Exhaustion> role.
 =cut
 
 sub _construct_next {
-
-    # my $class = shift;
-    shift;
+    my $class = shift;
     my $ipar = shift;
 
     # ensure we don't hold any strong references in the subroutine
-    my $sub = $ipar->{next};
+    my $sub = $ipar->{next} // $class->_throw( parameter =>  "Missing 'next' parameter" );
     Scalar::Util::weaken $ipar->{next};
     return $sub;
 }
+
+sub next { &{ $_[0] } }
+*__next__ = \&next;
 
 1;
 

@@ -205,9 +205,9 @@ sub construct {
 __PACKAGE__->_add_roles( qw[
       Exhausted::Closure
       Next::ClosedSelf
-      Current
-      Reset
-      Rewind
+      Current::Closure
+      Reset::Closure
+      Rewind::Closure
 ] );
 
 1;

@@ -5,7 +5,7 @@ use Test::Lib;
 
 use MyTest::Utils qw[ drain ];
 
-use Iterator::Flex::Common qw[ iseq ifreeze thaw ];
+use Iterator::Flex::Common qw[ iseq ifreeze thaw igrep ];
 use Data::Dump 'pp';
 
 sub _test_values {
@@ -95,5 +95,10 @@ subtest "serialize" => sub {
 
 };
 
+subtest "downstream can't freeze" => sub {
+    my $err = dies { ifreeze {} igrep { %_/2 } iseq( 3 ) };
+    isa_ok( $err, [ 'Iterator::Flex::Failure::parameter' ], "parameter exception" );
+    like ( "$err", qr/must provide a freeze method/, "correct message" );
+};
 
 done_testing;
