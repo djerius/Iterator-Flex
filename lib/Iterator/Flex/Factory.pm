@@ -497,6 +497,14 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
     return $obj;
 }
 
+sub construct_from_attr ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
+    my %gpar = $in_gpar->%*;
+
+    # this indicates that there should be no wrapping of 'next'
+    $gpar{+INPUT_EXHAUSTION} = PASSTHROUGH;
+    $CLASS->construct( $in_ipar, \%gpar );
+}
+
 =class_method _parse_pars
 
   ( \%iter_pars, \%general_pars ) = $class->_parse_pars( \%pars );
