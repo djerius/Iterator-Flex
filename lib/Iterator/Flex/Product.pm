@@ -101,7 +101,7 @@ sub construct {
       if @keys && @keys != @depends;
 
     my @iterators = map {
-        Iterator::Flex::Factory->to_iterator( $_, { EXHAUSTION, => RETURN } )
+        Iterator::Flex::Factory->to_iterator( $_, { (+EXHAUSTION) => RETURN } )
     } @depends;
 
     @value = map { $_->current } @iterators
@@ -113,11 +113,11 @@ sub construct {
     my $is_exhausted;
     my %params = (
 
-        _SELF, => \$self,
+        (+_SELF) => \$self,
 
-        IS_EXHAUSTED, => \$is_exhausted,
+        (+IS_EXHAUSTED) => \$is_exhausted,
 
-        NEXT, => sub {
+        (+NEXT) => sub {
             return $self->signal_exhaustion if $is_exhausted;
 
             # first time through
@@ -168,7 +168,7 @@ sub construct {
             }
         },
 
-        CURRENT, => sub {
+        (+CURRENT) => sub {
             return undef if !@value;
             return $self->signal_exhaustion if $is_exhausted;
             if ( @keys ) {
@@ -180,9 +180,10 @@ sub construct {
                 return [@value];
             }
         },
-        RESET,  => sub { @value = () },
-        REWIND, => sub { @value = () },
-        _DEPENDS, => \@iterators,
+
+        (+RESET)  => sub { @value = () },
+        (+REWIND) => sub { @value = () },
+        (+_DEPENDS) => \@iterators,
     );
 
     # can only freeze if the iterators support a current method
@@ -198,7 +199,7 @@ sub construct {
         $params{+_ROLES} = ['Freeze'];
     }
 
-    return { %params, (_NAME, 'iproduct') };
+    return { %params, (+_NAME) => 'iproduct' };
 }
 
 

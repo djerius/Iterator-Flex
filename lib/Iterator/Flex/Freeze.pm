@@ -72,24 +72,24 @@ sub construct {
       unless Ref::Util::is_coderef( $serialize );
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, RETURN } );
+      = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => RETURN } );
 
     $class->_throw( parameter => "'src' iterator (@{[ $src->_name ]}) must provide a freeze method" )
-      unless $class->_can_meth( $src, FREEZE );
+      unless $class->_can_meth( $src, +FREEZE );
 
     $class->_throw( parameter =>
           "'src' iterator must provide set_exhausted/is_exhausted methods" )
-      unless $class->_can_meth( $src, SET_EXHAUSTED )
-      && $class->_can_meth( $src, IS_EXHAUSTED );
+      unless $class->_can_meth( $src, +SET_EXHAUSTED )
+      && $class->_can_meth( $src, +IS_EXHAUSTED );
 
     my $self;
     my %params = (
-        _NAME ,=> 'freeze',
+        (+_NAME) => 'freeze',
 
-        _SELF ,=> \$self,
+        (+_SELF) => \$self,
 
-        _DEPENDS, => $src,
-        NEXT,     => sub {
+        (+_DEPENDS) => $src,
+        (+NEXT)     => sub {
             my $value = $src->();
             local $_ = $src->freeze;
             &$serialize();
@@ -100,7 +100,7 @@ sub construct {
 
     Scalar::Util::weaken $src;
     $params{+_ROLES} = [];
-    for my $meth ( PREV, CURRENT, REWIND, RESET ) {
+    for my $meth ( +PREV, +CURRENT, +REWIND, +RESET ) {
         next unless $src->may( $meth );
         my $sub = $src->can( $meth );
         Scalar::Util::weaken $sub;

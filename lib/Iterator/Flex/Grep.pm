@@ -60,19 +60,19 @@ sub construct {
     my ( $code, $src ) = @{$state}{ qw[ code src ] };
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { EXHAUSTION, THROW } );
+      = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => +THROW } );
 
     my $self;
     my $is_exhausted;
 
     return {
-        _NAME, => 'igrep',
+        (+_NAME) => 'igrep',
 
-        _SELF, => \$self,
+        (+_SELF) => \$self,
 
-        IS_EXHAUSTED, => \$is_exhausted,
+        (+IS_EXHAUSTED) => \$is_exhausted,
 
-        NEXT, => sub {
+        (+NEXT) => sub {
             return $self->signal_exhaustion
               if $is_exhausted;
 
@@ -91,8 +91,8 @@ sub construct {
             }
             return $ret;
         },
-        RESET,    => sub { },
-        _DEPENDS, => $src,
+        (+RESET)    => sub { },
+        (+_DEPENDS) => $src,
     };
 }
 

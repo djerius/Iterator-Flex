@@ -75,31 +75,31 @@ sub construct {
 
     return {
 
-        RESET ,=> sub {
+        (+RESET) => sub {
             $prev = $current = undef;
             $next = 0;
         },
 
-        REWIND ,=> sub {
+        (+REWIND) => sub {
             $next = 0;
         },
 
-        PREV ,=> sub {
+        (+PREV) => sub {
             return defined $prev ? $arr->[$prev] : undef;
         },
 
-        CURRENT ,=> sub {
+        (+CURRENT) => sub {
             return defined $current ? $arr->[$current] : undef;
         },
 
-        NEXT ,=> sub {
+        (+NEXT) => sub {
             $next    = 0 if $next == $len;
             $prev    = $current;
             $current = $next++;
             return $arr->[$current];
         },
 
-        FREEZE ,=> sub {
+        (+FREEZE) => sub {
             return [
                 $class,
                 {

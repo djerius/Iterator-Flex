@@ -120,26 +120,26 @@ sub construct {
 
     return {
 
-        _SELF ,=> \$self,
+        (+_SELF) => \$self,
 
-        RESET ,=> sub {
+        (+RESET) => sub {
             $prev = $current = undef;
             $next = 0;
         },
 
-        REWIND ,=> sub {
+        (+REWIND) => sub {
             $next = 0;
         },
 
-        PREV ,=> sub {
+        (+PREV) => sub {
             return defined $prev ? $obj->$at( $prev ) : undef;
         },
 
-        CURRENT ,=> sub {
+        (+CURRENT) => sub {
             return defined $current ? $obj->$at( $current ) : undef;
         },
 
-        NEXT ,=> sub {
+        (+NEXT) => sub {
             if ( $next == $len ) {
                 # if first time through, set current
                 $prev = $current

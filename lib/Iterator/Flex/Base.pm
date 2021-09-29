@@ -57,7 +57,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     my @roles = ( $roles->@* );
 
-    my $exhaustion_action = $gpar{ +EXHAUSTION } // [ RETURN, undef ];
+    my $exhaustion_action = $gpar{ +EXHAUSTION } // [ (+RETURN) => undef ];
 
     my @exhaustion_action
       = Ref::Util::is_arrayref( $exhaustion_action )
@@ -66,13 +66,13 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     $gpar{ +EXHAUSTION } = \@exhaustion_action;
 
-    if ( $exhaustion_action[0] eq RETURN ) {
+    if ( $exhaustion_action[0] eq +RETURN ) {
         push @roles, 'Exhaustion::Return';
     }
-    elsif ( $exhaustion_action[0] eq THROW ) {
+    elsif ( $exhaustion_action[0] eq +THROW ) {
 
         push @roles,
-          @exhaustion_action > 1 && $exhaustion_action[1] eq PASSTHROUGH
+          @exhaustion_action > 1 && $exhaustion_action[1] eq +PASSTHROUGH
           ? 'Exhaustion::PassthroughThrow'
           : 'Exhaustion::Throw';
     }
@@ -126,7 +126,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
           "attempt to register an iterator subroutine which has already been registered."
     ) if exists $REGISTRY{ refaddr $self };
 
-    $REGISTRY{ refaddr $self } = { ITERATOR, \%ipar, GENERAL, \%gpar };
+    $REGISTRY{ refaddr $self } = { (+ITERATOR) => \%ipar, (+GENERAL) => \%gpar };
 
     $self->_reset_exhausted if $self->can( '_reset_exhausted' );
 
@@ -193,7 +193,7 @@ Returns the subroutine which returns the next value from the iterator.
 =cut
 
 sub __iter__ {
-    return $REGISTRY{ refaddr $_[0] }{+ITERATOR}{next};
+    return $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+NEXT};
 }
 
 =method may

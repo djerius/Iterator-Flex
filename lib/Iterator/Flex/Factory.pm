@@ -79,7 +79,7 @@ sub to_iterator ( $CLASS, $iterable = undef, $pars = {} ) {
       defined $iterable
       ? $CLASS->construct_from_iterable( $iterable, $pars )
       : $CLASS->construct( {
-            NEXT,  sub { return }
+            (+NEXT) => sub { }
         } );
 }
 
@@ -251,14 +251,14 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     elsif ( $input_exhaustion[0] eq THROW ) {
         push @roles,  'Exhaustion::ImportedThrow', 'Wrap::Throw';
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
-        $gpar{ +EXHAUSTION }       = [ THROW, => PASSTHROUGH ]
+        $gpar{ +EXHAUSTION }       = [ (+THROW) => PASSTHROUGH ]
           unless $has_output_exhaustion_policy;
     }
 
     $CLASS->_throw( parameter => "missing or undefined 'next' parameter" )
       if !defined( $ipar{+NEXT} );
 
-    for my $method ( NEXT, REWIND, RESET, PREV, CURRENT  ) {
+    for my $method ( +NEXT, +REWIND, +RESET, +PREV, +CURRENT  ) {
 
         delete $ipar_k{$method};
         next unless defined( my $code = $ipar{$method} );
@@ -269,7 +269,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
 
         # if $class can't perform the required method, add a role
         # which can.
-        if ( $method eq NEXT ) {
+        if ( $method eq +NEXT ) {
             # next is always a closure, but the caller may want to
             # keep track of $self
             push @roles, defined $ipar{+_SELF} ? 'Next::ClosedSelf' : 'Next::Closure';
@@ -406,7 +406,7 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
     my %ipar = $ipar->%*;
     my %gpar = $gpar->%*;
 
-    $gpar{ +INPUT_EXHAUSTION } //= [ RETURN, => undef ];
+    $gpar{ +INPUT_EXHAUSTION } //= [ (+RETURN) => undef ];
 
     if ( !exists $ipar{next} ) {
         my $code;
@@ -469,7 +469,7 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
 
     if ( $exhaustion[0] eq RETURN ) {
 
-        if ( $existing_exhaustion eq THROW ) {
+        if ( $existing_exhaustion eq +THROW ) {
             Role::Tiny->apply_roles_to_object( $obj,
                 $obj->_load_role( 'Exhaustion::Return' ) );
         }
@@ -477,12 +477,12 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
 
     elsif ( $exhaustion[0] eq THROW ) {
 
-        if ( $existing_exhaustion eq THROW ) {
+        if ( $existing_exhaustion eq +THROW ) {
             Role::Tiny->apply_roles_to_object( $obj,
                 $obj->_load_role( 'Exhaustion::Return' ) );
         }
 
-        if ( $existing_exhaustion eq RETURN ) {
+        if ( $existing_exhaustion eq +RETURN ) {
             Role::Tiny->apply_roles_to_object( $obj,
                 $obj->_load_role( 'Exhaustion::Throw' ) );
         }
@@ -501,7 +501,7 @@ sub construct_from_attr ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     my %gpar = $in_gpar->%*;
 
     # this indicates that there should be no wrapping of 'next'
-    $gpar{+INPUT_EXHAUSTION} = PASSTHROUGH;
+    $gpar{+INPUT_EXHAUSTION} = +PASSTHROUGH;
     $CLASS->construct( $in_ipar, \%gpar );
 }
 
@@ -515,7 +515,7 @@ sub _parse_pars ( $, $pars ) {
 
     my %ipars = $pars->%*;
     # move  general parsibutes into their own hash
-    my %gpars = delete %ipars{ EXHAUSTION, INPUT_EXHAUSTION };
+    my %gpars = delete %ipars{ +EXHAUSTION, +INPUT_EXHAUSTION };
 
     delete %gpars{ grep { !defined $gpars{$_} } keys %gpars };
 

@@ -68,26 +68,26 @@ sub construct {
 
     return {
 
-        _SELF ,=> \$self,
+        (+_SELF) => \$self,
 
-        IS_EXHAUSTED ,=> \$is_exhausted,
+        (+IS_EXHAUSTED) => \$is_exhausted,
 
-        RESET ,=> sub {
+        (+RESET) => sub {
             $prev = $current = undef;
         },
 
-        REWIND ,=> sub {
+        (+REWIND) => sub {
         },
 
-        PREV ,=> sub {
+        (+PREV) => sub {
             return $prev;
         },
 
-        CURRENT ,=> sub {
+        (+CURRENT) => sub {
             return $current;
         },
 
-        NEXT ,=> sub {
+        (+NEXT) => sub {
 
             return $current
               if $is_exhausted;
@@ -101,11 +101,11 @@ sub construct {
             return $current;
         },
 
-        FREEZE ,=> sub {
-            return [ $class, { (PREV, $prev), (CURRENT, $current) } ];
+        (+FREEZE) => sub {
+            return [ $class, { (+PREV) => $prev, (+CURRENT) => $current } ];
         },
 
-        _DEPENDS ,=> $src,
+        (+_DEPENDS) => $src,
     };
 }
 

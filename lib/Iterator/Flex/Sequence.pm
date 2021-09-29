@@ -83,7 +83,7 @@ sub construct {
         $next  = $begin unless defined $next;
 
         %params = (
-            NEXT, => sub {
+            (+NEXT) => sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
                         $prev    = $current;
@@ -95,7 +95,7 @@ sub construct {
                 $current = $next++;
                 return $current;
             },
-            FREEZE, => sub {
+            (+FREEZE) => sub {
                 [
                     $class,
                     {
@@ -121,7 +121,7 @@ sub construct {
         $iter = 0      unless defined $iter;
 
         %params = (
-            FREEZE, => sub {
+            (+FREEZE) => sub {
                 [
                     $class,
                     {
@@ -135,7 +135,7 @@ sub construct {
                     } ]
             },
 
-            NEXT, => $begin < $end
+            (+NEXT) => $begin < $end
             ? sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
@@ -169,21 +169,21 @@ sub construct {
 
     return {
         %params,
-        CURRENT, => sub { $current },
-        PREV,    => sub { $prev },
-        REWIND,  => sub {
+        (+CURRENT) => sub { $current },
+        (+PREV)    => sub { $prev },
+        (+REWIND)  => sub {
             $next = $begin;
             $iter = 0;
         },
-        RESET, => sub {
+        (+RESET) => sub {
             $prev = $current = undef;
             $next = $begin;
             $iter = 0;
         },
 
-        _SELF, => \$self,
+        (+_SELF) => \$self,
 
-        IS_EXHAUSTED, => \$is_exhausted,
+        (+IS_EXHAUSTED) => \$is_exhausted,
     };
 
 }
