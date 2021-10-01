@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( ITERATOR_STATE THROW EXHAUSTION :IterAttrs :IterStates );
+use Iterator::Flex::Utils qw( STATE THROW EXHAUSTION :IterAttrs :IterStates );
 use Iterator::Flex::Factory;
 use Ref::Util;
 use parent 'Iterator::Flex::Base';
@@ -69,7 +69,7 @@ sub construct {
 
         (+_SELF) => \$self,
 
-        (+ITERATOR_STATE) => \$iterator_state,
+        (+STATE) => \$iterator_state,
 
         (+NEXT) => sub {
             return $self->signal_exhaustion if $iterator_state == +IterState_EXHAUSTED;

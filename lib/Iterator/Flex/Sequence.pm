@@ -13,7 +13,7 @@ use Scalar::Util;
 use List::Util;
 
 use parent 'Iterator::Flex::Base';
-use Iterator::Flex::Utils qw( ITERATOR_STATE :IterAttrs );
+use Iterator::Flex::Utils qw( STATE :IterAttrs );
 
 use namespace::clean;
 
@@ -183,7 +183,7 @@ sub construct {
 
         (+_SELF) => \$self,
 
-        (+ITERATOR_STATE) => \$iterator_state,
+        (+STATE) => \$iterator_state,
     };
 
 }

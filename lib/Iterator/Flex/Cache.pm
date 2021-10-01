@@ -8,7 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use parent 'Iterator::Flex::Base';
-use Iterator::Flex::Utils qw( ITERATOR_STATE :IterAttrs );
+use Iterator::Flex::Utils qw( STATE :IterAttrs );
 use Iterator::Flex::Factory;
 use Scalar::Util;
 
@@ -70,7 +70,7 @@ sub construct {
 
         (+_SELF) => \$self,
 
-        (+ITERATOR_STATE) => \$iterator_state,
+        (+STATE) => \$iterator_state,
 
         (+RESET) => sub {
             $prev = $current = undef;

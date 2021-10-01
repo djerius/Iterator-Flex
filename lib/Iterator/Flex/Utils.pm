@@ -29,7 +29,7 @@ BEGIN {
 
     %RegistryKeys
       = ( map { $_ => lc $_ }
-          qw[ INPUT_EXHAUSTION EXHAUSTION ITERATOR_STATE ITERATOR GENERAL METHODS ]
+          qw[ INPUT_EXHAUSTION EXHAUSTION ERROR STATE ITERATOR GENERAL METHODS ]
       );
 
     %IterAttrs = (
