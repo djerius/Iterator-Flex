@@ -116,7 +116,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     $class = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
 
-    $ipar{_name} //= $class;
+    $ipar{+_NAME} //= $class;
 
     my $self = bless $class->_construct_next( \%ipar, \%gpar ), $class;
 
@@ -154,7 +154,7 @@ sub DESTROY {
 }
 
 sub _name {
-    $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{_name};
+    $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{+_NAME};
 }
 
 
