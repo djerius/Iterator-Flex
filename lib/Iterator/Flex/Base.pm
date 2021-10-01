@@ -52,7 +52,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     my $roles = delete( $ipar{_roles} ) // [];
 
-    $class->throw( parameter => "_roles must be an arrayref" )
+    $class->_throw( parameter => "_roles must be an arrayref" )
       unless Ref::Util::is_arrayref( $roles );
 
     my @roles = ( $roles->@* );

@@ -56,7 +56,7 @@ sub new {
 sub construct {
     my ( $class, $state ) = @_;
 
-    $class->throw( parameter => "state must be a HASH reference" )
+    $class->_throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
     my ( $src, $prev, $current ) = @{$state}{qw[ depends prev current ]};

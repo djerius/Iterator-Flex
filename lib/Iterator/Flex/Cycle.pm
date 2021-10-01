@@ -69,7 +69,7 @@ sub construct {
     $class->_throw( parameter => "illegal value for 'current'" )
       if defined $current && ( $current < 0 || $current >= $len );
 
-    $class->throw( parameter => "illegal value for 'next'" )
+    $class->_throw( parameter => "illegal value for 'next'" )
       if $next < 0 || $next > $len;
 
 
