@@ -22,33 +22,42 @@ our %RegistryKeys;
 our %IterAttrs;
 our %Methods;
 
+our %IterStates;
+
 BEGIN {
     %ExhaustionActions = ( map { $_ => lc $_ } qw[ THROW RETURN PASSTHROUGH ] );
 
     %RegistryKeys
       = ( map { $_ => lc $_ }
-          qw[ INPUT_EXHAUSTION EXHAUSTION IS_EXHAUSTED ITERATOR GENERAL METHODS ]
+          qw[ INPUT_EXHAUSTION EXHAUSTION ITERATOR_STATE ITERATOR GENERAL METHODS ]
       );
 
-    %IterAttrs
-      = ( map { $_ => lc $_ }
+    %IterAttrs = (
+        map { $_ => lc $_ }
           qw[ _SELF _DEPENDS _ROLES _NAME
-              NEXT PREV CURRENT REWIND RESET FREEZE METHODS ]
-      );
+          NEXT PREV CURRENT REWIND RESET FREEZE METHODS ]
+    );
 
     %Methods = ( map { $_ => lc $_ } qw[ IS_EXHAUSTED SET_EXHAUSTED  ] );
 
+    %IterStates = (
+        IterState_CLEAR       => 0,
+        IterState_EXHAUSTED   => 1,
+        IterState_ERROR       => 2,
+    );
 }
 
 use constant \%ExhaustionActions;
 use constant \%RegistryKeys;
 use constant \%IterAttrs;
 use constant \%Methods;
+use constant \%IterStates;
 
 our %EXPORT_TAGS = (
     ExhaustionActions => [ keys %ExhaustionActions, ],
     RegistryKeys      => [ keys %RegistryKeys ],
     IterAttrs         => [ keys %IterAttrs ],
+    IterStates        => [ keys %IterStates ],
     Methods           => [ keys %Methods ],
     default           => [qw( %REGISTRY refaddr )],
 );

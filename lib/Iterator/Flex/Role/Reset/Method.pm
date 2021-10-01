@@ -27,7 +27,7 @@ around reset => sub {
     $self->_apply_method_to_depends( 'reset' );
 
     $self->$orig;
-    $self->_reset_exhausted;
+    $self->_clear_state;
 
     return;
 }
@@ -35,7 +35,7 @@ around reset => sub {
 
 
 requires 'reset';
-requires '_reset_exhausted';
+requires '_clear_state';
 1;
 
 # COPYRIGHT

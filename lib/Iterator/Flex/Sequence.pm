@@ -13,7 +13,7 @@ use Scalar::Util;
 use List::Util;
 
 use parent 'Iterator::Flex::Base';
-use Iterator::Flex::Utils qw( IS_EXHAUSTED :IterAttrs );
+use Iterator::Flex::Utils qw( ITERATOR_STATE :IterAttrs );
 
 use namespace::clean;
 
@@ -73,7 +73,7 @@ sub construct {
       = @{$state}{qw[ begin end step iter next current prev ]};
 
     my $self;
-    my $is_exhausted;
+    my $iterator_state;
 
     my %params;
 
@@ -183,13 +183,13 @@ sub construct {
 
         (+_SELF) => \$self,
 
-        (+IS_EXHAUSTED) => \$is_exhausted,
+        (+ITERATOR_STATE) => \$iterator_state,
     };
 
 }
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted::Closure
+      State::Closure
       Next::ClosedSelf
       Rewind::Closure
       Reset::Closure

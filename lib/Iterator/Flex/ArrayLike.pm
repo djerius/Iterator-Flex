@@ -156,7 +156,7 @@ sub construct {
 
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted::Registry
+      State::Registry
       Next::ClosedSelf
       Rewind::Closure
       Reset::Closure

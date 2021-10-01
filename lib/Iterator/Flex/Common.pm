@@ -450,7 +450,7 @@ sub thaw {
     $state->{thaw} = 1;
 
     my $iter = $package->$new_from_state( $state, $pars );
-    $exhausted ? $iter->set_exhausted : $iter->_reset_exhausted;
+    $exhausted ? $iter->set_exhausted : $iter->_clear_state;
     return $iter;
 }
 

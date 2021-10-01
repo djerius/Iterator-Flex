@@ -19,7 +19,7 @@ use Module::Runtime  ();
 
 Role::Tiny::With::with 'Iterator::Flex::Role', 'Iterator::Flex::Role::Utils';
 
-use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys :IterAttrs );
+use Iterator::Flex::Utils qw ( :default :ExhaustionActions :RegistryKeys :IterAttrs :IterStates );
 
 use namespace::clean;
 
@@ -81,8 +81,6 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
             parameter => "unknown exhaustion action: $exhaustion_action[0]" );
     }
 
-    # push @roles, 'Exhausted::Registry';
-
     if ( defined( my $par = $ipar{+METHODS} ) ) {
 
         require Iterator::Flex::Method;
@@ -128,7 +126,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     $REGISTRY{ refaddr $self } = { (+ITERATOR) => \%ipar, (+GENERAL) => \%gpar };
 
-    $self->_reset_exhausted if $self->can( '_reset_exhausted' );
+    $self->_clear_state;
 
     return $self;
 }
@@ -247,6 +245,26 @@ sub _apply_method_to_depends {
         # now apply the method
         $_->$meth foreach $depends->@*;
     }
+}
+
+sub is_exhausted {
+    $_[0]->get_state == +IterState_EXHAUSTED;
+}
+
+sub set_exhausted {
+    $_[0]->set_state( +IterState_EXHAUSTED );
+}
+
+sub _clear_state {
+    $_[0]->set_state( +IterState_CLEAR );
+}
+
+sub is_error {
+    $_[0]->get_state == +IterState_ERROR;
+}
+
+sub set_error {
+    $_[0]->set_state( +IterState_ERROR );
 }
 
 1;

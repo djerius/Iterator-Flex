@@ -31,14 +31,14 @@ sub reset {
     $self->_apply_method_to_depends( 'reset' );
 
     $REGISTRY{ refaddr $self }{ +ITERATOR }{+RESET}->( $self );
-    $self->_reset_exhausted;
+    $self->_clear_state;
 
     return;
 }
 *__reset__ = \&reset;
 
 
-requires '_reset_exhausted';
+requires '_clear_state';
 1;
 
 # COPYRIGHT

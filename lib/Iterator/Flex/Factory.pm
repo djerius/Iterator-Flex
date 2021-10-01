@@ -226,7 +226,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     $CLASS->_throw( parameter => "'@{[ _NAME ]}' parameter value must be a string\n" )
       if defined( $par = $ipar{+_NAME} ) && Ref::Util::is_ref( $par );
 
-    push @roles, 'Exhausted::Registry';
+    push @roles, 'State::Registry';
 
     delete $gpar_k{ +INPUT_EXHAUSTION };
     my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }

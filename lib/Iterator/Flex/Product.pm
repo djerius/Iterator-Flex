@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( RETURN IS_EXHAUSTED EXHAUSTION :IterAttrs );
+use Iterator::Flex::Utils qw( RETURN ITERATOR_STATE EXHAUSTION :IterAttrs :IterStates );
 use Iterator::Flex::Factory;
 use parent 'Iterator::Flex::Base';
 use Ref::Util;
@@ -110,15 +110,15 @@ sub construct {
     my @set = ( 1 ) x @value;
 
     my $self;
-    my $is_exhausted;
+    my $iterator_state;
     my %params = (
 
         (+_SELF) => \$self,
 
-        (+IS_EXHAUSTED) => \$is_exhausted,
+        (+ITERATOR_STATE) => \$iterator_state,
 
         (+NEXT) => sub {
-            return $self->signal_exhaustion if $is_exhausted;
+            return $self->signal_exhaustion if $iterator_state == +IterState_EXHAUSTED;
 
             # first time through
             if ( !@value ) {
@@ -170,7 +170,7 @@ sub construct {
 
         (+CURRENT) => sub {
             return undef if !@value;
-            return $self->signal_exhaustion if $is_exhausted;
+            return $self->signal_exhaustion if $iterator_state eq +IterState_EXHAUSTED;
             if ( @keys ) {
                 my %value;
                 @value{@keys} = @value;
@@ -204,7 +204,7 @@ sub construct {
 
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted::Closure
+      State::Closure
       Next::ClosedSelf
       Current::Closure
       Reset::Closure

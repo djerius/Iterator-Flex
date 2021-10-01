@@ -35,7 +35,6 @@ sub signal_exhaustion {
     Iterator::Flex::Failure::Exhausted->throw;
 }
 
-requires 'set_exhausted';
 
 1;
 

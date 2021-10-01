@@ -7,7 +7,7 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Iterator::Flex::Utils qw( IS_EXHAUSTED THROW EXHAUSTION :IterAttrs );
+use Iterator::Flex::Utils qw( ITERATOR_STATE THROW EXHAUSTION :IterAttrs :IterStates );
 use Iterator::Flex::Factory;
 use Ref::Util;
 use parent 'Iterator::Flex::Base';
@@ -62,17 +62,17 @@ sub construct {
       = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => +THROW } );
 
     my $self;
-    my $is_exhausted;
+    my $iterator_state;
 
     return {
         (+_NAME) => 'imap',
 
         (+_SELF) => \$self,
 
-        (+IS_EXHAUSTED) => \$is_exhausted,
+        (+ITERATOR_STATE) => \$iterator_state,
 
         (+NEXT) => sub {
-            return $self->signal_exhaustion if $is_exhausted;
+            return $self->signal_exhaustion if $iterator_state == +IterState_EXHAUSTED;
 
             my $ret = eval {
                 my $value = $src->();
@@ -95,7 +95,7 @@ sub construct {
 
 
 __PACKAGE__->_add_roles( qw[
-      Exhausted::Closure
+      State::Closure
       Next::ClosedSelf
       Rewind::Closure
       Reset::Closure

@@ -27,7 +27,7 @@ around rewind => sub {
     $self->_apply_method_to_depends( 'rewind' );
 
     $self->$orig;
-    $self->_reset_exhausted;
+    $self->_clear_state;
 
     return;
 }
@@ -35,7 +35,7 @@ around rewind => sub {
 
 
 requires 'rewind';
-requires '_reset_exhausted';
+requires '_clear_state';
 
 1;
 

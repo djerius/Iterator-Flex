@@ -30,14 +30,14 @@ sub rewind {
     $self->_apply_method_to_depends( 'rewind' );
 
     $REGISTRY{ refaddr $self }{ +ITERATOR }{+REWIND}->( $self );
-    $self->_reset_exhausted;
+    $self->_clear_state;
 
     return;
 }
 *__rewind__ = \&rewind;
 
 
-requires '_reset_exhausted';
+requires '_clear_state';
 
 1;
 

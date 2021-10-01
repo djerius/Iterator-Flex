@@ -40,7 +40,6 @@ sub signal_exhaustion {
     return $self->sentinel;
 }
 
-requires 'set_exhausted';
 
 1;
 
