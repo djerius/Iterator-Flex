@@ -1,6 +1,8 @@
 package Iterator::Flex::Role::Wrap::Self;
 
-# ABSTRACT: Construct a next() method for iterators which handle exhaustion
+# ABSTRACT: Construct a next() method for a coderef which expects to be passed an object ref
+
+# is this actually used?
 
 use strict;
 use warnings;

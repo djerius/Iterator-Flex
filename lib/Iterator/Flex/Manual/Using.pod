@@ -1,0 +1,63 @@
+# PODNAME: Using.pod
+# ABSTRACT: How to use an Iterator::Flex iterator
+
+=head1 DESCRIPTION
+
+=head2 Construction
+
+The first thing to do is to constuct one.  L<Iterator::Flex::Common> provides
+easy-to-use front-ends.
+
+
+=head2 Iteration
+
+=head2 Exhaustion
+
+=head2 Errors
+
+=head1 METHODS
+
+Not all iterators support all methods.
+
+=over
+
+=item prev
+
+  $value = $iter->prev;
+
+Returns the previous value of the iterator.  If the iterator was never
+advanced, this returns C<undef>.  If the iterator is exhausted, this
+returns the last retrieved value. Use the L<state> method to determine
+which state the iterator is in.
+
+=item current
+
+  $value = $iter->current;
+
+Returns the current value of the iterator.  If the iterator was never
+advanced, this returns undef.  If the iterator is exhausted, this
+returns C<undef>.  Use the L<state> method to determine which state
+the iterator is in.
+
+=item next
+
+  $value = $iter->next;
+
+Return the next value from the iterator.
+
+=item rewind
+
+  $iter->rewind;
+
+Resets the iterator so that the next value returned is the very first
+value.  It should not affect the results of the L<prev> and L<current>
+methods.
+
+=item reset
+
+  $iter->reset;
+
+Resets the iterator to its initial state.  The iterator's state is not
+changed.
+
+=back

@@ -1,4 +1,5 @@
 # PODNAME: Glossary.pod
+# ABSTRACT: Glossary
 
 =pod
 

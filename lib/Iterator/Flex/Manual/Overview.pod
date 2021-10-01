@@ -1,0 +1,387 @@
+# PODNAME: Overview.pod
+# ABSTRACT: An Abstract overview of Iterators
+
+=head1 DESCRIPTION
+
+=head2 Iterator lifecycle
+
+There are four iterator states:
+
+=over
+
+=item 1
+
+L<initialized|/Initialized State>
+
+=item 2
+
+L<iteration|/Iteration State>
+
+=item 3
+
+L<exhausted|/Exhausted State>
+
+=item 4
+
+L<error|/Error State>
+
+=back
+
+An iterator typically moves sequentially from 
+L<initialized|/Initialized State>
+to L<iteration|/Iteration State>
+to L<exhausted|/Exhausted State>.
+
+Non-sequential transitions may occur from I<non-error> states when
+
+=over
+
+=item *
+
+a data source is empty to begin with, in which case L</next> will
+transition from the L<initialized state|/Initialized State> directly to the
+L<exhausted state|/Exhausted State>.
+
+=item *
+
+something goes wrong, in which case the iterator will transition to
+the L<error state|/Error State>.
+
+=item *
+
+the iterator is L</reset>, in which case it transitions to the
+L<initialized state|/Initialized State>.
+
+=back
+
+Attempts to transition from an L<error state|/Error State> to another
+state result in undefined behavior.
+
+=head3 Initialized State
+
+An iterator is in the I<initialized> state immediately after it has been
+constructed, or if it has been L<reset|/reset>.
+
+In the initialized state,
+
+=over
+
+=item *
+
+L</next> will attempt to retrieve the first element from the data stream.
+
+=over
+
+=item *
+
+If the data stream is empty, the iterator transitions to the
+L</Exhausted State> and signals exhaustion.
+
+=item *
+
+If there was an error the iterator transitions to the L</Error State>
+and signals error.
+
+=item *
+
+otherwise, the iterator transitions to the L</Iteration State> and the
+element is returned.
+
+
+=back
+
+=item *
+
+L</prev> and L</current> (if they are supported) return an indeterminate value.
+
+=back
+
+=head3 Iteration State
+
+An iterator is in the I<iteration> state if the last call to L</next> successfully
+returned data.
+
+In the iteration state,
+
+=over
+
+=item *
+
+L</next> will attempt to retrieve the next element from the data stream.
+
+=over
+
+=item *
+
+If the data stream is empty, the iterator transitions to the
+L</Exhausted State> and signals exhaustion.
+
+=item *
+
+If there was an error, the iterator transitions to the L</Error State>
+and signals error.
+
+=item *
+
+otherwise, the element is returned.
+
+=back
+
+=item *
+
+L</prev> returns
+
+=over
+
+=item *
+
+an indeterminate value If the previous call to L</next> transitioned
+the iterator from the L</Initialized State>
+
+=item *
+
+otherwise, the value returned by the penultimate successful call to
+L</next>.
+
+=back
+
+=item *
+
+L</current> returns the value returned by the last successful call to
+L</next>.
+
+=back
+
+=head3 Exhausted State
+
+An iterator enters the I<exhausted> state after a call to L</next> when the iterator
+determines that there are no more data to retrieve.
+
+In this state,
+
+=over
+
+=item *
+
+L</prev> returns
+
+=over
+
+=item *
+
+an indeterminate value if the last L</next> call transitioned the
+iterator from the L</Initialized State>;
+
+=item *
+
+otherwise, the value returned by the penultimate successful call to L</next>.
+
+=back
+
+=item *
+
+L</current> returns an indeterminate value.
+
+=back
+
+For example, if the data are I<1, 2, 3>, the following expressions, executed
+in order, are all true.
+
+     1	 $iter->prev    == ?;  # indeterminate; in initialized state
+     2	 $iter->current == ?;  # indeterminate; in initialized state
+     3
+     4	 $iter->next    == 1;  # in iteration state
+     5	 $iter->prev    == ?;  # indeterminate
+     6	 $iter->current == 1;
+     7
+     8	 $iter->next    == 2;
+     9	 $iter->prev    == 1;  # from line 4
+    10	 $iter->current == 2;
+    11
+    12	 $iter->next    == 3;
+    13	 $iter->prev    == 2;
+    14	 $iter->current == 3;
+    15
+    16	 $iter->next;          # signals exhaustion;
+    17
+    18	 $iter->is_exhausted == 1;
+    19
+    20	 $iter->prev    == 3;
+    21	 $iter->current == ?;  # indeterminate
+    22	 $iter->next;          # still signals exhaustion;
+
+=head3 Error State
+
+An iterator transitions to the I<error> state when the iterator has
+determined that something went wrong.
+
+=head2 Signalling State Transistions
+
+The iterator signals transitions to the L<exhausted|/Exhausted State>
+and L<error|/Error State> states.
+
+=head3 Transitions to the Exhausted State
+
+Signalling exhaustion (via the C<signal_exhaustion> method) results in one of following actions:
+
+=over
+
+=item *
+
+throwing an exception of type C<Iterator::Flex::Failure::Exhausted>; or
+
+=item *
+
+returning a sentinel value
+
+=back
+
+The choice is made by the I<user> of the iterator; iterators use a generic signalling mechanism.
+
+
+=head3 Transitions to the Error State
+
+Signalling eerror (via the C<signal_error> method) results in one of following actions:
+
+=over
+
+=item *
+
+Throwing an exception of type C<Iterator::Flex::Failure::Error>.
+
+=back
+
+=head2 Capabilities
+
+C<Iterator::Flex> iterators have a single required capability, L</next>, as well as a number
+of optional capabilities.
+
+=head3 Required Capabilties
+
+=head4 next
+
+This provides the ability to return the next element from the
+iterator. During the first call to L</next> the iterator transitions
+from the L<initialized state|/Initialized State> to another
+(L<iteration|/Iteration State>, L<exhausted|/Exhausted State>
+or L<error|/Error State>).
+
+If it has made it to the L<iteration state|/Iteration State>, it
+returns a valid value, otherwise, it signals either
+L<exhaustion|Transitions to the Exhausted State>  or L<error|Transitions to the Error State>.
+
+Invoking I<next> will either result in a valid value, or, if the
+iterator is exhausted, an indication of exhaustion, which may either
+be
+
+=over
+
+=item *
+
+A sentinel value, indicated by the I<Iterator::Flex::Role::Exhaustion::Return> role.
+
+=item *
+
+An exception,  indicated by the I<Iterator::Flex::Role::Exhaustion::Throw> role.
+
+=back
+
+
+=head3 Optional Capabilities
+
+=head4 prev
+
+If the iterator is in the L<iteration state|/Iteration State>, it returns the
+value returned by the penultimate L</next> operation. If the last L</next>
+operation transitiioned the iterator from the L<initialized state|/Initialized State>,
+it returns an indeterminate value.
+
+In any other state, it returns an indeterminate value.
+
+=head4 current
+
+If the iterator is in the L<iteration state|/Iteration State>, returns the
+value returned by the last L</next> operation.
+
+In any other state, it returns an indeterminate value.
+
+=head4 rewind
+
+
+If the iterator is in the L<iteration state|/Iteration State>, ensures that
+the next L</next> operation will retrieve the first element from the
+data stream.
+
+Rewinding maintains the correctness of the L</prev> and L</current>
+capabilities, enabling cyclic iterators.
+
+For example, if the data are I<1, 2, 3>, the following expressions, executed
+in order, are all true.
+
+     1	 $iter->prev    == ?;  # indeterminate; in initialized state
+     2	 $iter->current == ?;  # indeterminate; in initialized state
+     3
+     4	 $iter->next    == 1;  # in iteration state
+     5	 $iter->prev    == ?;  # indeterminate
+     6	 $iter->current == 1;
+     7
+     8	 $iter->next    == 2;
+     9	 $iter->prev    == 1;  # from line 4
+    10	 $iter->current == 2;
+    11
+    12	 $iter->rewind;
+    13
+    14	 $iter->prev    == 1;  # no change
+    15	 $iter->current == 2;  # no change
+    16
+    17	 $iter->next    == 1;  # start all over
+    18	 $iter->current == 1;
+    19	 $iter->prev    == 2;  # from line 8
+    20
+    21	 $iter->next    == 2;
+    22	 $iter->current == 2;
+    23	 $iter->prev    == 1;  # from line 17
+
+=head4 reset
+
+Transitions the iterator to the L<initialized state|/Initialized State>.
+
+For example, if the data are I<1, 2, 3>, the following expressions, executed
+in order, are all true.
+
+     1	 $iter->prev    == ?;  # indeterminate; in initialized state
+     2	 $iter->current == ?;  # indeterminate; in initialized state
+     3
+     4	 $iter->next    == 1;  # in iteration state
+     5	 $iter->prev    == ?;  # indeterminate
+     6	 $iter->current == 1;
+     7
+     8	 $iter->next    == 2;
+     9	 $iter->prev    == 1;  # from line 4
+    10	 $iter->current == 2;
+    11
+    12	 $iter->rewet;
+    14
+    15	 $iter->prev    == ?;  # indeterminate; in initialized state
+    16	 $iter->current == ?;  # indeterminate; in initialized state
+    17
+    18	 $iter->next    == 1;  # in iteration state
+    19	 $iter->prev    == ?;  # indeterminate
+    20	 $iter->current == 1;
+    21
+    22	 $iter->next    == 2;
+    23	 $iter->prev    == 1;  # from line 18
+    24	 $iter->current == 2;
+    25
+
+=head4 freeze
+
+Save the state of the iterator and the data stream so that an iterator
+may be serialized and stored. This puts significant constraints on
+the nature of the data source.
+
+=head4 thaw
+
+The opposite of L</freeze>.  Given a serialized iterator, reconsititue it so
+that it behaves exactly as it does before it was frozen.
+

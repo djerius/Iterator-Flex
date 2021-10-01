@@ -1,0 +1,49 @@
+# PODNAME: Alien.pod
+# ABSTRACT: Interfacing with non- Iterator::Flex things.
+
+=head1 DESCRIPTION
+
+L<Iterator::Flex> provides transparent access to iterators available
+on CPAN (see L<Iterator::Flex::Manual::PriorArt>), as well as things
+which are L<iterable|Iterator::Flex::Manual::Glossary/iterable thing>,
+such as arrays (or objects which act like arrays), or globrefs (or
+objects which act like them), or objects which provide iterator
+methods.
+
+For these, L<Iterator::Flex::Common/iter> is the
+family-friendly front end; L<under the hood|/UNDER THE HOOD>
+L<Iterator::Flex::Factory/construct_from_iterable> does the heavy
+lifting.
+
+There's also L<Iterator::Flex::ArrayLike>, which interfaces
+to objects which can provide a length and an element accessor.
+
+
+
+=head1 UNDER THE HOOD
+
+Interfacing is accomplished by composing the appropriate
+L<Iterator::Flex::Role::Wrap> roles with the iterator class.
+
+The two behaviors that need translating are
+
+=over
+
+=item 1
+
+Invocation
+
+=item 2
+
+Signalling exhaustion
+
+=back
+
+=head2 Invocation
+
+Some iterators are objects which are invoked via a method call, others
+are code references which can be called directly. L<Iterator::Flex> always
+works with code references, so in the former case, a closure must be
+created.
+
+
