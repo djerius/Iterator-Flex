@@ -57,6 +57,16 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
 
     my @roles = ( $roles->@* );
 
+    $gpar{ +ERROR } //= [ (+THROW) ];
+    $gpar{ +ERROR } = [ $gpar{ +ERROR } ] unless Ref::Util::is_arrayref( $gpar{ +ERROR } );
+
+    if ( $gpar{+ERROR}[0] eq +THROW ) {
+        push @roles, 'Error::Throw';
+    }
+    else {
+        $class->_throw( "unknown specification of iterator error signaling behavior:", $gpar{+ERROR}[0] ) ;
+    }
+
     my $exhaustion_action = $gpar{ +EXHAUSTION } // [ (+RETURN) => undef ];
 
     my @exhaustion_action
