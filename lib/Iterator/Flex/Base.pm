@@ -277,6 +277,9 @@ sub set_error {
     $_[0]->set_state( +IterState_ERROR );
 }
 
+sub __regentry { $REGISTRY{ refaddr $_[0] } }
+
+
 1;
 
 # COPYRIGHT
