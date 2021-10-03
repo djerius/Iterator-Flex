@@ -212,8 +212,8 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     my $par;
     my @roles;
 
-    my $class = $ipar{class} // 'Iterator::Flex::Base';
-    delete $ipar_k{class};
+    my $class = $ipar{+CLASS} // 'Iterator::Flex::Base';
+    delete $ipar_k{+CLASS};
 
     $CLASS->_throw( parameter => "'class' parameter must be a string" )
       if Ref::Util::is_ref( $class );
@@ -229,8 +229,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     push @roles, 'State::Registry';
 
     delete $gpar_k{ +INPUT_EXHAUSTION };
-    my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION }
-      // [ RETURN, undef ];
+    my $input_exhaustion = $gpar{ +INPUT_EXHAUSTION } // [ (+RETURN) => undef ];
 
     my @input_exhaustion
       = Ref::Util::is_arrayref( $input_exhaustion )
@@ -240,7 +239,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     delete $gpar_k{ +EXHAUSTION };
     my $has_output_exhaustion_policy = defined $gpar{ +EXHAUSTION };
 
-    if ( $input_exhaustion[0] eq RETURN ) {
+    if ( $input_exhaustion[0] eq +RETURN ) {
         push @roles, 'Exhaustion::ImportedReturn','Wrap::Return';
         push $input_exhaustion->@*, undef if @input_exhaustion == 1;
         $gpar{ +INPUT_EXHAUSTION } = \@input_exhaustion;
@@ -467,7 +466,7 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
           "registered Iterator::Flex iterator doesn't have a registered exhaustion"
       );
 
-    if ( $exhaustion[0] eq RETURN ) {
+    if ( $exhaustion[0] eq +RETURN ) {
 
         if ( $existing_exhaustion eq +THROW ) {
             Role::Tiny->apply_roles_to_object( $obj,

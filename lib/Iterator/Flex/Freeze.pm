@@ -72,7 +72,7 @@ sub construct {
       unless Ref::Util::is_coderef( $serialize );
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => RETURN } );
+      = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => +RETURN } );
 
     $class->_throw( parameter => "'src' iterator (@{[ $src->_name ]}) must provide a freeze method" )
       unless $class->_can_meth( $src, +FREEZE );

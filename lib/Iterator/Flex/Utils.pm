@@ -34,7 +34,7 @@ BEGIN {
 
     %IterAttrs = (
         map { $_ => lc $_ }
-          qw[ _SELF _DEPENDS _ROLES _NAME
+          qw[ _SELF _DEPENDS _ROLES _NAME CLASS
           NEXT PREV CURRENT REWIND RESET FREEZE METHODS ]
     );
 

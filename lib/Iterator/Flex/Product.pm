@@ -101,7 +101,7 @@ sub construct {
       if @keys && @keys != @depends;
 
     my @iterators = map {
-        Iterator::Flex::Factory->to_iterator( $_, { (+EXHAUSTION) => RETURN } )
+        Iterator::Flex::Factory->to_iterator( $_, { (+EXHAUSTION) => +RETURN } )
     } @depends;
 
     @value = map { $_->current } @iterators
