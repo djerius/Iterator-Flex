@@ -33,8 +33,9 @@ around _construct_next => sub {
     # undef
     if ( !defined $sentinel ) {
         $wsub = sub {
-            my $val = $next->( $_[0] );
-            return !defined $val ? $_[0]->signal_exhaustion : $val;
+            my $self = $_[0] // $wsub;
+            my $val = $next->( $self );
+            return !defined $val ? $self->signal_exhaustion : $val;
         };
     }
 
@@ -43,28 +44,31 @@ around _construct_next => sub {
         my $sentinel = refaddr $sentinel;
 
         $wsub = sub {
-            my $val  = $next->( $_[0] );
+            my $self = $_[0] // $wsub;
+            my $val  = $next->( $self );
             my $addr = refaddr $val;
             return defined $addr
-              && $addr == $sentinel ? $_[0]->signal_exhaustion : $val;
+              && $addr == $sentinel ? $self->signal_exhaustion : $val;
         };
     }
 
     # number
     elsif ( Scalar::Util::looks_like_number( $sentinel ) ) {
         $wsub = sub {
-            my $val = $next->( $_[0] );
+            my $self = $_[0] // $wsub;
+            my $val = $next->( $self );
             return defined $val
-              && $val == $sentinel ? $_[0]->signal_exhaustion : $val;
+              && $val == $sentinel ? $self->signal_exhaustion : $val;
         };
     }
 
     # string
     else {
         $wsub = sub {
+            my $self = $_[0] // $wsub;
             my $val = $next->( $_[0] );
             return defined $val
-              && $val eq $sentinel ? $_[0]->signal_exhaustion : $val;
+              && $val eq $sentinel ? $self->signal_exhaustion : $val;
         };
     }
 

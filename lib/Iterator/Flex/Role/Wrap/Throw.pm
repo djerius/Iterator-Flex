@@ -33,10 +33,11 @@ around _construct_next => sub {
     if ( is_arrayref( $exception ) ) {
 
         $wsub = sub {
-            my $val = eval { $next->( $_[0] ) };
+            my $self = $_[0] // $wsub;
+            my $val = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
-                return $_[0]->signal_exhaustion( $e )
+                return $self->signal_exhaustion( $e )
                   if is_blessed_ref( $e ) && grep { $e->isa( $_ ) } @$exception;
                 die $e;
             }
@@ -47,10 +48,11 @@ around _construct_next => sub {
     elsif ( is_regexpref( $exception ) ) {
 
         $wsub = sub {
-            my $val = eval { $next->( $_[0] ) };
+            my $self = $_[0] // $wsub;
+            my $val = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
-                return $_[0]->signal_exhaustion( $e ) if $e =~ $exception;
+                return $self->signal_exhaustion( $e ) if $e =~ $exception;
                 die $e;
             }
             return $val;
@@ -60,10 +62,11 @@ around _construct_next => sub {
     elsif ( is_coderef( $exception ) ) {
 
         $wsub = sub {
-            my $val = eval { $next->( $_[0] ) };
+            my $self = $_[0] // $wsub;
+            my $val = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
-                return $_[0]->signal_exhaustion( $e ) if $exception->( $e );
+                return $self->signal_exhaustion( $e ) if $exception->( $e );
                 die $e;
             }
             return $val;
@@ -73,8 +76,9 @@ around _construct_next => sub {
     else {
 
         $wsub = sub {
-            my $val = eval { $next->( $_[0] ) };
-            return $@ ne '' ? $_[0]->signal_exhaustion( $@ ) : $val;
+            my $self = $_[0] // $wsub;
+            my $val = eval { $next->( $self ) };
+            return $@ ne '' ? $self->signal_exhaustion( $@ ) : $val;
         };
     }
 
