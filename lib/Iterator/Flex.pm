@@ -70,7 +70,9 @@ flexible iterators.
 See L<Iterator::Flex::Manual::Internals> for how everything links
 together.
 
+=head2 Show me the Manual
 
+L<Iterator::Flex::Manual>
 
 
 =head1 SEE ALSO

@@ -149,7 +149,7 @@ generated iterator should express exhaustion.
 
 =over
 
-=item native_exhaustion => I<spec>
+=item input_exhaustion => I<spec>
 
 I<spec> can be one of the following:
 

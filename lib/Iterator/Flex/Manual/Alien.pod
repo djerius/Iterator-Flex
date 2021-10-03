@@ -1,4 +1,4 @@
-# PODNAME: Alien.pod
+# PODNAME: Iterator::Flex::Manual::Alien
 # ABSTRACT: Interfacing with non- Iterator::Flex things.
 
 =head1 DESCRIPTION

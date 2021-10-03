@@ -1,6 +1,6 @@
 package Iterator::Flex::Common;
 
-# ABSTRACT: Iterators which can be rewound and serialized
+# ABSTRACT: Iterator Generators and Adapters
 
 use 5.10.0;
 use strict;
@@ -26,6 +26,8 @@ sub _throw {
 }
 
 
+=begin internals
+
 =sub _parse_params
 
      \%pars = _parse_params( \@_ );
@@ -33,7 +35,10 @@ sub _throw {
 Scans the passed arrayref for trailing C<< -pars => \%pars >> entries.  If found,
 removes them from the passed array and returns C<\%pars>.
 
+=end internals
+
 =cut
+
 
 sub _parse_params {
     my ( $args ) = @_;
@@ -58,11 +63,14 @@ sub _parse_params {
   $iter = iterator { CODE } ?\%params;
 
 Construct an iterator from code. The code will have access to the
-iterator object through C<$_[0]>.  The optional parameters are any of
-the parameters recognized by L<Iterator::Flex::Base/construct>.
+iterator object through C<$_[0]>. By default the code is expected to
+return C<undef> upon exhaustion.
 
- By default the code is expected to return C<undef> upon exhaustion.
+For example, here's a simple integer sequence iterator that counts up to 100:
 
+# EXAMPLE: ./examples/Common/iterator.pl
+
+See L</General Options> for a description of C<%params>
 
 =cut
 
@@ -465,156 +473,21 @@ __END__
 
 =head1 DESCRIPTION
 
-C<Iterator::Flex> implements iterators with the following characteristics:
+C<Iterator::Flex::Common> provides generators for iterators for some
+common cases (arrays, sequences), arbitrary code, and iterator
+adaptors.  As described in
+L<Iterator::Flex::Manual::Overview/Capabilities>, iterators have
+optional capabilities; the descriptions below list which capabilities
+each iterator provides.
 
-=over
+=head2 General Options
 
-=item I<next>
+Most of the generators take an optional trailing options hash. To pass
+extra general iterator options, use the C<-pars> options.  For
+example, to indicate that you'd like the iterator to throw an
+exception when exhausted, instead of returning C<undef>, set
 
-All iterators provide a C<next> method which advances the iterator and
-returns the new value.
+  %params = ( -pars => { exhaustion => 'throw' } );
 
-=item I<exhaustion>
+  $iter = iarray( \@array, \%params );
 
-=over
-
-=item *
-
-The C<next> method indicates exhaustion either by C<next> returning a
-sentinel (e.g. C<undef>) or by throwing an exception.
-
-=item *
-
-The C<is_exhausted> method returns true if the iterator is exhausted.
-In general, an iterator cannot know if it is exhausted until after a
-call to L</next> has signalled exhaustion.
-
-For example, if an iterator is reading lines from a stream, it cannot
-know that it is at the last line.  It must attempt to read a line,
-then fail, before it knows it is exhausted.
-
-=back
-
-=item I<reset>
-
-Iterators may optionally be reset to their initial state.
-
-=item I<rewind>
-
-Iterators may optionally be rewound, so that iterations may
-cycle. This differs from a reset in that the iterator will correctly
-return the previous value (if it provides that functionality).
-
-=item I<previous values>
-
-Iterators may optionally return their previous value.
-
-=item I<current>
-
-Iterators return their current value.
-
-=item I<freeze>
-
-Iterators may optionally provide a C<freeze> method for serialization.
-Iterators may be chained, and an iterator's dependencies are frozen automatically.
-
-=back
-
-=head2 This Module
-
-This module provides a generic generator for iterators (L</iterator>) as
-well as friendly interfaces to special purpose iterators.  To create
-
-
-=head2 Serialization of Iterators
-
-=over
-
-=item freeze I<optional>
-
-A subroutine which returns an array reference with the following elements, in the specified order :
-
-=over
-
-=item 1
-
-The name of the package containing the thaw subroutine.
-
-=item 2
-
-The name of the thaw subroutine.
-
-=item 3
-
-The data to be passed to the thaw routine.  The routine will be called
-as:
-
-  thaw( @{$data}, ?$depends );
-
-if C<$data> is an arrayref,
-
-  thaw( %{$data}, ?( depends => $depends )  );
-
-if C<$data> is a hashref, or
-
-  thaw( $data, ?$depends );
-
-for any other type of data.
-
-Dependencies are passed to the thaw routine only if they are present.
-
-=back
-
-=back
-
-=head1 SUBROUTINES
-
-=head1 METHODS
-
-Not all iterators support all methods.
-
-=over
-
-=item prev
-
-  $value = $iter->prev;
-
-Returns the previous value of the iterator.  If the iterator was never
-advanced, this returns C<undef>.  If the iterator is exhausted, this
-returns the last retrieved value. Use the L<state> method to determine
-which state the iterator is in.
-
-=item current
-
-  $value = $iter->current;
-
-Returns the current value of the iterator.  If the iterator was never
-advanced, this returns undef.  If the iterator is exhausted, this
-returns C<undef>.  Use the L<state> method to determine which state
-the iterator is in.
-
-=item next
-
-  $value = $iter->next;
-
-Return the next value from the iterator.
-
-=item rewind
-
-  $iter->rewind;
-
-Resets the iterator so that the next value returned is the very first
-value.  It should not affect the results of the L<prev> and L<current>
-methods.
-
-=item reset
-
-  $iter->reset;
-
-Resets the iterator to its initial state.  The iterator's state is not
-changed.
-
-=back
-
-
-=head1 SEE ALSO

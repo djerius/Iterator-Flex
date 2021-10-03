@@ -1,4 +1,4 @@
-# PODNAME: Internals.pod
+# PODNAME: Iterator::Flex::Manual::Internals
 # ABSTRACT: How Things Work
 
 =head1 DESCRIPTION

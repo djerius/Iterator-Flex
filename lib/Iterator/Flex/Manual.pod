@@ -1,8 +1,5 @@
-# PODNAME: Manual.pod
-
-=head1 NAME
-
-Iterator::Flex::Manual
+# PODNAME: Iterator::Flex::Manual
+# ABSTRACT: Index of Iterator::Flex Manuals
 
 =head1 DESCRIPTION
 

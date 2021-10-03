@@ -1,4 +1,4 @@
-# PODNAME: Serialization.pod
+# PODNAME: Iterator::Flex::Manual::Serialization
 # ABSTRACT: Serializing iterators
 
 =head1 DESCRIPTION

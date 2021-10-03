@@ -1,4 +1,4 @@
-# PODNAME: Overview.pod
+# PODNAME: Iterator::Flex::Manual::Overview
 # ABSTRACT: An Abstract overview of Iterators
 
 =head1 DESCRIPTION
@@ -260,6 +260,10 @@ of optional capabilities.
 
 =head4 next
 
+  # these are equivalent
+  $value = $iter->next;
+  $value = $iter->();
+
 This provides the ability to return the next element from the
 iterator. During the first call to L</next> the iterator transitions
 from the L<initialized state|/Initialized State> to another
@@ -268,7 +272,7 @@ or L<error|/Error State>).
 
 If it has made it to the L<iteration state|/Iteration State>, it
 returns a valid value, otherwise, it signals either
-L<exhaustion|Transitions to the Exhausted State>  or L<error|Transitions to the Error State>.
+L<exhaustion|/Transitions to the Exhausted State>  or L<error|/Transitions to the Error State>.
 
 Invoking I<next> will either result in a valid value, or, if the
 iterator is exhausted, an indication of exhaustion, which may either
@@ -291,6 +295,8 @@ An exception,  indicated by the I<Iterator::Flex::Role::Exhaustion::Throw> role.
 
 =head4 prev
 
+  $value = $iter->prev;
+
 If the iterator is in the L<iteration state|/Iteration State>, it returns the
 value returned by the penultimate L</next> operation. If the last L</next>
 operation transitiioned the iterator from the L<initialized state|/Initialized State>,
@@ -300,6 +306,8 @@ In any other state, it returns an indeterminate value.
 
 =head4 current
 
+  $value = $iter->current;
+
 If the iterator is in the L<iteration state|/Iteration State>, returns the
 value returned by the last L</next> operation.
 
@@ -307,6 +315,7 @@ In any other state, it returns an indeterminate value.
 
 =head4 rewind
 
+  $iter->rewind;
 
 If the iterator is in the L<iteration state|/Iteration State>, ensures that
 the next L</next> operation will retrieve the first element from the
@@ -344,6 +353,8 @@ in order, are all true.
 
 =head4 reset
 
+  $iter->reset;
+
 Transitions the iterator to the L<initialized state|/Initialized State>.
 
 For example, if the data are I<1, 2, 3>, the following expressions, executed
@@ -376,12 +387,15 @@ in order, are all true.
 
 =head4 freeze
 
-Save the state of the iterator and the data stream so that an iterator
-may be serialized and stored. This puts significant constraints on
+  $state = $iter->freeze;
+  $iter = ithaw( $state );
+
+C<freeze> serializes the state of the iterator and the data stream so that the state
+can be saved and later restored. This puts significant constraints on
 the nature of the data source.
 
-=head4 thaw
-
-The opposite of L</freeze>.  Given a serialized iterator, reconsititue it so
-that it behaves exactly as it does before it was frozen.
+C<ithaw> is a I<subroutine> (not a method) which is the opposite of
+L</freeze>.  Given a serialized iterator, it reconsititue it so that
+it behaves exactly as it would before it was frozen.  Under the hood
+it calls the C<thaw> method.
 

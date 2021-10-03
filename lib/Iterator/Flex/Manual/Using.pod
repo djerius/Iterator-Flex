@@ -1,4 +1,4 @@
-# PODNAME: Using.pod
+# PODNAME: Iterator::Flex::Manual::Using
 # ABSTRACT: How to use an Iterator::Flex iterator
 
 =head1 DESCRIPTION
@@ -6,7 +6,7 @@
 =head2 Construction
 
 The first thing to do is to constuct one.  L<Iterator::Flex::Common> provides
-easy-to-use front-ends.
+a number of easy-to-use front-ends, so 
 
 
 =head2 Iteration

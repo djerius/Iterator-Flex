@@ -1,4 +1,4 @@
-# PODNAME: Glossary.pod
+# PODNAME: Iterator::Flex::Manual::Glossary
 # ABSTRACT: Glossary
 
 =pod
@@ -11,7 +11,7 @@ Iterator::Flex::Manual::Glossary
 
 =head2 I<iterable object>
 
-An I<iterable object> is an object which can be wrapped by an L<Iterable::Flex::Base> based iterator,
+An I<iterable object> is an object which can be wrapped by an L<Iterator::Flex::Base> based iterator,
 and which has one or more of the following:
 
 =over
@@ -43,7 +43,7 @@ will be called as
 
 =head2 I<iterable thing>
 
-An I<iterable thing> is an entity which can be wrapped by an L<Iterable::Flex::Base> based iterator.
+An I<iterable thing> is an entity which can be wrapped by an L<Iterator::Flex::Base> based iterator.
 
 It may be one of the following:
 

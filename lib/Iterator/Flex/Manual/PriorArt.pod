@@ -1,4 +1,4 @@
-# PODNAME: PriorArt.pod
+# PODNAME: Iterator::Flex::Manual::PriorArt
 # ABSTRACT: Other Iterator Models
 
 =head1 DESCRIPTION

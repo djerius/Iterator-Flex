@@ -1,4 +1,4 @@
-# PODNAME: Basics.pod
+# PODNAME: Iterator::Flex::Manual::Basics
 # ABSTRACT: Iterator Basics
 
 =head1 DESCRIPTION
@@ -79,7 +79,7 @@ Setting a boolean predicate in a multi-valued return, e.g.
 =back
 
 There's no right way to do it, just different tradeoffs; see
-L<Iterator::Flex::Manal::PriorArt> for how other languages and Perl
+L<Iterator::Flex::Manual::PriorArt> for how other languages and Perl
 modules handle it.
 
 Returning a sentinel value is often good enough, but only if that
@@ -129,37 +129,37 @@ appropriate to all data sources or iterators, so they are optional.
 
 Some capabilities can be emulated by L<iterator
 adapters|Iterator::Flex::Manual::Adapters>.  The supported capabilities
-are documented in L<Iterator::Manual::Overview>, and are
+are documented in L<Iterator::Flex::Manual::Overview>, and are
 
 =over
 
 =item *
 
-L<next|Iterator::Manual::Overview/next>
+L<next|Iterator::Flex::Manual::Overview/next>
 
 =item *
 
-L<current|Iterator::Manual::Overview/current>
+L<current|Iterator::Flex::Manual::Overview/current>
 
 =item *
 
-L<prev|Iterator::Manual::Overview/prev>
+L<prev|Iterator::Flex::Manual::Overview/prev>
 
 =item *
 
-L<rewind|Iterator::Manual::Overview/rewind>
+L<rewind|Iterator::Flex::Manual::Overview/rewind>
 
 =item *
 
-L<reset|Iterator::Manual::Overview/reset>
+L<reset|Iterator::Flex::Manual::Overview/reset>
 
 =item *
 
-L<freeze|Iterator::Manual::Overview/freeze>
+L<freeze|Iterator::Flex::Manual::Overview/freeze>
 
 =item *
 
-L<thaw|Iterator::Manual::Overview/thaw>
+L<thaw|Iterator::Flex::Manual::Overview/thaw>
 
 =back
 
