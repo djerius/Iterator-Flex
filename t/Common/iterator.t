@@ -5,38 +5,134 @@ use warnings;
 
 use Test2::V0;
 
+use Scalar::Util 'refaddr';
+use Ref::Util 'is_ref';
 use Iterator::Flex::Common 'iterator';
 
-subtest 'no attr' => sub {
+sub use_object { sub { $_[0]->next } }
+sub use_coderef { sub { $_[0]->() } }
 
-    my @data = ( 1 .. 10 );
-    my @got;
-    my $iterator = iterator { shift @data };
+sub test {
+    my ( $mknext ) = @_;
+    my $ctx = context();
 
-    while ( my $data = $iterator->next ) { push @got, $data }
+    subtest 'default' => sub {
 
-    is( \@got, [ 1 .. 10 ], "got data" );
+        my $len = my @data = ( 1 .. 10 );
+        my @got;
+        my $iterator = iterator { shift @data };
+        my $next     = $mknext->( $iterator );
+        while ( @got < $len and my $data = $next->( $iterator ) ) {
+            push @got, $data;
+        }
 
-};
+        is( \@got, [ 1 .. 10 ], "got data" );
 
-subtest 'attr => rewind' => sub {
+    };
 
-    my @data = ( 1 .. 10 );
-    my @got;
-    my $iterator = iterator { shift @data }
-      -pars => { rewind => sub { @data = ( 1 .. 10 ) } };
 
-    while ( my $data = $iterator->next ) { push @got, $data }
+    for my $sentinel (
+        [ undef  => sub { !defined $_[0] }, undef ],
+        [ number => sub { $_[0] == $_[1] }, -22 ],
+        [ string => sub { $_[0] eq $_[1] }, 'last' ],
+        [
+            reference =>
+              sub { is_ref( $_[0] ) && refaddr( $_[0] ) == refaddr( $_[1] ) },
+            \1
+        ],
+      )
+    {
 
-    is( \@got, [ 1 .. 10 ], "first run" );
+        my ( $label, $compare, $value ) = @$sentinel;
 
-    $iterator->rewind;
+        subtest "input exhaustion: sentinel is a $label" => sub {
+            my $len = my @data = ( 1 .. 10 );
+            my @got;
+            my $iterator = iterator { shift( @data ) // $value }
+            -pars => { input_exhaustion => [ return => $value ] };
+            my $next = $mknext->( $iterator );
+            while ( @got <= $len ) {
+                my $data = $next->( $iterator );
+                last if $compare->( $data, $value );
+                push @got, $data;
+            }
+            is( \@got, [ 1 .. 10 ], "got data" );
+        };
 
-    @got = ();
-    while ( my $data = $iterator->next ) { push @got, $data }
+    }
 
-    is( \@got, [ 1 .. 10 ], "after rewind" );
+    subtest "input exhaustion: throw" => sub {
+        my $len = my @data = ( 1 .. 10 );
+        my @got;
+        my $iterator = iterator { shift( @data ) // die }
+          -pars => { input_exhaustion => 'throw',
+                     exhaustion => 'return',
+                   };
+        my $next = $mknext->( $iterator );
+        while ( @got <= $len ) {
+            my $data = $next->( $iterator );
+            last if !defined $data;
+            push @got, $data;
+        }
+        is( \@got, [ 1 .. 10 ], "got data" );
+    };
 
-};
+
+    subtest 'output exhaustion: throw' => sub {
+        my $len = my @data = ( 1 .. 10 );
+        my @got;
+        my $iterator
+          = iterator { shift @data } -pars => { exhaustion => 'throw' };
+        my $next = $mknext->( $iterator );
+
+        my $err = dies {
+            my $data;
+            while ( @got <= $len ) {
+                $data = $next->( $iterator );
+                push @got, $data;
+            }
+        };
+
+        isa_ok( $err, 'Iterator::Flex::Failure::Exhausted' );
+        is( \@got, [ 1 .. 10 ], "got data" );
+    };
+
+
+
+    subtest 'attr => rewind' => sub {
+
+        my $len = my @data = ( 1 .. 10 );
+        my @got;
+        my $iterator = iterator { shift @data }
+        -pars => { rewind => sub { @data = ( 1 .. 10 ) }, };
+
+        my $next = $mknext->( $iterator );
+        while ( @got < $len and my $data = $next->( $iterator ) ) {
+            push @got, $data;
+        }
+
+        is( \@got, [ 1 .. 10 ], "first run" );
+
+        $iterator->rewind;
+
+        @got = ();
+        while ( @got < $len and my $data = $next->( $iterator ) ) {
+            push @got, $data;
+        }
+
+        is( \@got, [ 1 .. 10 ], "after rewind" );
+
+    };
+
+    $ctx->release;
+}
+
+for my $impl ( [ object => \&use_object ],
+               [ coderef => \&use_coderef ],
+             ) {
+    my ( $label, $sub ) = @$impl;
+    subtest ( $label, \&test,  $sub );
+}
+
 
 done_testing;
