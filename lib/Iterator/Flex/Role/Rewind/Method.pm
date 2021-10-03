@@ -30,7 +30,8 @@ around rewind => sub {
     $self->_clear_state;
 
     return;
-}
+};
+
 *__rewind__ = \&rewind;
 
 

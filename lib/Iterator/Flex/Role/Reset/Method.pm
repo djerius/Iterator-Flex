@@ -30,7 +30,8 @@ around reset => sub {
     $self->_clear_state;
 
     return;
-}
+};
+
 *__reset__ = \&reset;
 
 
