@@ -2,7 +2,7 @@
 
 use Test2::V0;
 
-use Iterator::Flex::Common qw[ igrep iarray ];
+use Iterator::Flex::Common qw[ igrep iarray iterator ];
 
 subtest "basic" => sub {
 
@@ -25,6 +25,12 @@ subtest "basic" => sub {
 };
 
 subtest "reset" => sub {
+
+    {
+        my $iter = igrep { $_ >= 10 } iterator { undef };
+        isa_ok( dies { $iter->reset }, [ 'Iterator::Flex::Failure::Unsupported' ], 'unsupported' );
+    }
+
 
     my $iter = igrep { $_ >= 10 } iarray( [ 0, 10, 20 ] );
 

@@ -248,7 +248,7 @@ sub _apply_method_to_depends {
     if ( defined ( my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{+_DEPENDS} ) ) {
         # first check if dependencies have method
         my $cant = List::Util::first { !$_->can( $meth ) } $depends->@*;
-        $self->_throw( parameter =>
+        $self->_throw( Unsupported =>
               "dependency: @{[ $cant->_name ]} does not have a '$meth' method"
         ) if $cant;
 
