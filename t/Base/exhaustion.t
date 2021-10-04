@@ -16,12 +16,14 @@ subtest 'return' => sub {
 
     subtest 'undef => 10' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data }
         -pars => { exhaustion => [ return => 11 ] };
 
-        while ( ( my $data = $iter->next ) != 11 ) { push @got, $data }
+        while ( @got <= $len and ( my $data = $iter->next ) != 11 ) {
+            push @got, $data;
+        }
 
         ok( $iter->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
@@ -31,11 +33,13 @@ subtest 'return' => sub {
 
     subtest 'undef => passthrough' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data };
 
-        while ( my $data = $iter->next ) { push @got, $data }
+        while ( @got <= $len and ( my $data = $iter->next ) ) {
+            push @got, $data;
+        }
 
         ok( $iter->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
@@ -44,12 +48,14 @@ subtest 'return' => sub {
 
     subtest 'integer => passthrough' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data; }
         -pars => { input_exhaustion => [ return => 10 ] };
 
-        while ( ( my $data = $iter->next ) != 10 ) { push @got, $data }
+        while ( @got <= $len and ( my $data = $iter->next ) != 10 ) {
+            push @got, $data;
+        }
 
         ok( $iter->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 9 ], "got data" );
@@ -58,12 +64,14 @@ subtest 'return' => sub {
 
     subtest 'string => passthrough' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data // 'A' }
         -pars => { input_exhaustion => [ return => 'A' ] };
 
-        while ( ( my $data = $iter->next ) ne 'A' ) { push @got, $data }
+        while ( @got <= $len and ( my $data = $iter->next ) ne 'A' ) {
+            push @got, $data;
+        }
 
         ok( $iter->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
@@ -71,15 +79,15 @@ subtest 'return' => sub {
 
     subtest 'reference => passthrough' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $ref = [];
         my $iter = iterator { shift @data // $ref }
         -pars => { input_exhaustion => [ return => $ref ] };
 
         my $data;
-        while ( $data = $iter->next
-            and !( defined refaddr $data && refaddr $data == $ref ) )
+        while ( @got <= $len and ( $data = $iter->next
+                                  and !( defined refaddr $data && refaddr $data == $ref ) ) )
         {
             push @got, $data;
         }
@@ -92,7 +100,7 @@ subtest 'return' => sub {
 
     subtest 'undef => throw' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator {
             shift @data;
@@ -101,7 +109,7 @@ subtest 'return' => sub {
 
         isa_ok(
             dies {
-                while ( my $data = $iter->next ) { push @got, $data }
+                while ( @got <= $len and my $data = $iter->next ) { push @got, $data }
             },
             ['Iterator::Flex::Failure::Exhausted'],
             "exhaustion"
@@ -118,7 +126,7 @@ subtest 'throw' => sub {
 
     subtest 'any => undef' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator {
             die( "exhausted" ) if $data[0] == 9;
@@ -131,7 +139,7 @@ subtest 'throw' => sub {
 
         ok(
             lives {
-                while ( my $data = $iter->next ) { push @got, $data }
+                while ( @got <= $len and my $data = $iter->next ) { push @got, $data }
             },
             'iterate to exhaustion'
         );
@@ -143,7 +151,7 @@ subtest 'throw' => sub {
 
     subtest 'any => passthrough' => sub {
 
-        my @data = ( 1 .. 10 );
+        my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator {
             die( "exhausted" ) if $data[0] == 9;
@@ -153,7 +161,7 @@ subtest 'throw' => sub {
 
         like(
             dies {
-                while ( my $data = $iter->next ) { push @got, $data }
+                while ( @got <= $len and my $data = $iter->next ) { push @got, $data }
             },
             qr/exhausted/,
             "exhaustion"
@@ -167,7 +175,7 @@ subtest 'throw' => sub {
 
         subtest 'exhausted' => sub {
 
-            my @data = ( 1 .. 10, undef );
+            my $len = my @data = ( 1 .. 10, undef );
             my @got;
             my $iter = iterator {
                 die( "exhausted" ) if $data[0] == 9;
@@ -180,7 +188,7 @@ subtest 'throw' => sub {
 
             isa_ok(
                 dies {
-                    while ( defined( my $data = $iter->next ) ) {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
                         push @got, $data;
                     }
                 },
@@ -195,7 +203,7 @@ subtest 'throw' => sub {
 
         subtest 'died' => sub {
 
-            my @data = ( 1 .. 10, undef );
+            my $len = my @data = ( 1 .. 10, undef );
             my @got;
             my $iter = iterator {
                 die( "died" ) if $data[0] == 9;
@@ -208,7 +216,7 @@ subtest 'throw' => sub {
 
             like(
                 dies {
-                    while ( defined( my $data = $iter->next ) ) {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
                         push @got, $data;
                     }
                 },
@@ -227,7 +235,7 @@ subtest 'throw' => sub {
 
         subtest 'exhausted' => sub {
 
-            my @data = ( 1 .. 10, undef );
+            my $len = my @data = ( 1 .. 10, undef );
             my @got;
             my $iter = iterator {
                 die( "exhausted" ) if $data[0] == 9;
@@ -241,7 +249,7 @@ subtest 'throw' => sub {
 
             isa_ok(
                 dies {
-                    while ( defined( my $data = $iter->next ) ) {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
                         push @got, $data;
                     }
                 },
@@ -256,7 +264,7 @@ subtest 'throw' => sub {
 
         subtest 'died' => sub {
 
-            my @data = ( 1 .. 10, undef );
+            my $len = my @data = ( 1 .. 10, undef );
             my @got;
             my $iter = iterator {
                 die( "died" ) if $data[0] == 9;
@@ -270,7 +278,7 @@ subtest 'throw' => sub {
 
             like(
                 dies {
-                    while ( defined( my $data = $iter->next ) ) {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
                         push @got, $data;
                     }
                 },

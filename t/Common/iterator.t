@@ -22,10 +22,11 @@ sub test {
         my @got;
         my $iterator = iterator { shift @data };
         my $next     = $mknext->( $iterator );
-        while ( @got < $len and my $data = $next->( $iterator ) ) {
+        while ( @got <= $len and my $data = $next->( $iterator ) ) {
             push @got, $data;
         }
 
+        ok( $iterator->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
 
     };
@@ -56,6 +57,7 @@ sub test {
                 last if $compare->( $data, $value );
                 push @got, $data;
             }
+            ok( $iterator->is_exhausted, "exhausted flag" );
             is( \@got, [ 1 .. 10 ], "got data" );
         };
 
@@ -74,6 +76,7 @@ sub test {
             last if !defined $data;
             push @got, $data;
         }
+        ok( $iterator->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
     };
 
@@ -94,6 +97,7 @@ sub test {
         };
 
         isa_ok( $err, 'Iterator::Flex::Failure::Exhausted' );
+        ok( $iterator->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
     };
 
@@ -107,7 +111,7 @@ sub test {
         -pars => { rewind => sub { @data = ( 1 .. 10 ) }, };
 
         my $next = $mknext->( $iterator );
-        while ( @got < $len and my $data = $next->( $iterator ) ) {
+        while ( @got <= $len and my $data = $next->( $iterator ) ) {
             push @got, $data;
         }
 
@@ -116,10 +120,11 @@ sub test {
         $iterator->rewind;
 
         @got = ();
-        while ( @got < $len and my $data = $next->( $iterator ) ) {
+        while ( @got <= $len and my $data = $next->( $iterator ) ) {
             push @got, $data;
         }
 
+        ok( $iterator->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "after rewind" );
 
     };
