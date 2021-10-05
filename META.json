@@ -104,7 +104,6 @@
             "Class::Method::Modifiers" : "0",
             "Exporter" : "0",
             "List::Util" : "1.33",
-            "Module::Build::Tiny" : "0",
             "Module::Runtime" : "0",
             "Package::Variant" : "0",
             "Ref::Util" : "0",
@@ -117,7 +116,7 @@
             "namespace::clean" : "0",
             "overload" : "0",
             "parent" : "0",
-            "perl" : "v5.28.1",
+            "perl" : "v5.28.0",
             "strict" : "0",
             "warnings" : "0"
          }

@@ -32,7 +32,7 @@ iterators need the bells and whistles, but sometimes they are very handy.
 ## Where are the iterators?
 
 See [Iterator::Flex::Common](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3ACommon) for a set of common iterators.  These
-are premade for you.  See [Iterator::Flex::Manual::Using](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3AUsing) for how to
+are pre-made for you.  See [Iterator::Flex::Manual::Using](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3AUsing) for how to
 use them.
 
 ## I need to write my own.
