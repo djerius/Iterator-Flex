@@ -19,13 +19,11 @@ There's also L<Iterator::Flex::ArrayLike>, which interfaces
 to objects which can provide a length and an element accessor.
 
 
-
 =head1 UNDER THE HOOD
 
-Interfacing is accomplished by composing the appropriate
-L<Iterator::Flex::Role::Wrap> roles with the iterator class.
+=head2 Other iterators
 
-The two behaviors that need translating are
+Interfacing is accomplished by creating a proxy iterator which translates
 
 =over
 
@@ -35,9 +33,12 @@ Invocation
 
 =item 2
 
-Signalling exhaustion
+Exhaustion signalling
 
 =back
+
+and forwards other capability invocations to the source iterator.
+
 
 =head2 Invocation
 

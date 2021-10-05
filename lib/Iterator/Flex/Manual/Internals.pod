@@ -41,6 +41,7 @@ for the keys are available from L<Iterator::Flex::Utils>):
          + -- { +STATE }
          + -- { +_DEPENDS }
          + -- { +_NAME }
+         + -- { +_ROLES }
     + -- { +GENERAL }
          + -- { +INPUT_EXHAUSTION }
          + -- { +EXHAUSTION }
@@ -73,6 +74,104 @@ C<Iterator::Flex::Base::new_from_attrs>.  Everything else calls it. It
 accepts two hash arguments, one for parameters specific to the
 particular iterator, the other for specifyin general behaviors, such
 as how the iterator should signal exhaustion or error.
+
+=head4 Roles
+
+=over
+
+=item
+
+L<Iterator::Flex::Role::Freeze>
+
+=item
+
+L<Iterator::Flex::Role::Current::Method>
+
+=item
+
+L<Iterator::Flex::Role::Current::Closure>
+
+=item
+
+L<Iterator::Flex::Role::Next::Closure>
+
+=item
+
+L<Iterator::Flex::Role::Next::ClosedSelf>
+
+=item
+
+L<Iterator::Flex::Role::Reset::Method>
+
+=item
+
+L<Iterator::Flex::Role::Reset::Closure>
+
+=item
+
+L<Iterator::Flex::Role::Exhaustion::Return>
+
+=item
+
+L<Iterator::Flex::Role::Exhaustion::PassthroughThrow>
+
+=item
+
+L<Iterator::Flex::Role::Exhaustion::Throw>
+
+=item
+
+L<Iterator::Flex::Role::Exhaustion::ImportedReturn>
+
+=item
+
+L<Iterator::Flex::Role::Exhaustion::ImportedThrow>
+
+=item
+
+L<Iterator::Flex::Role::Rewind::Method>
+
+=item
+
+L<Iterator::Flex::Role::Rewind::Closure>
+
+=item
+
+L<Iterator::Flex::Role::State::Registry>
+
+=item
+
+L<Iterator::Flex::Role::State::Closure>
+
+=item
+
+L<Iterator::Flex::Role::Utils>
+
+=item
+
+L<Iterator::Flex::Role::Wrap::Return>
+
+=item
+
+L<Iterator::Flex::Role::Wrap::Self>
+
+=item
+
+L<Iterator::Flex::Role::Wrap::Throw>
+
+=item
+
+L<Iterator::Flex::Role::Prev::Method>
+
+=item
+
+L<Iterator::Flex::Role::Prev::Closure>
+
+=item
+
+L<Iterator::Flex::Role::Error::Throw>
+
+=back
 
 =head1 SEE ALSO
 

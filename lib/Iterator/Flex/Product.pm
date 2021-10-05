@@ -30,7 +30,7 @@ array reference containing an element from each iterable.
 If the input is a list of key, iterable pairs, C<$iterator> will return a
 hash reference.
 
-The iterables are converted into iterators via L<Iterator::Factor/to_iterator> if required.
+The iterables are converted into iterators via L<Iterator::Flex::Factory/to_iterator> if required.
 
 All of the iterables must support the C<rewind> method.
 

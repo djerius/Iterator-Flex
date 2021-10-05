@@ -27,8 +27,7 @@ Not all iterators support all methods.
 
 Returns the previous value of the iterator.  If the iterator was never
 advanced, this returns C<undef>.  If the iterator is exhausted, this
-returns the last retrieved value. Use the L<state> method to determine
-which state the iterator is in.
+returns the last retrieved value.
 
 =item current
 
@@ -36,8 +35,7 @@ which state the iterator is in.
 
 Returns the current value of the iterator.  If the iterator was never
 advanced, this returns undef.  If the iterator is exhausted, this
-returns C<undef>.  Use the L<state> method to determine which state
-the iterator is in.
+returns C<undef>.
 
 =item next
 
@@ -50,7 +48,7 @@ Return the next value from the iterator.
   $iter->rewind;
 
 Resets the iterator so that the next value returned is the very first
-value.  It should not affect the results of the L<prev> and L<current>
+value.  It should not affect the results of the L</prev> and L</current>
 methods.
 
 =item reset
@@ -59,6 +57,18 @@ methods.
 
 Resets the iterator to its initial state.  The iterator's state is not
 changed.
+
+=item is_exhausted
+
+  $iter->is_exhausted;
+
+True if the iterator is in the L<exhausted state|Iterator::Flex::Manual::Overview/Exhausted State>.
+
+=item is_error
+
+  $iter->is_error;
+
+True if the iterator is in the L<error state|Iterator::Flex::Manual::Overview/Error State>.
 
 =back
 

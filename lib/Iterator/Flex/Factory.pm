@@ -31,8 +31,8 @@ Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
   $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%par );
 
-Construct an iterator from an L<iterable thing|Iterator::Manual::Glossary/iterable thing>,
-with optional L<general parameters|Iterator::Overview/Classes of Parameters>.
+Construct an iterator from an L<iterable thing|Iterator::Flex::Manual::Glossary/iterable thing>,
+with optional L<general parameters|Iterator::Flex::Manual::Overview/Classes of Parameters>.
 
 =cut
 

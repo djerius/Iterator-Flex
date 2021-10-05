@@ -22,7 +22,7 @@ use namespace::clean;
 
 The iterator caches values of C<$iterable> (by default, the previous and current values),
 
-C<$iterable> is converted into an iterator via L<Iterator::Factor/to_iterator> if required.
+C<$iterable> is converted into an iterator via L<Iterator::Flex::Factory/to_iterator> if required.
 
 The optional C<%pars> hash may contain standard I<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters> as well

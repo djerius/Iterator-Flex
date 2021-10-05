@@ -22,7 +22,7 @@ use namespace::clean;
 Returns an iterator equivalent to running C<grep> on C<$iterable> with
 the specified code.
 
-C<$iterable> is converted into an iterator via L<Iterator::Factor/to_iterator> if required.
+C<$iterable> is converted into an iterator via L<Iterator::Flex::Factory/to_iterator> if required.
 
 C<CODE> is I<not> run if C<$iterable> is exhausted.
 

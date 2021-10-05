@@ -100,7 +100,7 @@ sub construct ( $class, $state ) {
 
         (+NEXT) => sub {
             if ( $next == $len ) {
-                # if first time through, set current
+                # if first time through, set prev
                 $prev = $current
                   if ! $self->is_exhausted;
                 return $current = $self->signal_exhaustion;

@@ -1,0 +1,26 @@
+# PODNAME: Iterator::Flex::Manual::Caveats
+# ABSTRACT: Caveats
+
+=head1 DESCRIPTION
+
+=head2 Serialization
+
+Serialization is a work in progress
+
+Most of the machinery is in place, but it requires some cleanup
+
+=over
+
+=item *
+
+The freeze code must be made available via the L<Iterator::Flex::Manual::Overview/freeze> parameter.
+It should be possible to use an object method.
+
+This is a simple fix: convert the single L<Iterator::Flex::Role::Freeze> role into
+separate C<Iterator::Flex::Role::Freeze::Closure>  and C<Iterator::Flex::Role::Freeze::Method> roles.
+
+=back
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

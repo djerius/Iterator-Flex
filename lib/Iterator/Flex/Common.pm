@@ -29,7 +29,7 @@ use Iterator::Flex::Factory;
 Construct an iterator from code. The code will have access to the
 iterator object through C<$_[0]>. By default the code is expected to
 return C<undef> upon exhaustion (this can be changed by setting the
-L<Iterator::Manual::Overview/input_exhaustion> parameter).
+L<Iterator::Flex::Manual::Overview/input_exhaustion> parameter).
 
 For example, here's a simple integer sequence iterator that counts up to 100:
 
@@ -59,7 +59,7 @@ sub iterator :prototype(&@) ($code, $pars={} ) {
 Construct an iterator from an L<iterable
 thing|Iterator::Flex::Manual::Glossary/iterable thing>.  By default
 the code is expected to return C<undef> upon exhaustion (this can be
-changed by setting the L<Iterator::Manual::Overview/input_exhaustion>
+changed by setting the L<Iterator::Flex::Manual::Overview/input_exhaustion>
 parameter).
 
 See L</Parameters> for a description of C<%pars>
@@ -396,8 +396,10 @@ optional capabilities; the descriptions below list which capabilities
 each iterator provides.
 
 For iterator adapaters, such as L</icache>, some capabilites are
-supported only if the iterable they operate on supports them.  For example,
-L<icache> can't provide the C<reset> or C<rewind> capabilities if the
+supported only if the iterable they operate on supports them.  For
+example, L</icache> can't provide the
+L<reset|Iterator::Flex::Manual::Overview/reset> or
+L<rewind|Iterator::Flex::Manual::Overview/rewind> capabilities if the
 iterable reads from the terminal.  In these cases, attempting to use
 this capability will result in an error.
 

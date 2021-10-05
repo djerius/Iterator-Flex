@@ -125,9 +125,9 @@ The only one required is L</next>, which retrieves a value,
 There are a limited set of additional capabilities which are not
 appropriate to all data sources or iterators, so they are optional.
 
-Some capabilities can be emulated by L<iterator
-adapters|Iterator::Flex::Manual::Adapters>.  The supported capabilities
-are documented in L<Iterator::Flex::Manual::Overview>, and are
+Some capabilities can be emulated by iterator adapters.  The supported
+capabilities are documented in L<Iterator::Flex::Manual::Overview>,
+and are
 
 =over
 
@@ -167,10 +167,10 @@ An I<iterator generator> creates an iterator from a data source, which
 may be real (such as a data structure in memory, a database, etc.), or
 virtual (such as a sequence of numbers). L<Iterator::Flex> provides
 iterator generators via convenience wrappers and classes for:
-
-array (L<iarray|/Iterator::Flex::Common/iarray>,
+arrays (L<iarray|/Iterator::Flex::Common/iarray>,
 L<Iterator::Flex::Array>), numeric sequences
-(L<iseq|/Iterator::Flex::Common/iseq>, L<Iterator::Flex::Sequence>).
+(L<iseq|/Iterator::Flex::Common/iseq>, L<Iterator::Flex::Sequence>),
+array like objects (L<Iterator::Flex::ArrayLike>).
 
 For others, writing an iterator is straightforward; see
 L<Iterator::Flex::Manual::Authoring>.
@@ -182,20 +182,41 @@ Applying an adapter to an iterator results in another iterator, which can be use
 input to another adapter.
 
 L<Iterator::Flex> provides adapters both via convenience wrappers and
-classes for grep (L<igrep|/Iterator::Flex::Common/igrep>,
-L<Iterator::Flex::Grep>), map (L<imap|/Iterator::Flex::Common/imap>,
-L<Iterator::Flex::Map>), cycle
-(L<icycle|/Iterator::Flex::Common/icycle>, L<Iterator::Flex::Cycle>),
-cartesian product (L<iproduct|/Iterator::Flex::Common/iproduct>,
-L<Iterator::Flex::Product>), cache
-(L<icache|/Iterator::Flex::Common/icache>, L<Iterator::Flex::Cache>),
+classes for 
+
+=item grep
+
+L<igrep|/Iterator::Flex::Common/igrep>, L<Iterator::Flex::Grep>)
+
+=item map
+
+L<imap|/Iterator::Flex::Common/imap>, L<Iterator::Flex::Map>
+
+=item cycle
+
+L<icycle|/Iterator::Flex::Common/icycle>, L<Iterator::Flex::Cycle>
+
+=item Cartesian product
+
+L<iproduct|/Iterator::Flex::Common/iproduct>,
+L<Iterator::Flex::Product>
+
+=item Caching/Buffering 
+
+L<icache|/Iterator::Flex::Common/icache>, L<Iterator::Flex::Cache>
+
+=item Continuous Serialization
+
+L<ifreeze|/Iterator::Flex::Common/ifreeze>, L<Iterator::Flex::Freeze>
+
+=back
 
 =head3 Iterator Wrappers
 
-There are a number of existing iterator packages on CPAN (see L</PRIOR
-ART>).  L<Iterator::Flex> can wrap those iterators so that they can be
-used within the L<Iterator::Flex> framework.  See
-L<Iterator::Flex::Manual::Alien>.
+There are a number of existing iterator packages on CPAN (see
+L<Iterator::Flex::Manual::PriorArt>).  L<Iterator::Flex> can wrap
+those iterators so that they can be used within the L<Iterator::Flex>
+framework.  See L<Iterator::Flex::Manual::Alien>.
 
 =head1 SEE ALSO
 

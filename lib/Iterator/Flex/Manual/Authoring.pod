@@ -13,9 +13,9 @@ to the factory.
 
 =head2 The Attribute Hash
 
-The attribute hash (documented much greater detail in L</Iterator
-Attributes>) describes the iterator's capabilities and provides
-an implementation.
+The attribute hash (whose contents are documented much greater detail
+in L<Iterator::Flex::Manual::Overview/Iterator Parameters>) describes
+the iterator's capabilities and provides implementations.
 
 The heart of L<Iterator::Flex> iterators is the C<next> capability,
 which I<must> be implemented as a closure. Other capabilities are
@@ -65,8 +65,9 @@ variables that are defined outside of the subroutine.
 
 It's cheap to retain the state of an array (it's just an index), so we
 can easily keep track of C<$next>, C<$prev>, C<$current>, and provide
-the additional I<previous> and I<current> capabilities.  We also keep
-track of the array, C<$arr>, and its length C<$len>.
+the additional L<prev|Iterator::Flex::Manual::Overview/prev> and
+L<current|Iterator::Flex::Manual::Overview/current> capabilities.  We
+also keep track of the array, C<$arr>, and its length C<$len>.
 
 Finally, there's C<$self>, which is a handle to the iterator's
 object. It's not used for any performance critical work.
@@ -78,7 +79,7 @@ These must all be properly initialized; more on that later.
 The code is divided into two sections; the first deals with data exhaustion:
 
      if ( $next == $len ) {
-         # if first time through, set current
+         # if first time through, set prev
          $prev = $current
            if ! $self->is_exhausted;
          return $current = $self->signal_exhaustion;
@@ -94,19 +95,19 @@ just calls the C<signal_exhaustion> method, which will first set the
 C<is_exhausted> predicate and then either return a sentinel value or
 throw an exception (which the iterator should I<not> catch).  In the
 former case, the iterator should pass that sentinel value on to the
-caller, and ensure that the C<current> capability will return the same
-value.
+caller.
 
 Unlike in some iterator models, calling C<next> after the iterator is
 exhausted is always a defined operation, always resulting in the same
-behavior.  C<next> should thus I<always> call B<signal_exhaustion> when
+behavior.  C<next> should thus I<always> call C<signal_exhaustion> when
 exhausted, even if the iterator has already signalled exhaustion.
 
 =head4 Iteration Phase
 
 The second part of the code takes care of returning the correct data
 and setting the iterator up for the succeeding call to C<next>. It
-also ensures that the I<current> and I<previous> capabilities will
+also ensures that the I<< L<current|Iterator::Flex::Manual::Overview/current> >>
+and I<< L<prev|Iterator::Flex::Manual::Overview/prev> >> capabilities will
 return the proper values:
 
      $prev    = $current;
@@ -118,7 +119,7 @@ return the proper values:
 
 Finally, we'll get to the iterator intialization phase, which may make
 more sense now that we've gone through the other phases.  Recall that
-we're using closed over variables to keep track of state. That means
+we are using closed over variables to keep track of state. That means
 our C<next> sub must be created for every iterator so it can close
 over the current set of lexical variables.
 
