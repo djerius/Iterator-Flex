@@ -149,7 +149,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     }
 
     # these are dealt with in the iterator constructor.
-    delete $ipar_k{ +METHODS };
+    delete @ipar_k{ +METHODS, +FREEZE  };
 
     if ( !!%ipar_k || !!%gpar_k ) {
 
@@ -311,21 +311,30 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
     return $CLASS->construct( \%ipar, \%gpar );
 }
 
+
+# create a proxy object for an Iterator::Flex object.  This is only
+# required if an adaptor needs a different exhaustion signal than is
+# provided by the object.
+
+# Currently, proxy objects are not treated specially when de-serializing
+# (e.g., they'll be run through to_iterator), but it *should* be a no-op.
+
+
 sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
-
-    my @exhaustion = do {
-        my $exhaustion = $gpar->{ +EXHAUSTION };
-        return $obj unless defined $exhaustion;
-
-        Ref::Util::is_arrayref( $exhaustion )
-          ? ( $exhaustion->@* )
-          : ( $exhaustion );
-    };
 
     my \%registry
       = exists $REGISTRY{ refaddr $obj }
       ? $REGISTRY{ refaddr $obj }{ +GENERAL }
       : $CLASS->_throw( internal => "non-registered Iterator::Flex iterator" );
+
+
+    # if caller didn't specify an exhaustion, set it to return => undef
+    my @want = do {
+        my $exhaustion = $gpar->{ +EXHAUSTION } // [ ( +RETURN ) => undef ];
+        Ref::Util::is_arrayref( $exhaustion )
+          ? ( $exhaustion->@* )
+          : ( $exhaustion );
+    };
 
 
     # multiple different output exhaustion roles may have been
@@ -334,39 +343,31 @@ sub construct_from_iterator_flex ( $CLASS, $obj, $, $gpar ) {
     # latest one applied will work.  So, use what's in the registry to
     # figure out what it actually does.
 
-    my $existing_exhaustion = $registry{ +EXHAUSTION }[0]
-      // $CLASS->_throw( internal =>
+    my \@have = $registry{ +EXHAUSTION } // $CLASS->_throw( internal =>
           "registered Iterator::Flex iterator doesn't have a registered exhaustion"
+    );
+
+    # reuse the object if the requested and existing exhaustion signals are the same.
+    return $obj
+      if $want[0] eq $have[0]
+      && (
+          ( defined $want[1] && defined $have[1] && $want[1] eq $have[1] )
+       || (   !defined $want[1] && !defined $have[1] )
       );
 
-    if ( $exhaustion[0] eq +RETURN ) {
+    # now we need a proxy object.
+    my %gpars = (
+        exhaustion       => [@want],
+        input_exhaustion => [@have],
+    );
 
-        if ( $existing_exhaustion eq +THROW ) {
-            Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( 'Exhaustion::Return' ) );
-        }
+    my %ipars;
+    for my $method ( +NEXT, +PREV, +CURRENT, +REWIND, +RESET, +FREEZE ) {
+        next unless defined (  my $code = $CLASS->_can_meth( $obj, $method ) );
+        $ipars{$method} = sub { $code->( $obj ) };
     }
 
-    elsif ( $exhaustion[0] eq THROW ) {
-
-        if ( $existing_exhaustion eq +THROW ) {
-            Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( 'Exhaustion::Return' ) );
-        }
-
-        if ( $existing_exhaustion eq +RETURN ) {
-            Role::Tiny->apply_roles_to_object( $obj,
-                $obj->_load_role( 'Exhaustion::Throw' ) );
-        }
-    }
-
-    else {
-        $CLASS->_throw( internal =>
-            "unexpected exhaustion action: $exhaustion[0]" );
-    }
-
-    $registry{ +EXHAUSTION }->@* = @exhaustion;
-    return $obj;
+    return $CLASS->construct( \%ipars, \%gpars );
 }
 
 sub construct_from_attr ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
