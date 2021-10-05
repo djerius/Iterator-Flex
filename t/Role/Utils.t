@@ -5,6 +5,8 @@ use Test2::V0;
 package My::T::Role::Utils {
     use Package::Stash;
 
+    use Iterator::Flex::Utils qw( throw_failure );
+
     sub ::Pkg {
         my $package = scalar caller;
         my $stash = Package::Stash->new($package);
@@ -13,7 +15,9 @@ package My::T::Role::Utils {
 
         my $name = *{$stash->namespace->{TEMPLATE}}{SCALAR};
         ++ ${$name};
-        Package::Stash->new( $package . '::' . ${$name} );
+        my $pkg = Package::Stash->new( $package . '::' . ${$name} );
+        $pkg->add_symbol( '&_throw' => sub { shift; throw_failure( @_ ) } );
+        $pkg;
     }
 }
 
@@ -48,6 +52,12 @@ subtest '_can_meth' => sub {
                     $pkg->get_symbol( '&__method2__' ), $method );
             }
         };
+
+        subtest 'bad method' => sub {
+            isa_ok( dies { $pkg->name->$_can_meth( [] ) },
+                    [ 'Iterator::Flex::Failure::parameter' ] );
+        };
+
     };
 
     subtest 'object' => sub {
@@ -73,6 +83,12 @@ subtest '_can_meth' => sub {
                     $pkg->get_symbol( '&__method2__' ), $method );
             }
         };
+
+        subtest 'bad method' => sub {
+            isa_ok( dies { $pkg->name->$_can_meth( $obj, [] ) },
+                    [ 'Iterator::Flex::Failure::parameter' ] );
+        };
+
     };
 
     subtest 'return value' => sub {

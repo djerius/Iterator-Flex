@@ -7,8 +7,10 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Role::Tiny;
 use Ref::Util;
+
+use Role::Tiny;
+use experimental 'signatures';
 
 =method _load_module
 
@@ -95,12 +97,16 @@ If both C<code> and C<name> are specified, both are returned as a list, C<name> 
 =cut
 
 
-sub _can_meth {
-    my $thing = shift;
-    my $par = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
-    $thing = shift if Ref::Util::is_blessed_ref( $_[0] );
+sub _can_meth ( $self, @methods ) {
 
-    for my $method ( @_ ) {
+    my $thing = Ref::Util::is_blessed_ref( $methods[0] ) ? shift @methods : $self;
+
+    my $par = Ref::Util::is_hashref( $methods[-1] ) ? pop @methods : {};
+
+    for my $method ( @methods) {
+        $self->_throw( parameter => "'method' parameters must be a string" )
+          if Ref::Util::is_ref( $method );
+
         my $sub;
         foreach ( "__${method}__", $method ) {
             if ( defined( $sub = $thing->can( $_ ) ) ) {
