@@ -2,6 +2,28 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.12      2021-10-05 17:40:04-04:00 America/New_York
+
+    * First public release
+
+  [INCOMPATIBILITY]
+
+    * explicitly requires Perl v5.28
+    * yet another radical API change and refactoring. hopefully the
+      last!
+
+  [ENHANCEMENTS]
+
+    * lots of documentation. still not complete
+    * better handling of proxy iterators
+    * beginning of error handling
+
+
+  [TODO]
+
+    * icycle should handle any rewindable iterator, not just arrays
+
+
 0.11      2020-04-30 10:48:47-04:00 America/New_York
 
   [INCOMPATIBILITY]
