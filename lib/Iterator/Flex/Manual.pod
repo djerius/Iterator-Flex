@@ -19,6 +19,10 @@ L<Iterator::Flex::Manual::Basics> - Iterator Basics
 
 =item *
 
+L<Iterator::Flex::Manual::Caveats> - Caveats
+
+=item *
+
 L<Iterator::Flex::Manual::Glossary> - A Glossary
 
 =item *

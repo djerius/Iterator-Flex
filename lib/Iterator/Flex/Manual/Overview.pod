@@ -27,7 +27,7 @@ L<error|/Error State>
 
 =back
 
-An iterator typically moves sequentially from 
+An iterator typically moves sequentially from
 L<initialized|/Initialized State>
 to L<iteration|/Iteration State>
 to L<exhausted|/Exhausted State>.
@@ -399,3 +399,260 @@ L</freeze>.  Given a serialized iterator, it reconsititue it so that
 it behaves exactly as it would before it was frozen.  Under the hood
 it calls the C<thaw> method.
 
+=head2 Iterator Parameters
+
+Parameters are passed to iterator and attribute generators, either
+through the convenience functions in L<Iterator::Flex::Common>, the
+constructors in L<Iterator::Flex::Factory> or the constructors in
+bespoke iterator classes which subclass L<Iterator::Flex::Base>.
+
+=head3 Classes of Parameters
+
+There are three classes of parameters used by iterators and adaptors:
+
+=over
+
+=item *
+
+I<Model> parameters are specific to a type of iterator.  For example, the
+L<cache|Iterator::Flex::Cache> iterator has a model parameter for the
+cache L<capacity|Iterator::Flex::Cache/capacity>.
+
+=item *
+
+I<Interface> parameters provide implementations of the capabilites that the
+iterator provides.
+
+=item *
+
+I<Signal> parameters define how the iterator signals exhaustion or error.
+
+=back
+
+Signal and Interface parameters are also called I<General Parameters>.
+
+=head3 Interface Parameters
+
+=over
+
+=item C<_self>
+
+A reference to a lexical variable which will be set by the iterator
+generator to a reference to the iterator object.  This is used only if
+the iterator class consumes the
+L<Iterator::Flex::Role::Next::ClosedSelf> role.
+
+=item C<_name>
+
+The name of the iterator to be used in error messages.  If not specified, it is set
+to the iterator class.
+
+=item C<state>
+
+A reference to a lexical variable which will reflect whether the state
+is one of L<exhaustion|/Exhausted State>, L<error|/Error State>, or
+something else.  This is used if the iterator class consumes the
+L<Iterator::Flex::Role::State::Closure> role.  (The alternative is for
+the state to be stored in the iterator registry by consuming the
+L<Iterator::Flex::Role::State::Registry> role).
+
+Using this functionality the state stored in the lexical variable can
+be accessed directly from iterator closures and compared to one of the
+constants C<IterState_EXHAUSTED> or C<IterState_ERROR> (see
+L<Iterator::Flex::Utils/Iterator State Constants>).
+
+The state is also queriable via the
+L<is_exhausted|Iterator::Flex::Base/is_exhausted> and
+L<is_error|Iterator::Flex::Base/is_error> iterator object methods.
+
+=item C<class>
+
+The class which will consume iterator roles and from which the object
+will be instantiated.  This option is only used by
+L<Iterator::Flex::Factory> generators.  It defaults to
+L<Iterator::Flex::Base>.
+
+=item C<next>
+
+A code reference which returns the next element in the data source.
+This will be made available as the object method C<next>, but
+may also be invoked directly as a subroutine (e.g. C<$next->()> ).
+
+Access to the iterator object can be obtained by either:
+
+=over
+
+=item *
+
+specifying the L</_self> parameter
+and applying the L<Iterator::Flex::Role::Next::ClosedSelf>
+role to the class.
+
+=item *
+
+applying the L<Iterator::Flex::Role::Wrap::Self> role.  The results
+in the creation of a wrapper ensuring that the code reference is
+always invoked as an object method.
+
+=back
+
+=item C<prev>
+
+A code reference which returns the value retrieved by the penultimate
+call to L</next>.  This will be made available as the object method C<prev>.
+
+This is used only if the iterator class consumes the
+L<Iterator::Flex::Role::Prev::Closure> role.
+
+Classes constructed via the L<Iterator::Flex::Factory> constructors will automatically
+be composed with the L<Iterator::Flex::Role::Prev::Method> if the L</prev> parameter
+is not specified and the class specified by the L</class> parameter provides a C<prev>
+object method.
+
+Bespoke classes should apply the L<Iterator::Flex::Role::Prev::Method>
+role using the L<Iterator::Flex::Base/_add_roles> class method.
+
+
+=item C<current>
+
+A code reference which returns the value retrieved by the last call to L</next>.
+This will be made available as the object method C<current>.
+
+This is used only if the iterator class consumes the
+L<Iterator::Flex::Role::Current::Closure> role.
+
+Classes constructed via the L<Iterator::Flex::Factory> constructors will automatically
+be composed with the L<Iterator::Flex::Role::Current::Method> if the L</prev> parameter
+is not specified and the class specified by the L</class> parameter provides a C<prev>
+object method.
+
+Bespoke classes should apply the L<Iterator::Flex::Role::Current::Method>
+role using the L<Iterator::Flex::Base/_add_roles> class method.
+
+
+=item C<reset>
+
+A code reference which will restore the iterator to the L<initialized
+state|/Initialized State>.
+
+This is used only if the iterator class consumes the
+L<Iterator::Flex::Role::Reset::Closure> role.
+
+Classes constructed via the L<Iterator::Flex::Factory> constructors will automatically
+be composed with the L<Iterator::Flex::Role::Reset::Method> if the L</prev> parameter
+is not specified and the class specified by the L</class> parameter provides a C<prev>
+object method.
+
+Bespoke classes should apply the L<Iterator::Flex::Role::Reset::Method>
+role using the L<Iterator::Flex::Base/_add_roles> class method.
+
+The state variable (accessible via the
+L<is_exhausted|Iterator::Flex::Base/is_exhausted> and
+L<is_error|Iterator::Flex::Base/is_error> iterator object methods)
+will automatically be reset.
+
+If the iterator is an adapter depending upon other iterators, they
+will automatically be reset.
+
+=item C<rewind>
+
+A code reference which will ensure that the next call to L</next> returns the first
+element in the data stream.
+
+This is used only if the iterator class consumes the
+L<Iterator::Flex::Role::Rewind::Closure> role.
+
+Classes constructed via the L<Iterator::Flex::Factory> constructors will automatically
+be composed with the L<Iterator::Flex::Role::Rewind::Method> if the L</prev> parameter
+is not specified and the class specified by the L</class> parameter provides a C<prev>
+object method.
+
+Bespoke classes should apply the L<Iterator::Flex::Role::Rewind::Method>
+role using the L<Iterator::Flex::Base/_add_roles> class method.
+
+If the iterator is an adapter depending upon other iterators, they
+will automatically be rewound.
+
+=item C<freeze>
+
+A code reference which returns a serialized version of the iterator.
+See L<Iterator::Flex::Manual::Serialization> and
+L<Iterator::Flex::Manual::Caveats/Serialization>.
+
+=item C<methods>
+
+A hash whose keys are method names and whose values are coderefs.
+These will be added as methods to the iterator class.
+Useful for making a set of closures available as methods.
+
+=item C<_depends>
+
+A list of iterator objects that the adapter depends upon. Used by
+iterator adapters.  Automatically added by L<Iterator::Flex::Factory>
+constructors.  Bespoke classes must provide this explicitly.
+
+=back
+
+=head3 Signal Exhaustion
+
+=over
+
+=item C<input_exhaustion>
+
+This applies only to iterator adaptors, and indicates how the consumed iterator signals exhaustion.
+It may have one of the following values:
+
+=over
+
+=item C<throw>
+
+Throw an exception of L<Iterator::Flex::Failure::Exhaustion|Iterator::Flex::Failure/Exhaustion>.
+
+=item C<< [ throw => 'passthrough' ] >>
+
+Only for adaptors; the consumed iterator will throw on exhaustion; let that exception propagate.
+
+=item C<< [ throw => $coderef ] >>
+
+Invoke C<$coderef>.  If it does not throw, an exception of
+L<Iterator::Flex::Failure::Exhaustion|Iterator::Flex::Failure/Exhaustion>. will
+be thrown.
+
+=item C<return>
+
+For both iterators and adaptors, indicates that a sentinel value of
+c<undef> will be returned.
+
+=item C<< [ return => $value ] >>
+
+For both iterators and adaptors, indicates that the specified sentinel value will be returned.
+
+=back
+
+=item C<exhaustion>
+
+This applies to both iterators and  adaptors, and indicates how they signal exhaustion.
+It takes the same values as L</input_exhaustion>
+
+=item C<error>
+
+This applies to both iterators and  adaptors, and indicates how they signal error.
+It may have one of the following values:
+
+=over
+
+=item C<throw>
+
+Throw an exception of L<Iterator::Flex::Failure::Error|Iterator::Flex::Failure/Error>.
+
+=item C<< [ throw => $coderef ] >>
+
+Invoke C<$coderef>.  If it does not throw, an exception of  L<Iterator::Flex::Failure::Error|Iterator::Flex::Failure/Error>. will be thrown.
+
+=back
+
+=back
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

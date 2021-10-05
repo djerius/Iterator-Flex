@@ -188,8 +188,7 @@ At this point C<%AttrHash> is functionaly complete. The only thing left unknown 
 the array to iterate over, which has to be kept variable, so wrapping the above
 code into a subroutine
 
- sub configure {
-     my ( $array ) = @_;
+ sub configure ( $array ) {
 
      # initialize lexical variables here
      ...
@@ -297,14 +296,10 @@ interpreted by the C<Iterator::Flex> framework.
 
 Here's the code for L<Iterator::Flex::Array/new>:
 
-  sub new {
-      my $class = shift;
-      my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
-
+  sub new ( $class, $array, $pars={} ) {
       $class->_throw( parameter => "argument must be an ARRAY reference" )
-        unless Ref::Util::is_arrayref( $_[0] );
-
-      $class->SUPER::new( { array => $_[0] }, $gpar );
+        unless Ref::Util::is_arrayref( $array );
+      $class->SUPER::new( { array => $array }, $pars );
   }
 
 It's pretty simple. It saves the general options hash if present,
@@ -438,3 +433,7 @@ use parent 'Iterator::Flex::Base';
   ] );
 
   1;
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

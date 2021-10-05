@@ -41,3 +41,7 @@ Dependencies are passed to the thaw routine only if they are present.
 =back
 
 =back
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

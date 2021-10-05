@@ -73,3 +73,7 @@ C<Iterator::Flex::Base::new_from_attrs>.  Everything else calls it. It
 accepts two hash arguments, one for parameters specific to the
 particular iterator, the other for specifyin general behaviors, such
 as how the iterator should signal exhaustion or error.
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

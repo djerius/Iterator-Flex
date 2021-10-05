@@ -49,4 +49,18 @@ can signal exhaustion any way it wants. This is great unless you need to use
 an iterator which doesn't fit your exhaustion model.  In any case,
 see L<Iterator::Flex::Manual::Alien>.
 
+=over
 
+=item *
+
+L<Iterator>
+
+=item *
+
+L<Iterator::Simple>
+
+=back
+
+=head1 SEE ALSO
+
+Iterator::Flex::Manual

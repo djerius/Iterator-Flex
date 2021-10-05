@@ -46,4 +46,6 @@ are code references which can be called directly. L<Iterator::Flex> always
 works with code references, so in the former case, a closure must be
 created.
 
+=head1 SEE ALSO
 
+Iterator::Flex::Manual

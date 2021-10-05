@@ -14,10 +14,8 @@ at a time.  The state required would be the array and the index
 of the next element to return.   Here's a simple iterator which
 uses a hash to keep track of state
 
-  sub iterate {
-     my $state = shift;
+  sub iterate ( $state ) {
      my $array = $state->{array};
-
      return $state{index} > $#$array ? undef : $array->[$state{index}++];
   }
 
@@ -199,3 +197,6 @@ ART>).  L<Iterator::Flex> can wrap those iterators so that they can be
 used within the L<Iterator::Flex> framework.  See
 L<Iterator::Flex::Manual::Alien>.
 
+=head1 SEE ALSO
+
+Iterator::Flex::Manual
