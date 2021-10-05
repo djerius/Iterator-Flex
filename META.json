@@ -1,10 +1,10 @@
 {
-   "abstract" : "Iterators which can be rewound and serialized",
+   "abstract" : "Iterators with flexible behaviors",
    "author" : [
       "Diab Jerius <djerius@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Zilla version 6.024, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "gpl_3"
    ],
@@ -39,6 +39,7 @@
             "Dist::Zilla::Plugin::EnsureChangesHasContent" : "0",
             "Dist::Zilla::Plugin::EnsurePrereqsInstalled" : "0",
             "Dist::Zilla::Plugin::FakeRelease" : "0",
+            "Dist::Zilla::Plugin::FileFinder::ByName" : "0",
             "Dist::Zilla::Plugin::GatherDir" : "0",
             "Dist::Zilla::Plugin::GatherDir::Template" : "0",
             "Dist::Zilla::Plugin::InsertCopyright" : "0",
@@ -136,7 +137,8 @@
             "Test2::V0" : "0",
             "Test::Lib" : "0",
             "Test::More" : "0",
-            "aliased" : "0"
+            "aliased" : "0",
+            "mro" : "0"
          }
       }
    },
@@ -159,6 +161,10 @@
       },
       "Iterator::Flex::Cache" : {
          "file" : "lib/Iterator/Flex/Cache.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Common" : {
+         "file" : "lib/Iterator/Flex/Common.pm",
          "version" : "0.12"
       },
       "Iterator::Flex::Cycle" : {
@@ -189,6 +195,10 @@
          "file" : "lib/Iterator/Flex/Method.pm",
          "version" : "0.12"
       },
+      "Iterator::Flex::Method::Maker" : {
+         "file" : "lib/Iterator/Flex/Method.pm",
+         "version" : "0.12"
+      },
       "Iterator::Flex::Product" : {
          "file" : "lib/Iterator/Flex/Product.pm",
          "version" : "0.12"
@@ -197,20 +207,16 @@
          "file" : "lib/Iterator/Flex/Role.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Current" : {
-         "file" : "lib/Iterator/Flex/Role/Current.pm",
+      "Iterator::Flex::Role::Current::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/Current/Closure.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Exhausted::Closure" : {
-         "file" : "lib/Iterator/Flex/Role/Exhausted/Closure.pm",
+      "Iterator::Flex::Role::Current::Method" : {
+         "file" : "lib/Iterator/Flex/Role/Current/Method.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Exhausted::NoOp" : {
-         "file" : "lib/Iterator/Flex/Role/Exhausted/NoOp.pm",
-         "version" : "0.12"
-      },
-      "Iterator::Flex::Role::Exhausted::Registry" : {
-         "file" : "lib/Iterator/Flex/Role/Exhausted/Registry.pm",
+      "Iterator::Flex::Role::Error::Throw" : {
+         "file" : "lib/Iterator/Flex/Role/Error/Throw.pm",
          "version" : "0.12"
       },
       "Iterator::Flex::Role::Exhaustion::ImportedReturn" : {
@@ -237,44 +243,60 @@
          "file" : "lib/Iterator/Flex/Role/Freeze.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Next" : {
-         "file" : "lib/Iterator/Flex/Role/Next.pm",
-         "version" : "0.12"
-      },
       "Iterator::Flex::Role::Next::ClosedSelf" : {
          "file" : "lib/Iterator/Flex/Role/Next/ClosedSelf.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Next::NoSelf" : {
-         "file" : "lib/Iterator/Flex/Role/Next/NoSelf.pm",
+      "Iterator::Flex::Role::Next::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/Next/Closure.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Next::WrapReturn" : {
-         "file" : "lib/Iterator/Flex/Role/Next/WrapReturn.pm",
+      "Iterator::Flex::Role::Prev::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/Prev/Closure.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Next::WrapSelf" : {
-         "file" : "lib/Iterator/Flex/Role/Next/WrapSelf.pm",
+      "Iterator::Flex::Role::Prev::Method" : {
+         "file" : "lib/Iterator/Flex/Role/Prev/Method.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Next::WrapThrow" : {
-         "file" : "lib/Iterator/Flex/Role/Next/WrapThrow.pm",
+      "Iterator::Flex::Role::Reset::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/Reset/Closure.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Prev" : {
-         "file" : "lib/Iterator/Flex/Role/Prev.pm",
+      "Iterator::Flex::Role::Reset::Method" : {
+         "file" : "lib/Iterator/Flex/Role/Reset/Method.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Reset" : {
-         "file" : "lib/Iterator/Flex/Role/Reset.pm",
+      "Iterator::Flex::Role::Rewind::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/Rewind/Closure.pm",
          "version" : "0.12"
       },
-      "Iterator::Flex::Role::Rewind" : {
-         "file" : "lib/Iterator/Flex/Role/Rewind.pm",
+      "Iterator::Flex::Role::Rewind::Method" : {
+         "file" : "lib/Iterator/Flex/Role/Rewind/Method.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Role::State::Closure" : {
+         "file" : "lib/Iterator/Flex/Role/State/Closure.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Role::State::Registry" : {
+         "file" : "lib/Iterator/Flex/Role/State/Registry.pm",
          "version" : "0.12"
       },
       "Iterator::Flex::Role::Utils" : {
          "file" : "lib/Iterator/Flex/Role/Utils.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Role::Wrap::Return" : {
+         "file" : "lib/Iterator/Flex/Role/Wrap/Return.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Role::Wrap::Self" : {
+         "file" : "lib/Iterator/Flex/Role/Wrap/Self.pm",
+         "version" : "0.12"
+      },
+      "Iterator::Flex::Role::Wrap::Throw" : {
+         "file" : "lib/Iterator/Flex/Role/Wrap/Throw.pm",
          "version" : "0.12"
       },
       "Iterator::Flex::Sequence" : {
@@ -299,6 +321,7 @@
    },
    "version" : "0.12",
    "x_generated_by_perl" : "v5.30.0",
-   "x_serialization_backend" : "Cpanel::JSON::XS version 4.17"
+   "x_serialization_backend" : "Cpanel::JSON::XS version 4.17",
+   "x_spdx_expression" : "GPL-3.0-only"
 }
 
