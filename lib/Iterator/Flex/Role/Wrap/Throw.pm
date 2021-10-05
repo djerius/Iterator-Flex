@@ -11,14 +11,13 @@ use Iterator::Flex::Utils qw( :RegistryKeys INPUT_EXHAUSTION );
 use Scalar::Util;
 use Ref::Util qw( is_regexpref is_arrayref is_coderef );
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
-around _construct_next => sub {
+around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
-    my $orig  = shift;
-    my $gpar = $_[-1];
-    my $next  = $orig->( @_ );
+    my $next  = $class->$orig( $ipar, $gpar );
 
     my $exception = (
         $gpar->{ +INPUT_EXHAUSTION } // do {

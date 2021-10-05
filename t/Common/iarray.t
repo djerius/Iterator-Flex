@@ -195,7 +195,8 @@ subtest 'exhaustion' => sub {
 
     subtest 'return' => sub {
 
-        my $iter = iarray( [ @array ], -pars => { exhaustion => [ return => 22 ] } );
+        my $array = [ @array ];
+        my $iter = iarray( $array , { exhaustion => [ return => 22 ] } );
 
         drain( $iter, 3, 22 );
         ok ( $iter->is_exhausted, 'drained' );
@@ -205,7 +206,7 @@ subtest 'exhaustion' => sub {
 
     subtest 'throw' => sub {
 
-        my $iter = iarray( [ @array ], -pars => { exhaustion => 'throw' } );
+        my $iter = iarray( [ @array ], { exhaustion => 'throw' } );
 
         ok( dies { drain( $iter, 3 ) }, "threw" );
 

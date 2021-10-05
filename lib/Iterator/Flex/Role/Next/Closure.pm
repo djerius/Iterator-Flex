@@ -10,6 +10,7 @@ our $VERSION = '0.12';
 use Iterator::Flex::Utils 'NEXT';
 use Scalar::Util;
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -26,9 +27,7 @@ by a specific L<Iterator::Flex::Role::Exhaustion> role.
 
 =cut
 
-sub _construct_next {
-    my $class = shift;
-    my $ipar = shift;
+sub _construct_next ( $class, $ipar, $ ) {
 
     # ensure we don't hold any strong references in the subroutine
     my $sub = $ipar->{+NEXT} // $class->_throw( parameter =>  "Missing 'next' parameter" );
@@ -36,7 +35,7 @@ sub _construct_next {
     return $sub;
 }
 
-sub next { &{ $_[0] } }
+sub next ( $self ) { &{ $self } }
 *__next__ = \&next;
 
 1;

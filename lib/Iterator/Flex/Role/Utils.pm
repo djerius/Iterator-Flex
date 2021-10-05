@@ -26,9 +26,7 @@ the module (for whatever reason).
 
 =cut
 
-sub _load_module {
-
-    my ( $class, $path, $namespaces )  = @_;
+sub _load_module ( $class, $path, $namespaces ) {
 
     if ( substr( $path, 0, 1 ) eq '+' ) {
         my $module = substr( $path, 1 );
@@ -57,10 +55,10 @@ sub _load_module {
 Simply calls
 
   $class->_load_module( 'Role', @path );
+
 =cut
 
-sub _load_role {
-    my ( $class, $path ) = @_;
+sub _load_role ( $class, $path ) {
     $class->_load_module( $path, [ $class->_role_namespaces ] );
 }
 
@@ -92,7 +90,7 @@ return the coderef of the method. (Default)
 
 If both C<code> and C<name> are specified, both are returned as a list, C<name> first:
 
-  ($name, $code ) = $class->_can_meth( $obj, @method, {name => 1, code => 1 } );
+  ($name, $code ) = $class->_can_meth( $obj, @methods, {name => 1, code => 1 } );
 
 =cut
 
@@ -141,8 +139,7 @@ If C<$method> is not defined, then C<< $obj->_can_meth( $target, @fallbacks ) >>
 
 =cut
 
-sub _resolve_meth {
-    my ( $obj, $target, $method, @fallbacks ) = @_;
+sub _resolve_meth ( $obj, $target, $method, @fallbacks ) {
 
     my $code = do {
 
@@ -171,12 +168,11 @@ Throw an exception object of class C<Iterator::Flex::Failure::$type> with the gi
 =cut
 
 
-sub _throw {
-    shift;
+sub _throw ( $self, $failure, $msg ) {
     require Iterator::Flex::Failure;
     local @Iterator::Flex::Role::Utils::CARP_NOT = scalar caller;
-    my $type  = join( '::', 'Iterator::Flex::Failure', shift );
-    $type->throw( { msg => shift, trace => Iterator::Flex::Failure->croak_trace } );
+    my $type  = join( '::', 'Iterator::Flex::Failure', $failure );
+    $type->throw( { msg => $msg, trace => Iterator::Flex::Failure->croak_trace } );
 }
 
 

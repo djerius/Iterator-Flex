@@ -15,62 +15,24 @@ use Role::Tiny       ();
 use Role::Tiny::With ();
 use Module::Runtime;
 
+
 use Iterator::Flex::Base;
 use Iterator::Flex::Utils qw[
   :ExhaustionActions
   :default
   :RegistryKeys
   :IterAttrs
+  parse_pars
 ];
 
 Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
 =class_method to_iterator
 
-  $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%gpar );
+  $iter = Iterator::Flex::Factory->to_iterator( $iterable, \%par );
 
-Construct an iterator from an iterable thing. The C<%gpar> parameter
-may contain
-return C<undef> upon exhaustion.
-
- An iterable thing is
-
-=over
-
-=item an object
-
-An iterable object has one or more of the following methods
-
-=over
-
-=item C<__iter__> or C<iter>
-
-=item C<__next__> or C<next>
-
-=item an overloaded C<< <> >> operator
-
-This should return the next item.
-
-=item an overloaded C<< &{} >> operator
-
-This should return a subroutine which returns the next item.
-
-=back
-
-
-See L</construct_from_object>
-
-=item an arrayref
-
-The returned iterator will be an L<Iterator::Flex::Array> iterator.
-
-=item a coderef
-
-The coderef must return the next element in the iteration.
-
-=item a globref
-
-=back
+Construct an iterator from an L<iterable thing|Iterator::Manual::Glossary/iterable thing>,
+with optional L<general parameters|Iterator::Overview/Classes of Parameters>.
 
 =cut
 
@@ -89,106 +51,12 @@ sub to_iterator ( $CLASS, $iterable = undef, $pars = {} ) {
 
 =class_method construct
 
-  $iterator = Iterator::Flex::Factory->construct( %params );
+  $iterator = Iterator::Flex::Factory->construct( \%interface_pars, \%signal_pars );
 
-Construct an iterator object.
-
-The following parameters are accepted:
-
-=over
-
-=item name I<optional>
-
-An optional name to be output during error messages
-
-=item methods I<optional>
-
-A hash whose keys are method names and whose values are coderefs.
-These will be added as methods to the iterator class.  The coderef
-will be called as
-
-  $coderef->( $attributes, @args );
-
-where C<$attributes> is the hash containing the iterator's attributes
-(recall that the actual iterator object is a coderef, so iterator
-attributes are not stored in the object), and @args are the arguments
-the method was originally called with.
-
-=item next I<required>
-
-A subroutine which returns the next value.
-
-=item prev I<optional>
-
-A subroutine which returns the previous value.  It should return undefined
-if the iterator is at the beginning.
-
-=item current I<optional>
-
-A subroutine which returns the current value without fetching.  It should return undefined
-if the iterator is at the beginning.
-
-=item reset I<optional>
-
-A subroutine which resets the iterator such that
-L</next>, L</prev>, and L</current> return the values they would have
-if the iterator were initially started.
-
-=item rewind I<optional>
-
-A subroutine which rewinds the iterator such that the next element returned
-will be the first element from the iterator.  It should not alter the values
-returned by L</prev> or L</current>.
-
-=back
-
-The following parameters define how iterator exhaustion is handled. It is separated into
-two classes: I<native> exhaustion and I<output> exhaustion.  I<Native> exhaustion describes
-how the I<next> method expresses exhaustion, while I<output> exhaustion describes how the
-generated iterator should express exhaustion.
-
-=over
-
-=item input_exhaustion => I<spec>
-
-I<spec> can be one of the following:
-
-=over
-
-=item C<throw>
-
-=item [ C<throw> => I<exception string or object> ]
-
-The iterator will signal its exhaustion by throwing an exception.
-
-=item C<return>
-
-=item [ C<return> => I<sentinel value> ]
-
-The iterator will signal its exhaustion by returning a sentinel value.
-If not specified, it is C<undef>.
-
-=back
-
-=item exhaustion => i<spec>
-
-I<spec> can be one of the following:
-
-=over
-
-=item C<throw>
-
-=item [ C<throw> => I<exception string or object> ]
-
-=item C<return>
-
-=item [ C<return> => I<sentinel value> ]
-
-=item C<passthrough>
-
-=back
-
-=back
+Construct an iterator object from the passed hash of
+I<< L<interface parameters|Iterator::Flex::Manual::Overview/Interface Parameters> >>
+and
+I<< L<signal parameters|Iterator::Flex::Manual::Overview/Signal Parameters> >>
 
 =cut
 
@@ -300,7 +168,7 @@ sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
 
 =class_method construct_from_iterable
 
-  $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, %parameters );
+  $iter = Iterator::Flex::Factory->construct_from_iterable( $iterable, \%pars );
 
 Construct an iterator from an
 L<Iterator::Flex::Manual::Glossary/iterable thing>.  The returned
@@ -333,26 +201,32 @@ a globref, the arguments are passed to L</construct>.
 
 sub construct_from_iterable ( $CLASS, $obj, $pars = {} ) {
 
-    my ( $ipars, $gpars ) = $CLASS->_parse_pars( $pars );
+    my ( $mpars, $ipars, $spars ) = parse_pars( $pars );
 
+    $CLASS->_throw( parameter =>
+          "unknown parameters pased to construct_from_iterable: @{[ join ', ', keys $mpars->%* ]}"
+    ) if $mpars->%*;
 
     if ( Ref::Util::is_blessed_ref( $obj ) ) {
-        return $CLASS->construct_from_object( $obj, $ipars, $gpars );
+        return $CLASS->construct_from_object( $obj, $ipars, $spars );
     }
 
     elsif ( Ref::Util::is_arrayref( $obj ) ) {
-        return $CLASS->construct_from_array( $obj, $gpars );
+        $CLASS->_throw( parameter =>
+              "unknown parameters pased to construct_from_iterable: @{[ join ', ', $ipars->%* ]}"
+        ) if $ipars->%*;
+        return $CLASS->construct_from_array( $obj, $spars );
     }
 
     elsif ( Ref::Util::is_coderef( $obj ) ) {
-        return $CLASS->construct( { $ipars->%*, next => $obj }, $gpars );
+        return $CLASS->construct( { $ipars->%*, next => $obj }, $spars );
     }
 
     elsif ( Ref::Util::is_globref( $obj ) ) {
         return $CLASS->construct( {
                 $ipars->%*, next => sub { scalar <$obj> }
             },
-            $gpars
+            $spars
         );
     }
 
@@ -363,13 +237,13 @@ sub construct_from_iterable ( $CLASS, $obj, $pars = {} ) {
 
 =class_method construct_from_array
 
-  $iter = Iterator::Flex::Factory->construct_from_array( $array_ref, %parameters );
+  $iter = Iterator::Flex::Factory->construct_from_array( $array_ref, ?\%pars );
 
 =cut
 
-sub construct_from_array ( $, $obj, $gpars ) {
+sub construct_from_array ( $class, $obj, $pars={} ) {
     require Iterator::Flex::Array;
-    return Iterator::Flex::Array->new( $obj, $gpars );
+    return Iterator::Flex::Array->new( $obj, $pars );
 }
 
 =class_method construct_from_object
@@ -407,29 +281,28 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
 
     $gpar{ +INPUT_EXHAUSTION } //= [ (+RETURN) => undef ];
 
-    if ( !exists $ipar{next} ) {
+    if ( !exists $ipar{+NEXT} ) {
         my $code;
         if ( $code = $CLASS->_can_meth( $obj, 'iter' ) ) {
-            $ipar{next} = $code->( $obj );
+            $ipar{+NEXT} = $code->( $obj );
         }
         elsif ( $code = $CLASS->_can_meth( $obj, 'next' )
             || overload::Method( $obj, '<>' ) )
         {
-            $ipar{next} = sub { $code->( $obj ) };
+            $ipar{+NEXT} = sub { $code->( $obj ) };
         }
 
         elsif ( $code = overload::Method( $obj, '&{}' ) ) {
-            $ipar{next} = $code->( $obj );
+            $ipar{+NEXT} = $code->( $obj );
         }
 
         elsif ( $code = overload::Method( $obj, '@{}' ) ) {
-            return $CLASS->construct_from_array( $code->( $obj ), $ipar,
-                \%gpar );
+            return $CLASS->construct_from_array( $code->( $obj ), \%gpar );
         }
 
     }
 
-    for my $method ( grep { !exists $ipar{$_} } 'prev', 'current' ) {
+    for my $method ( grep { !exists $ipar{$_} } +PREV, +CURRENT ) {
         my $code = $CLASS->_can_meth( $obj, $method );
         $ipar{$method} = sub { $code->( $obj ) }
           if $code;
@@ -502,23 +375,6 @@ sub construct_from_attr ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
     # this indicates that there should be no wrapping of 'next'
     $gpar{+INPUT_EXHAUSTION} = +PASSTHROUGH;
     $CLASS->construct( $in_ipar, \%gpar );
-}
-
-=class_method _parse_pars
-
-  ( \%iter_pars, \%general_pars ) = $class->_parse_pars( \%pars );
-
-=cut
-
-sub _parse_pars ( $, $pars ) {
-
-    my %ipars = $pars->%*;
-    # move  general parsibutes into their own hash
-    my %gpars = delete %ipars{ +EXHAUSTION, +INPUT_EXHAUSTION };
-
-    delete %gpars{ grep { !defined $gpars{$_} } keys %gpars };
-
-    return \%ipars, \%gpars;
 }
 
 1;

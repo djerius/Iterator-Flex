@@ -6,7 +6,7 @@ use 5.10.0;
 use strict;
 use warnings;
 
-use experimental 'postderef';
+use experimental ( 'postderef', 'signatures' );
 
 our $VERSION = '0.12';
 
@@ -18,142 +18,64 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Ref::Util qw[ is_arrayref is_hashref is_ref is_globref ];
 use Module::Runtime qw[ require_module ];
+use Iterator::Flex::Utils qw[ throw_failure ];
+use Iterator::Flex::Factory;
 
-sub _throw {
-    require Iterator::Flex::Failure;
-    my $type  = join( '::', 'Iterator::Flex::Failure', shift );
-    $type->throw( { msg => shift, trace => Iterator::Flex::Failure->croak_trace } );
-}
-
-
-=begin internals
-
-=sub _parse_params
-
-     \%pars = _parse_params( \@_ );
-
-Scans the passed arrayref for trailing C<< -pars => \%pars >> entries.  If found,
-removes them from the passed array and returns C<\%pars>.
-
-=end internals
-
-=cut
-
-
-sub _parse_params {
-    my ( $args ) = @_;
-
-    my $pars = {};
-    # look for a -pars => \%pars at the end of the argument list
-    if (   $args->@* > 2
-        && is_hashref( $args->[-1] )
-        && !( is_ref( $args->[-2] ) || is_globref( \( $args->[-2] ) ) )
-        && $args->[-2] eq '-pars' )
-    {
-        $pars = pop $args->@*;
-        # get rid of '-pars'
-        pop $args->@*;
-    }
-
-    return $pars;
-}
 
 =sub iterator
 
-  $iter = iterator { CODE } ?\%params;
+  $iter = iterator { CODE } ?\%pars;
 
 Construct an iterator from code. The code will have access to the
 iterator object through C<$_[0]>. By default the code is expected to
-return C<undef> upon exhaustion.
+return C<undef> upon exhaustion (this can be changed by setting the
+L<Iterator::Manual::Overview/input_exhaustion> parameter).
 
 For example, here's a simple integer sequence iterator that counts up to 100:
 
 # EXAMPLE: ./examples/Common/iterator.pl
 
-See L</General Options> for a description of C<%params>
+See L</Parameters> for a description of C<%pars>
+
+The returned iterator supports the following methods:
+
+=over
+
+=item next
+
+=back
 
 =cut
 
-sub iterator(&@) {
-    my $pars = _parse_params( \@_ );
-    @_ >1 && _throw( parameter => 'extra_argument' );
-    require Iterator::Flex::Factory;
-    Iterator::Flex::Factory->construct_from_iterable( $_[0], $pars );
+sub iterator :prototype(&@) ($code, $pars={} ) {
+    Iterator::Flex::Factory->construct_from_iterable( $code, $pars );
 }
 
 
 =sub iter
 
-  $iter = iter( $iterable, ?\%params );
+  $iter = iter( $iterable, ?\%pars );
 
-Construct an iterator from an iterable thing. The iterator will
-return C<undef> upon exhaustion.
+Construct an iterator from an L<iterable
+thing|Iterator::Flex::Manual::Glossary/iterable thing>.  By default
+the code is expected to return C<undef> upon exhaustion (this can be
+changed by setting the L<Iterator::Manual::Overview/input_exhaustion>
+parameter).
 
- An iterable thing is
-
-=over
-
-=item an object
-
-An iterable object has one or more of the following methods
-
-=over
-
-=item C<__iter__> or C<iter>
-
-=item C<__next__> or C<next>
-
-=item an overloaded C<< <> >> operator
-
-This should return the next item.
-
-=item an overloaded C<< &{} >> operator
-
-This should return a subroutine which returns the next item.
-
-=back
-
-Additionally, if the object has the following methods, they are used
-by the constructed iterator:
-
-=over
-
-=item C<__prev__> or C<prev>
-
-=item C<__current__> or C<current>
-
-=back
-
-See L</construct_from_object>
-
-=item an arrayref
-
-The returned iterator will be an L<Iterator::Flex/iarray> iterator.
-
-=item a coderef
-
-The coderef must return the next element in the iteration.
-
-=item a globref
-
-=back
-
+See L</Parameters> for a description of C<%pars>
 
 =cut
 
-sub iter {
-    my $pars = _parse_params( \@_ );
-    @_ > 1 && _throw( parameter => 'extra_argument' );
-    require Iterator::Flex::Factory;
-    Iterator::Flex::Factory->to_iterator( $_[0], $pars );
+sub iter ( $iterable, $pars={} ) {
+    Iterator::Flex::Factory->to_iterator( $iterable, $pars );
 }
 
 
 =sub iarray
 
-  $iterator = iarray( $array_ref, ?\%params );
+  $iterator = iarray( $array_ref, ?\%pars );
 
-Wrap an array in an iterator.
+Wrap an array in an iterator. See L<Iterator::Flex::Array> for more details.
 
 The returned iterator supports the following methods:
 
@@ -175,18 +97,18 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub iarray {
-    my $pars = _parse_params( \@_ );
-    @_ > 1 && _throw( parameter => 'extra_argument' );
+sub iarray ($array, $pars={} ) {
     require Iterator::Flex::Array;
-    return Iterator::Flex::Array->new( $_[0], $pars );
+    return Iterator::Flex::Array->new( $array, $pars );
 }
 
 =sub icache
 
-  $iterator = icache( $iterable, ?\%params );
+  $iterator = icache( $iterable, ?\%pars );
 
 The iterator caches the current and previous values of the passed iterator,
+See L<Iterator::Flex::Cache> for more details.
+
 
 The returned iterator supports the following methods:
 
@@ -208,18 +130,17 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub icache {
-    my $pars = _parse_params( \@_ );
-    @_ > 1 && _throw( parameter => 'extra_argument' );
+sub icache ( $iterable, $pars={} ) {
     require Iterator::Flex::Cache;
-    Iterator::Flex::Cache->new( $_[0], $pars );
+    Iterator::Flex::Cache->new( $iterable, $pars );
 }
 
 =sub icycle
 
-  $iterator = icycle( $array_ref, ?\%params );
+  $iterator = icycle( $array_ref, ?\%pars );
 
 Wrap an array in an iterator.  The iterator will continuously cycle through the array's values.
+See L<Iterator::Flex::Cycle> for more details.
 
 =over
 
@@ -239,20 +160,20 @@ Wrap an array in an iterator.  The iterator will continuously cycle through the 
 
 =cut
 
-sub icycle {
-    my $pars = _parse_params( \@_ );
-    @_ > 1 && _throw( parameter => 'extra_argument' );
+sub icycle ( $array, $pars={} ) {
     require Iterator::Flex::Cycle;
-    return Iterator::Flex::Cycle->new( $_[0], $pars );
+    return Iterator::Flex::Cycle->new( $array, $pars );
 }
 
 
 =sub igrep
 
-  $iterator = igrep { CODE } $iterable, ?\%params;
+  $iterator = igrep { CODE } $iterable, ?\%pars;
 
-Returns an iterator equivalent to running L<grep> on C<$iterable> with the specified code.
-C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
+Returns an iterator equivalent to running C<grep> on C<$iterable> with the specified code.
+C<CODE> is I<not> run if C<$iterable> is exhausted.  To indicate how C<$iterable> signals
+exhaustion, use the C<input_exhaustion> general parameter; by default it is expected to return
+C<undef>. See L<Iterator::Flex::Grep> for more details.
 
 The iterator supports the following methods:
 
@@ -266,20 +187,21 @@ The iterator supports the following methods:
 
 =cut
 
-sub igrep(&$) {
-    my $pars = _parse_params( \@_ );
-    @_ > 2 && _throw( parameter => 'extra_argument' );
+sub igrep :prototype(&$) ($code, $pars = {} )  {
     require Iterator::Flex::Grep;
-    Iterator::Flex::Grep->new( @_, $pars );
+    Iterator::Flex::Grep->new( $code, $pars );
 }
 
 
 =sub imap
 
-  $iterator = imap { CODE } $iterable, ?\%params;
+  $iterator = imap { CODE } $iterable, ?\%pars;
 
-Returns an iterator equivalent to running L<map> on C<$iterable> with the specified code.
-C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
+Returns an iterator equivalent to running C<map> on C<$iterable> with
+the specified code.  C<CODE> is I<not> run if C<$iterable> is
+exhausted.  To indicate how C<$iterable> signals exhaustion, use the
+C<input_exhaustion> general parameter; by default it is expected to
+return C<undef>. See L<Iterator::Flex::Map> for more details.
 
 The iterator supports the following methods:
 
@@ -293,18 +215,16 @@ The iterator supports the following methods:
 
 =cut
 
-sub imap(&$) {
-    my $pars = _parse_params( \@_ );
-    @_ > 2 && _throw( parameter => 'extra_argument' );
+sub imap :prototype(&$) ($code, $pars={} ) {
     require Iterator::Flex::Map;
-    Iterator::Flex::Map->new( @_, $pars );
+    Iterator::Flex::Map->new( $code, $pars );
 }
 
 
 =sub iproduct
 
-  $iterator = iproduct( $iterable1, $iterable2, ..., ?\%params );
-  $iterator = iproduct( key1 => $iterable1, key2 => iterable2, ..., ?\%params );
+  $iterator = iproduct( $iterable1, $iterable2, ..., ?\%pars );
+  $iterator = iproduct( key1 => $iterable1, key2 => iterable2, ..., ?\%pars );
 
 Returns an iterator which produces a Cartesian product of the input iterables.
 If the input to B<iproduct> is a list of iterables, C<$iterator> will return an
@@ -337,9 +257,8 @@ C<prev> or C<__prev__> method.
 =cut
 
 sub iproduct {
-    my $pars = _parse_params( \@_ );
     require Iterator::Flex::Product;
-    return Iterator::Flex::Product->new( @_, $pars );
+    return Iterator::Flex::Product->new( @_ );
 }
 
 =sub iseq
@@ -374,15 +293,14 @@ The iterator supports the following methods:
 
 
 sub iseq {
-    my $pars = _parse_params( \@_ );
     require Iterator::Flex::Sequence;
-    Iterator::Flex::Sequence->new( @_, $pars );
+    Iterator::Flex::Sequence->new( @_ );
 }
 
 
 =sub ifreeze
 
-  $iter = ifreeze { CODE } $iterator, ?\%params;
+  $iter = ifreeze { CODE } $iterator, ?\%pars;
 
 Construct a pass-through iterator which freezes the input iterator
 after every call to C<next>.  C<CODE> will be passed the frozen state
@@ -408,33 +326,30 @@ If C<$iterator> provides a C<prev> method.
 
 =back
 
+See L<Iterator::Flex::Manual::Serialization> for more information.
 
 =cut
 
-sub ifreeze (&$) {
-    my $pars = _parse_params( \@_ );
-    @_ > 2 && _throw( parameter => 'extra_argument' );
+sub ifreeze :prototype(&$) ($code, $pars={} ){
     require Iterator::Flex::Freeze;
-    Iterator::Flex::Freeze->new( @_, $pars );
+    Iterator::Flex::Freeze->new( $code, $pars );
 }
 
 
 =sub thaw
 
    $frozen = $iterator->freeze;
-   $iterator = thaw( $frozen, ?\%params );
+   $iterator = thaw( $frozen, ?\%pars );
 
-Restore an iterator that has been frozen.  See L</Serialization of
-Iterators> for more information.
+Restore an iterator that has been frozen.
+See L<Iterator::Flex::Manual::Serialization> for more information.
 
 
 =cut
 
-sub thaw {
-    my $pars = _parse_params( \@_ );
-    @_ > 1 && _throw( parameter => 'extra_argument' );
+sub thaw ($frozen, $pars={} ) {
 
-    my @steps = @{$_[0]};
+    my @steps = $frozen->@*;
 
     # parent data and iterator state is last
     my $exhausted = pop @steps;
@@ -444,13 +359,13 @@ sub thaw {
 
     my ( $package, $state ) = @$parent;
 
-    _throw( parameter => "state argument for $package constructor must be a HASH  reference" )
+    throw_failure( parameter => "state argument for $package constructor must be a HASH  reference" )
       unless is_hashref( $state );
 
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
       or
-    _throw( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
+    throw_failure( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
 
     $state->{depends} = \@depends
       if @depends;
@@ -480,14 +395,30 @@ L<Iterator::Flex::Manual::Overview/Capabilities>, iterators have
 optional capabilities; the descriptions below list which capabilities
 each iterator provides.
 
-=head2 General Options
+For iterator adapaters, such as L</icache>, some capabilites are
+supported only if the iterable they operate on supports them.  For example,
+L<icache> can't provide the C<reset> or C<rewind> capabilities if the
+iterable reads from the terminal.  In these cases, attempting to use
+this capability will result in an error.
 
-Most of the generators take an optional trailing options hash. To pass
-extra general iterator options, use the C<-pars> options.  For
-example, to indicate that you'd like the iterator to throw an
-exception when exhausted, instead of returning C<undef>, set
+=head2 Parameters
 
-  %params = ( -pars => { exhaustion => 'throw' } );
+Most of the generators take an optional trailing hash, C<%pars> to
+accomodate optional parameters.  Parameters come in three classes,
+explained in L<Iterator::Flex::Manual::Overview/Iterator Parameters>.
+I<General Parameters> are documented there. I<Model Parameters> are
+specific to a type of iterators and are noted in the documentation for
+the generators, below.
 
-  $iter = iarray( \@array, \%params );
+For example, to construct a caching iterator, setting the size of
+the cache, and indicating that the returned iterator should signal
+exhaustion by throwing an exception:
 
+  $iter = icache( $iterable,
+                  { capacity => 2,
+                    exhaustion => 'throw',
+                  } );
+
+Or, to indicate that an iterable signals exhaustion via throwing an exception:
+
+  $iter = igrep( $iterable, { input_exhaustion => 'throw' } );

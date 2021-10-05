@@ -4,6 +4,7 @@ package Iterator::Flex::ArrayLike;
 
 use strict;
 use warnings;
+use experimental 'signatures';
 
 our $VERSION = '0.12';
 
@@ -18,13 +19,15 @@ Role::Tiny::With::with 'Iterator::Flex::Role::Utils';
 
 =method new
 
-  $iterator = Iterator::Flex::ArrayLike->new( $obj, %ipars, \%gpars );
+  $iterator = Iterator::Flex::ArrayLike->new( $obj, ?\%pars );
 
 Wrap an array-like object in an iterator.  An array like object must
 provide two methods, one which returns the number of elements, and
 another which returns the element at a given index.
 
-The following parameters are available:
+The optional C<%pars> hash may contain standard I<signal
+parameters|Iterator::Flex::Manual::Overview/Signal Parameters> as well
+as the following model parameters:
 
 =over
 
@@ -52,7 +55,7 @@ or C<__getitem__> will be used if the object provides it.
 
 =back
 
-The returned iterator supports the following methods:
+The returned iterator supports the following capabilities:
 
 =over
 
@@ -72,22 +75,15 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
-
-    my ( $obj, %ipar ) = @_;
-    $ipar{ object } = $obj;
+sub new ( $class, $obj, $pars={} ) {
 
     $class->_croak( parameter => "argument must be a blessed reference" )
       unless Ref::Util::is_blessed_ref( $obj );
 
-    $class->SUPER::new( \%ipar, $gpar );
+    $class->SUPER::new( { object => $obj }, $pars );
 }
 
-sub construct {
-
-    my ( $class, $state ) = @_;
+sub construct ( $class, $state ) {
 
     $class->_throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );

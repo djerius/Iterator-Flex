@@ -10,14 +10,13 @@ our $VERSION = '0.12';
 use Iterator::Flex::Utils qw( :default INPUT_EXHAUSTION );
 use Scalar::Util;
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
-around _construct_next => sub {
+around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
-    my $orig  = shift;
-    my $gpar = $_[-1];
-    my $next  = $orig->( @_ );
+    my $next  = $class->$orig( $ipar, $gpar );
 
     # this will be weakened latter.
     my $wsub;

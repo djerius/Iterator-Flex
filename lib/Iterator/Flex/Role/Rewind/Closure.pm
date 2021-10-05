@@ -10,6 +10,7 @@ our $VERSION = '0.12';
 use Iterator::Flex::Base ();
 use Iterator::Flex::Utils qw( :default ITERATOR REWIND );
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -23,9 +24,7 @@ Rewind the iterator;
 
 =cut
 
-sub rewind {
-
-    my $self  = shift;
+sub rewind ( $self ) {
 
     $self->_apply_method_to_depends( 'rewind' );
 

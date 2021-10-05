@@ -4,6 +4,7 @@ package Iterator::Flex::Product;
 
 use strict;
 use warnings;
+use experimental qw( signatures declared_refs );
 
 our $VERSION = '0.12';
 
@@ -13,15 +14,14 @@ use parent 'Iterator::Flex::Base';
 use Ref::Util;
 use List::Util;
 
-use experimental 'declared_refs';
 
 use namespace::clean;
 
 =method new
 
-  $iterator = Iterator::Flex::Product->new( $iterable1, $iterable2, ... );
+  $iterator = Iterator::Flex::Product->new( $iterable1, $iterable2, ..., ?\%pars );
   $iterator = Iterator::Flex::Product->new( key1 => $iterable1,
-                              key2 => iterable2, ... );
+                              key2 => iterable2, ..., ?\%pars );
 
 Returns an iterator which produces a Cartesian product of the input iterables.
 If the input to B<iproduct> is a list of iterables, C<$iterator> will return an
@@ -30,9 +30,14 @@ array reference containing an element from each iterable.
 If the input is a list of key, iterable pairs, C<$iterator> will return a
 hash reference.
 
+The iterables are converted into iterators via L<Iterator::Factor/to_iterator> if required.
+
 All of the iterables must support the C<rewind> method.
 
-The iterator supports the following methods:
+The optional C<%pars> hash may contain standard I<signal
+parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
+
+The iterator supports the following capabilities:
 
 =over
 
@@ -54,40 +59,33 @@ C<prev> or C<__prev__> method.
 =cut
 
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
+sub new ( $class, @args ) {
+    my $pars = Ref::Util::is_hashref( $args[-1] ) ? pop @args : {};
 
     $class->_throw( parameter => 'not enough parameters' )
-      unless @_;
+      unless @args;
 
     my @iterators;
     my @keys;
 
     # distinguish between ( key => iterator, key =>iterator ) and ( iterator, iterator );
-    if ( Ref::Util::is_ref( $_[0] ) ) {
-        @iterators = @_;
+    if ( Ref::Util::is_ref( $args[0] ) ) {
+        @iterators = @args;
     }
     else {
         $class->_throw( parameter => 'expected an even number of arguments' )
-          if  @_ % 2;
+          if  @args % 2;
 
-        while ( @_ ) {
-            push @keys, shift;
-            push @iterators, shift;
+        while ( @args ) {
+            push @keys, shift @args;
+            push @iterators, shift @args;
         }
     };
 
-    # can only work if the iterators support a rewind method
-    $class->_throw( parameter => "all iterables must provide a rewind method" )
-      unless List::Util::all  { defined $class->_can_meth( $_, 'rewind' ) } @iterators;
-
-    $class->SUPER::new( { keys => \@keys, depends =>\@iterators, value => [] }, $gpar );
+    $class->SUPER::new( { keys => \@keys, depends =>\@iterators, value => [] }, $pars );
 }
 
-sub construct {
-    my ( $class, $state ) = @_;
-
+sub construct ( $class, $state ) {
     $class->_throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
@@ -96,13 +94,18 @@ sub construct {
     my ( \@depends, \@keys, \@value, $thaw )
       = @{$state}{qw[ depends keys value thaw ]};
 
-    $class->_throw(
-        parameter => "number of keys not equal to number of iterators" )
-      if @keys && @keys != @depends;
-
+    # transform into iterators if required.
     my @iterators = map {
         Iterator::Flex::Factory->to_iterator( $_, { (+EXHAUSTION) => +RETURN } )
     } @depends;
+
+    # can only work if the iterators support a rewind method
+    $class->_throw( parameter => "all iterables must provide a rewind method" )
+      unless List::Util::all  { defined $class->_can_meth( $_, 'rewind' ) } @iterators;
+
+    $class->_throw(
+        parameter => "number of keys not equal to number of iterators" )
+      if @keys && @keys != @iterators;
 
     @value = map { $_->current } @iterators
       if $thaw;
@@ -199,7 +202,8 @@ sub construct {
         $params{+_ROLES} = ['Freeze'];
     }
 
-    return { %params, (+_NAME) => 'iproduct' };
+    $params{+_NAME} = 'iproduct';
+    return \%params;
 }
 
 

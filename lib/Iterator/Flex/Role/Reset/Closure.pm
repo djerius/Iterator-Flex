@@ -13,6 +13,7 @@ use List::Util;
 use Iterator::Flex::Base ();
 use Iterator::Flex::Utils qw( :default ITERATOR RESET );
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -26,8 +27,7 @@ Resets the iterator to its initial value.
 
 =cut
 
-sub reset {
-    my $self = shift;
+sub reset ( $self ) {
     $self->_apply_method_to_depends( 'reset' );
 
     $REGISTRY{ refaddr $self }{ +ITERATOR }{+RESET}->( $self );

@@ -19,7 +19,7 @@ subtest 'return' => sub {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data }
-        -pars => { exhaustion => [ return => 11 ] };
+        { exhaustion => [ return => 11 ] };
 
         while ( @got <= $len and ( my $data = $iter->next ) != 11 ) {
             push @got, $data;
@@ -27,7 +27,6 @@ subtest 'return' => sub {
 
         ok( $iter->is_exhausted, "exhausted flag" );
         is( \@got, [ 1 .. 10 ], "got data" );
-
     };
 
 
@@ -51,7 +50,7 @@ subtest 'return' => sub {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data; }
-        -pars => { input_exhaustion => [ return => 10 ] };
+        { input_exhaustion => [ return => 10 ] };
 
         while ( @got <= $len and ( my $data = $iter->next ) != 10 ) {
             push @got, $data;
@@ -67,7 +66,7 @@ subtest 'return' => sub {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iter = iterator { shift @data // 'A' }
-        -pars => { input_exhaustion => [ return => 'A' ] };
+        { input_exhaustion => [ return => 'A' ] };
 
         while ( @got <= $len and ( my $data = $iter->next ) ne 'A' ) {
             push @got, $data;
@@ -83,7 +82,7 @@ subtest 'return' => sub {
         my @got;
         my $ref = [];
         my $iter = iterator { shift @data // $ref }
-        -pars => { input_exhaustion => [ return => $ref ] };
+        { input_exhaustion => [ return => $ref ] };
 
         my $data;
         while ( @got <= $len and ( $data = $iter->next
@@ -105,7 +104,7 @@ subtest 'return' => sub {
         my $iter = iterator {
             shift @data;
         }
-          -pars => { exhaustion => 'throw' } ;
+          { exhaustion => 'throw' } ;
 
         isa_ok(
             dies {
@@ -132,7 +131,7 @@ subtest 'throw' => sub {
             die( "exhausted" ) if $data[0] == 9;
             shift @data;
         }
-        -pars => {
+        {
             input_exhaustion => 'throw',
             exhaustion          => 'return'
         };
@@ -157,7 +156,7 @@ subtest 'throw' => sub {
             die( "exhausted" ) if $data[0] == 9;
             shift @data;
         }
-        -pars => { input_exhaustion => 'throw' };
+        { input_exhaustion => 'throw' };
 
         like(
             dies {
@@ -181,7 +180,7 @@ subtest 'throw' => sub {
                 die( "exhausted" ) if $data[0] == 9;
                 shift @data;
             }
-            -pars => {
+            {
                 input_exhaustion => [ throw => qr/exhausted/ ],
                 exhaustion          => 'throw'
             };
@@ -209,7 +208,7 @@ subtest 'throw' => sub {
                 die( "died" ) if $data[0] == 9;
                 shift @data;
             }
-            -pars => {
+            {
                 input_exhaustion => [ throw => qr/exhausted/ ],
                 exhaustion          => 'throw'
             };
@@ -241,7 +240,7 @@ subtest 'throw' => sub {
                 die( "exhausted" ) if $data[0] == 9;
                 shift @data;
             }
-            -pars => {
+            {
                 input_exhaustion =>
                   [ throw => sub { $_[0] =~ 'exhausted' } ],
                 exhaustion => 'throw'
@@ -270,7 +269,7 @@ subtest 'throw' => sub {
                 die( "died" ) if $data[0] == 9;
                 shift @data;
             }
-            -pars => {
+            {
                 input_exhaustion =>
                   [ throw => sub { $_[0] =~ 'exhausted' } ],
                 exhaustion => 'throw'

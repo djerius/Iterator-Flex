@@ -9,9 +9,10 @@ our $VERSION = '0.12';
 
 use Ref::Util;
 use Scalar::Util;
-use Role::Tiny;
 use Iterator::Flex::Utils qw( NEXT _SELF );
 
+use Role::Tiny;
+use experimental 'signatures';
 use namespace::clean;
 
 =method next
@@ -22,9 +23,7 @@ use namespace::clean;
 
 =cut
 
-sub _construct_next {
-    my $class = shift;
-    my $ipar = shift;
+sub _construct_next ( $class, $ipar, $ ) {
 
     my $sub = $ipar->{+NEXT} // $class->_throw( parameter =>  "Missing 'next' parameter" );
     Scalar::Util::weaken $ipar->{+NEXT};
@@ -38,7 +37,7 @@ sub _construct_next {
     return $sub;
 }
 
-sub next { &{ $_[0] } }
+sub next ($self) { &{ $self } }
 *__next__ = \&next;
 
 1;

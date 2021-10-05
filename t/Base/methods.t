@@ -10,13 +10,14 @@ my @data = ( 0 .. 10 );
 my $iter = iterator {
     pop @data;
 }
--pars => {
+{
     methods => {
         now => sub {
             isa_ok( $_[0], ['Iterator::Flex::Base'], 'initial arg is object' );
             $data[-1];
-        }
-    } };
+        },
+    },
+};
 
 
 is( $iter->next, 10, "first value" );
@@ -28,10 +29,12 @@ ok(
     lives {
         $iter = iterator(
             sub { },
-            -pars => {
+            {
                 methods => {
-                    now => sub { }
-                } } );
+                    now => sub { },
+                },
+            },
+        );
     },
     'reuse method name'
 ) or note $@;

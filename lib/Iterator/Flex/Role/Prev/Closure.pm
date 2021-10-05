@@ -9,6 +9,7 @@ our $VERSION = '0.12';
 
 use Iterator::Flex::Utils qw( :default ITERATOR PREV );
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -22,8 +23,8 @@ Returns the previous value.
 
 =cut
 
-sub prev {
-     $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+PREV}->( $_[0] );
+sub prev ($self) {
+     $REGISTRY{ refaddr $self }{+ITERATOR}{+PREV}->( $self );
 }
 *__prev__ = \&prev;
 

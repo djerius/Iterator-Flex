@@ -12,6 +12,7 @@ use List::Util;
 use Iterator::Flex::Utils qw( :default ITERATOR :IterAttrs :RegistryKeys );
 use Iterator::Flex::Base;
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -24,9 +25,8 @@ L<Iterator::Flex/"Serialization of Iterators"> for more information.
 
 =cut
 
-sub freeze {
+sub freeze ( $obj ) {
 
-    my $obj  = $_[0];
     my $ipar = $REGISTRY{ refaddr $obj }{ +ITERATOR };
 
     my @freeze;

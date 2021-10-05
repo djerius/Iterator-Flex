@@ -2,6 +2,7 @@ package Iterator::Flex::Method;
 
 use strict;
 use warnings;
+use experimental 'signatures';
 
 our $VERSION = '0.12';
 
@@ -24,8 +25,7 @@ package Iterator::Flex::Method::Maker {
     use Package::Variant importing => qw[ Role::Tiny ];
     use Module::Runtime;
 
-    sub make_variant_package_name {
-        my ( $class, $package ) = @_;
+    sub make_variant_package_name ( $class, $package, % ) {
 
         $package = "Iterator::Flex::Role::Method::$package";
 
@@ -39,8 +39,7 @@ package Iterator::Flex::Method::Maker {
         return $package;
     }
 
-    sub make_variant {
-        my ( $class, $target_package, $package, %arg ) = @_;
+    sub make_variant ( $class, $target_package, $package, %arg ) {
         my $name = $arg{name};
         install $name => sub {
             return $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{ +METHODS }{$name}

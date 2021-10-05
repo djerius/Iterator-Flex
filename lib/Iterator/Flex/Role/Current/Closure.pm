@@ -9,6 +9,7 @@ our $VERSION = '0.12';
 
 use Iterator::Flex::Utils qw( :default ITERATOR CURRENT );
 use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -22,8 +23,8 @@ Returns the current value.
 
 =cut
 
-sub current {
-    $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+CURRENT}->( $_[0] );
+sub current ( $self ) {
+    $REGISTRY{ refaddr $self }{+ITERATOR}{+CURRENT}->( $_[0] );
 }
 *__current__ = \&current;
 

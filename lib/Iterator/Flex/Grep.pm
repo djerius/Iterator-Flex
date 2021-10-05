@@ -4,6 +4,7 @@ package Iterator::Flex::Grep;
 
 use strict;
 use warnings;
+use experimental 'signatures';
 
 our $VERSION = '0.12';
 
@@ -16,16 +17,19 @@ use namespace::clean;
 
 =method new
 
-  $iterator = Ierator::Flex::Grep->new( $coderef, $iterable );
+  $iterator = Ierator::Flex::Grep->new( $coderef, $iterable, ?\%pars );
 
-Returns an iterator equivalent to running L<grep> on C<$iterable> with
-the specified code.  C<$iteratable> is converted into an iterator (if
-it is not already one) via C<$class->to_iterator>, which defaults to
-L<Iterator::Flex::Base/to_iterable>).
+Returns an iterator equivalent to running C<grep> on C<$iterable> with
+the specified code.
 
-C<CODE> is I<not> run if C<$iterable> returns I<undef> (that is, it is exhausted).
+C<$iterable> is converted into an iterator via L<Iterator::Factor/to_iterator> if required.
 
-The iterator supports the following methods:
+C<CODE> is I<not> run if C<$iterable> is exhausted.
+
+The optional C<%pars> hash may contain standard I<signal
+parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
+
+The iterator supports the following capabilities:
 
 =over
 
@@ -37,22 +41,15 @@ The iterator supports the following methods:
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
-
-    $class->_throw( parameter => 'not enough parameters' )
-      unless @_ > 1;
-
+sub new ( $class, $code, $iterable, $pars={} ) {
     $class->_throw( parameter => "'code' parameter is not a coderef" )
-      unless Ref::Util::is_coderef( $_[0] );
+      unless Ref::Util::is_coderef( $code );
 
-    $class->SUPER::new( { code => $_[0], src => $_[1] }, $gpar );
+    $class->SUPER::new( { code => $code, src => $iterable }, $pars );
 }
 
 
-sub construct {
-    my ( $class, $state ) = @_;
+sub construct ( $class, $state ) {
 
     $class->_throw( parameter => "'state' parameter must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );

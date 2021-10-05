@@ -8,6 +8,7 @@ use warnings;
 our $VERSION = '0.12';
 
 use Role::Tiny;
+use experimental 'signatures';
 
 # avoid compile time dependency loop madness
 require Iterator::Flex;
@@ -22,7 +23,7 @@ Return a new iterator caching the original iterator via L<Iterator::Flex/icache>
 
 =cut
 
-sub icache { Iterator::Flex::icache( \&{ $_[1] }, $_[0] ) }
+sub icache ( $iter, $code ) { Iterator::Flex::icache( \&{ $code }, $iter ) }
 
 =method igrep
 
@@ -32,7 +33,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/igrep
 
 =cut
 
-sub igrep { Iterator::Flex::igrep( \&{ $_[1] }, $_[0] ) }
+sub igrep ( $iter, $code ) { Iterator::Flex::igrep( \&{ $code }, $iter ) }
 
 =method imap
 
@@ -42,7 +43,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/ifree
 
 =cut
 
-sub imap { Iterator::Flex::imap( \&{ $_[1] }, $_[0] ) }
+sub imap ( $iter, $code ) { Iterator::Flex::imap( \&{ $code }, $iter ) }
 
 =method ifreeze
 
@@ -52,7 +53,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/ifree
 
 =cut
 
-sub ifreeze { Iterator::Flex::ifreeze( \&{ $_[1] }, $_[0] ) }
+sub ifreeze ( $iter, $code ) { Iterator::Flex::ifreeze( \&{ $code }, $iter ) }
 
 1;
 

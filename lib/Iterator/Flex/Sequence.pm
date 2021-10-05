@@ -4,8 +4,7 @@ package Iterator::Flex::Sequence;
 
 use strict;
 use warnings;
-
-use experimental qw( postderef );
+use experimental 'signatures', 'postderef';
 
 our $VERSION = '0.12';
 
@@ -19,16 +18,19 @@ use namespace::clean;
 
 =method new
 
-  # integer sequence starting at 0, incrementing by 1, ending at $end
-  $iterator = Iterator::Flex::Sequence->new( $end );
+  # sequence starting at 0, incrementing by 1, ending at $end
+  $iterator = Iterator::Flex::Sequence->new( $end, ?\%pars );
 
-  # integer sequence starting at $begin, incrementing by 1, ending at $end
-  $iterator = Iterator::Flex::Sequence->new( $begin, $end );
+  # sequence starting at $begin, incrementing by 1, ending at $end
+  $iterator = Iterator::Flex::Sequence->new( $begin, $end, ?\%pars );
 
-  # real sequence starting at $begin, incrementing by $step, ending <= $end
-  $iterator = Iterator::Flex::Sequence->new( $begin, $end, $step );
+  # sequence starting at $begin, incrementing by $step, ending <= $end
+  $iterator = Iterator::Flex::Sequence->new( $begin, $end, $step, ?\%pars );
 
-The iterator supports the following methods:
+The optional C<%pars> hash may contain standard I<signal
+parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
+
+The iterator supports the following capabilities:
 
 =over
 
@@ -47,27 +49,26 @@ The iterator supports the following methods:
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
+sub new ( $class, @args ) {
+
+    my $pars = Ref::Util::is_hashref( $args[-1] ) ? pop @args : {};
 
     $class->_throw( parameter => "incorrect number of arguments for sequence" )
-      if @_ < 1 || @_ > 3 ;
+      if @args < 1 || @args > 3 ;
 
     my %state;
-    $state{step}  = pop if @_ == 3;
-    $state{end}   = pop;
-    $state{begin} = pop;
+    $state{step}  = pop @args if @args == 3;
+    $state{end}   = pop @args;
+    $state{begin} = pop @args;
 
 
-    $class->SUPER::new( \%state, $gpar );
+    $class->SUPER::new( \%state, $pars );
 }
 
-sub construct {
-    my ( $class, $state ) = @_;
+sub construct ( $class, $state ) {
 
     $class->_throw( parameter => "$class: arguments must be numbers\n" )
-      if List::Util::first { !Scalar::Util::looks_like_number( $_ ) };
+      unless List::Util::all { Scalar::Util::looks_like_number( $_ ) };
 
     my ( $begin, $end, $step, $iter, $next, $current, $prev )
       = @{$state}{qw[ begin end step iter next current prev ]};

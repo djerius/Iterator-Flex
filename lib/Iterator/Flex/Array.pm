@@ -10,16 +10,20 @@ our $VERSION = '0.12';
 use Iterator::Flex::Utils ':IterAttrs';
 use Ref::Util;
 use namespace::clean;
+use experimental 'signatures';
 
 use parent 'Iterator::Flex::Base';
 
 =method new
 
-  $iterator = Iterator::Flex::Array->new( $array_ref );
+  $iterator = Iterator::Flex::Array->new( $array_ref, ?\%pars );
 
 Wrap an array in an iterator.
 
-The returned iterator supports the following methods:
+The optional C<%pars> hash may contain standard I<signal
+parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
+
+The returned iterator supports the following capabilities:
 
 =over
 
@@ -39,20 +43,15 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
-
+sub new ( $class, $array, $pars={} ) {
     $class->_throw( parameter => "argument must be an ARRAY reference" )
-      unless Ref::Util::is_arrayref( $_[0] );
+      unless Ref::Util::is_arrayref( $array );
 
-    $class->SUPER::new( { array => $_[0] }, $gpar );
+    $class->SUPER::new( { array => $array }, $pars );
 }
 
 
-sub construct {
-
-    my ( $class, $state ) = @_;
+sub construct ( $class, $state ) {
 
     $class->_throw( parameter => "'state' parameter must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );

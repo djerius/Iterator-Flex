@@ -4,6 +4,7 @@ package Iterator::Flex::Cycle;
 
 use strict;
 use warnings;
+use experimental 'signatures';
 
 our $VERSION = '0.12';
 
@@ -40,18 +41,15 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $gpar = Ref::Util::is_hashref( $_[-1] ) ? pop : {};
+sub new ( $class, $array, $ ) {
 
     $class->_throw( parameter => "argument must be an ARRAY reference" )
-      unless Ref::Util::is_arrayref( $_[0] );
+      unless Ref::Util::is_arrayref( $array );
 
-    $class->SUPER::new( { array => $_[0] }, $gpar );
+    $class->SUPER::new( { array => $array }, {} );
 }
 
-sub construct {
-    my ( $class, $state ) = ( shift, shift );
+sub construct ( $class, $state ) {
 
     $class->_throw( parameter => "state must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );

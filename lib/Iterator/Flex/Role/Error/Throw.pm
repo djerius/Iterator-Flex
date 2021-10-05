@@ -7,9 +7,11 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Role::Tiny;
 use Iterator::Flex::Utils qw( :default :RegistryKeys );
 use Ref::Util;
+
+use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -23,9 +25,7 @@ iterator's error flag and throws an exception.
 
 =cut
 
-sub signal_error {
-    my $self = shift;
-
+sub signal_error ($self) {
     $self->set_error;
     my $exception = $REGISTRY{refaddr $self}{+GENERAL}{+ERROR}[1];
 

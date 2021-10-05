@@ -50,7 +50,7 @@ sub test {
             my $len = my @data = ( 1 .. 10 );
             my @got;
             my $iterator = iterator { shift( @data ) // $value }
-            -pars => { input_exhaustion => [ return => $value ] };
+              { input_exhaustion => [ return => $value ] };
             my $next = $mknext->( $iterator );
             while ( @got <= $len ) {
                 my $data = $next->( $iterator );
@@ -67,7 +67,7 @@ sub test {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iterator = iterator { shift( @data ) // die }
-          -pars => { input_exhaustion => 'throw',
+          { input_exhaustion => 'throw',
                      exhaustion => 'return',
                    };
         my $next = $mknext->( $iterator );
@@ -85,7 +85,7 @@ sub test {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iterator
-          = iterator { shift @data } -pars => { exhaustion => 'throw' };
+          = iterator { shift @data } { exhaustion => 'throw' };
         my $next = $mknext->( $iterator );
 
         my $err = dies {
@@ -108,7 +108,7 @@ sub test {
         my $len = my @data = ( 1 .. 10 );
         my @got;
         my $iterator = iterator { shift @data }
-        -pars => { rewind => sub { @data = ( 1 .. 10 ) }, };
+        { rewind => sub { @data = ( 1 .. 10 ) }, };
 
         my $next = $mknext->( $iterator );
         while ( @got <= $len and my $data = $next->( $iterator ) ) {

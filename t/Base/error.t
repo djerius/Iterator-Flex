@@ -5,12 +5,9 @@
 use strict;
 use warnings;
 
-use 5.10.0;
-
 use Test2::V0;
 
 use Iterator::Flex::Common 'iterator';
-use Scalar::Util 'refaddr';
 
 subtest 'return' => sub {
 
@@ -21,7 +18,7 @@ subtest 'return' => sub {
         my $iter;
 
         $iter = iterator { $iter->signal_error if $data[0] == 5; shift @data }
-        -pars => { exhaustion => [ return => 11 ] };
+        { exhaustion => [ return => 11 ] };
 
 
         isa_ok(

@@ -7,8 +7,10 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Role::Tiny;
 use Iterator::Flex::Utils qw( :default ITERATOR STATE :IterStates );
+
+use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -20,10 +22,10 @@ Set the iterator's state to $state
 
 =cut
 
-sub set_state {
+sub set_state ($self, $state ) {
 
-    ${ $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{ +STATE } } = $_[1]
-      unless ( ${ $REGISTRY{ refaddr $_[0] }{ +ITERATOR }{ +STATE } }
+    ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } } = $state
+      unless ( ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } }
         // +IterState_CLEAR ) == +IterState_ERROR;
 }
 
@@ -35,8 +37,8 @@ Get the iterator's state;
 
 =cut
 
-sub get_state {
-    ${ $REGISTRY{ refaddr $_[0] }{+ITERATOR}{+STATE} };
+sub get_state ($self) {
+    ${ $REGISTRY{ refaddr $self }{+ITERATOR}{+STATE} };
 }
 1;
 

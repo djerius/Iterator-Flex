@@ -7,9 +7,11 @@ use warnings;
 
 our $VERSION = '0.12';
 
-use Role::Tiny;
-use Iterator::Flex::Utils qw( :default :RegistryKeys );
 use Ref::Util;
+use Iterator::Flex::Utils qw( :default :RegistryKeys );
+
+use Role::Tiny;
+use experimental 'signatures';
 
 use namespace::clean;
 
@@ -23,8 +25,7 @@ iterator's exhausted flag and throws an exception.
 
 =cut
 
-sub signal_exhaustion {
-    my $self = shift;
+sub signal_exhaustion ( $self, @ ) {
     $self->set_exhausted;
 
     my $exception = $REGISTRY{refaddr $self}{+GENERAL}{+EXHAUSTION}[1];
