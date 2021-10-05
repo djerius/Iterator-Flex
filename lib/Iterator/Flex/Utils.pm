@@ -2,7 +2,7 @@ package Iterator::Flex::Utils;
 
 # ABSTRACT: Internal utilities
 
-use 5.28.1;
+use 5.28.0; # hash slices
 
 use strict;
 use warnings;

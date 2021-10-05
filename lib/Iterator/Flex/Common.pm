@@ -395,7 +395,7 @@ L<Iterator::Flex::Manual::Overview/Capabilities>, iterators have
 optional capabilities; the descriptions below list which capabilities
 each iterator provides.
 
-For iterator adapaters, such as L</icache>, some capabilites are
+For iterator adapters, such as L</icache>, some capabilities are
 supported only if the iterable they operate on supports them.  For
 example, L</icache> can't provide the
 L<reset|Iterator::Flex::Manual::Overview/reset> or
@@ -406,7 +406,7 @@ this capability will result in an error.
 =head2 Parameters
 
 Most of the generators take an optional trailing hash, C<%pars> to
-accomodate optional parameters.  Parameters come in three classes,
+accommodate optional parameters.  Parameters come in three classes,
 explained in L<Iterator::Flex::Manual::Overview/Iterator Parameters>.
 I<General Parameters> are documented there. I<Model Parameters> are
 specific to a type of iterators and are noted in the documentation for

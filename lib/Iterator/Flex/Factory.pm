@@ -6,7 +6,7 @@ use 5.25.0;
 use strict;
 use warnings;
 
-use experimental qw( signatures declared_refs );
+use experimental qw( signatures declared_refs refaliasing);
 
 our $VERSION = '0.12';
 

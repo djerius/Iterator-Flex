@@ -3,7 +3,7 @@
 use Test::More;
 use Test::LeakTrace;
 
-use Iterator::Flex qw[ igrep iarray ];
+use Iterator::Flex::Common qw[ igrep iarray ];
 
 no_leaks_ok {
 

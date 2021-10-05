@@ -3,7 +3,7 @@
 
 =head1 DESCRIPTION
 
-=head2 Iterator lifecycle
+=head2 Iterator life-cycle
 
 There are four iterator states:
 
@@ -215,14 +215,14 @@ in order, are all true.
 An iterator transitions to the I<error> state when the iterator has
 determined that something went wrong.
 
-=head2 Signalling State Transistions
+=head2 Signaling State Transitions
 
 The iterator signals transitions to the L<exhausted|/Exhausted State>
 and L<error|/Error State> states.
 
 =head3 Transitions to the Exhausted State
 
-Signalling exhaustion (via the C<signal_exhaustion> method) results in one of following actions:
+Signaling exhaustion (via the C<signal_exhaustion> method) results in one of following actions:
 
 =over
 
@@ -236,12 +236,12 @@ returning a sentinel value
 
 =back
 
-The choice is made by the I<user> of the iterator; iterators use a generic signalling mechanism.
+The choice is made by the I<user> of the iterator; iterators use a generic signaling mechanism.
 
 
 =head3 Transitions to the Error State
 
-Signalling eerror (via the C<signal_error> method) results in one of following actions:
+Signaling error (via the C<signal_error> method) results in one of following actions:
 
 =over
 
@@ -256,7 +256,7 @@ Throwing an exception of type C<Iterator::Flex::Failure::Error>.
 C<Iterator::Flex> iterators have a single required capability, L</next>, as well as a number
 of optional capabilities.
 
-=head3 Required Capabilties
+=head3 Required Capabilities
 
 =head4 next
 
@@ -299,7 +299,7 @@ An exception,  indicated by the I<Iterator::Flex::Role::Exhaustion::Throw> role.
 
 If the iterator is in the L<iteration state|/Iteration State>, it returns the
 value returned by the penultimate L</next> operation. If the last L</next>
-operation transitiioned the iterator from the L<initialized state|/Initialized State>,
+operation transitioned the iterator from the L<initialized state|/Initialized State>,
 it returns an indeterminate value.
 
 In any other state, it returns an indeterminate value.
@@ -371,7 +371,7 @@ in order, are all true.
      9	 $iter->prev    == 1;  # from line 4
     10	 $iter->current == 2;
     11
-    12	 $iter->rewet;
+    12	 $iter->reset;
     14
     15	 $iter->prev    == ?;  # indeterminate; in initialized state
     16	 $iter->current == ?;  # indeterminate; in initialized state
@@ -395,7 +395,7 @@ can be saved and later restored. This puts significant constraints on
 the nature of the data source.
 
 C<ithaw> is a I<subroutine> (not a method) which is the opposite of
-L</freeze>.  Given a serialized iterator, it reconsititue it so that
+L</freeze>.  Given a serialized iterator, it reconstitute it so that
 it behaves exactly as it would before it was frozen.  Under the hood
 it calls the C<thaw> method.
 
@@ -408,7 +408,7 @@ bespoke iterator classes which subclass L<Iterator::Flex::Base>.
 
 =head3 Classes of Parameters
 
-There are three classes of parameters used by iterators and adaptors:
+There are three classes of parameters used by iterators and adapters:
 
 =over
 
@@ -420,7 +420,7 @@ cache L<capacity|Iterator::Flex::Cache/capacity>.
 
 =item *
 
-I<Interface> parameters provide implementations of the capabilites that the
+I<Interface> parameters provide implementations of the capabilities that the
 iterator provides.
 
 =item *
@@ -461,7 +461,7 @@ be accessed directly from iterator closures and compared to one of the
 constants C<IterState_EXHAUSTED> or C<IterState_ERROR> (see
 L<Iterator::Flex::Utils/Iterator State Constants>).
 
-The state is also queriable via the
+The state is also queryable via the
 L<is_exhausted|Iterator::Flex::Base/is_exhausted> and
 L<is_error|Iterator::Flex::Base/is_error> iterator object methods.
 
@@ -599,7 +599,7 @@ constructors.  Bespoke classes must provide this explicitly.
 
 =item C<input_exhaustion>
 
-This applies only to iterator adaptors, and indicates how the consumed iterator signals exhaustion.
+This applies only to iterator adapters, and indicates how the consumed iterator signals exhaustion.
 It may have one of the following values:
 
 =over
@@ -610,7 +610,7 @@ Throw an exception of L<Iterator::Flex::Failure::Exhaustion|Iterator::Flex::Fail
 
 =item C<< [ throw => 'passthrough' ] >>
 
-Only for adaptors; the consumed iterator will throw on exhaustion; let that exception propagate.
+Only for adapters; the consumed iterator will throw on exhaustion; let that exception propagate.
 
 =item C<< [ throw => $coderef ] >>
 
@@ -620,23 +620,23 @@ be thrown.
 
 =item C<return>
 
-For both iterators and adaptors, indicates that a sentinel value of
+For both iterators and adapters, indicates that a sentinel value of
 c<undef> will be returned.
 
 =item C<< [ return => $value ] >>
 
-For both iterators and adaptors, indicates that the specified sentinel value will be returned.
+For both iterators and adapters, indicates that the specified sentinel value will be returned.
 
 =back
 
 =item C<exhaustion>
 
-This applies to both iterators and  adaptors, and indicates how they signal exhaustion.
+This applies to both iterators and  adapters, and indicates how they signal exhaustion.
 It takes the same values as L</input_exhaustion>
 
 =item C<error>
 
-This applies to both iterators and  adaptors, and indicates how they signal error.
+This applies to both iterators and  adapters, and indicates how they signal error.
 It may have one of the following values:
 
 =over

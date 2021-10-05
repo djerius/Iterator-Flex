@@ -52,17 +52,17 @@ L<Exhaustion|/Iterator::Flex::Manual::Overview/Exhaustion State>: The iterator h
 
 (There's a fourth state, L<Error|/Iterator::Flex::Manual::Overview/Error State>.)
 
-=head2 Returning Data and Signalling Exhaustion or Error
+=head2 Returning Data and Signaling Exhaustion or Error
 
 =head3 Iterator Exhaustion
 
-Exhaustion is traditionally signalled via:
+Exhaustion is traditionally signaled via:
 
 =over
 
 =item 1
 
-Returning a I<sentinal> value;
+Returning a I<sentinel> value;
 
 =item 2
 
@@ -70,13 +70,13 @@ Throwing an exception.
 
 =item 3
 
-Setting a boolean predicate in a multi-valued return, e.g.
+Setting a Boolean predicate in a multi-valued return, e.g.
 
  { value => $value, success => $bool }
 
 =back
 
-There's no right way to do it, just different tradeoffs; see
+There's no right way to do it, just different trade-offs; see
 L<Iterator::Flex::Manual::PriorArt> for how other languages and Perl
 modules handle it.
 
@@ -92,7 +92,7 @@ a database), e.g.
 
 The iterator itself happily keeps going until it runs out of data, but
 when it returns the C<undef> value, our example code above interprets it as
-the iterator signalling exhaustion and will stop querying the iterator.
+the iterator signaling exhaustion and will stop querying the iterator.
 Obviously that's wrong.
 
 One option is to use a value that knowingly can't occur. If your
@@ -114,7 +114,7 @@ done via any of the methods specified in L</Iterator Exhaustion>.
 
 Most implementations (language or Perl modules) don't provide an
 explicit specification of how to handle this.  L<Iterator::Flex>
-provies a C<< L<signal_error|/Iterator::Flex::Base/signal_error> >>
+provides a C<< L<signal_error|/Iterator::Flex::Base/signal_error> >>
 method which currently supports throwing an exception.
 
 =head2 Iterator Capabilities
@@ -182,7 +182,9 @@ Applying an adapter to an iterator results in another iterator, which can be use
 input to another adapter.
 
 L<Iterator::Flex> provides adapters both via convenience wrappers and
-classes for 
+classes for
+
+=over
 
 =item grep
 

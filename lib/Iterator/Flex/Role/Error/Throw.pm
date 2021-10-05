@@ -19,7 +19,7 @@ use namespace::clean;
 
    $iterator->signal_error;
 
-Signal that an error ocurred.  This version sets the
+Signal that an error occurred.  This version sets the
 iterator's error flag and throws an exception.
 
 

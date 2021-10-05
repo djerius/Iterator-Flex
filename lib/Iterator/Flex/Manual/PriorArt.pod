@@ -1,6 +1,9 @@
 # PODNAME: Iterator::Flex::Manual::PriorArt
 # ABSTRACT: Other Iterator Models
 
+=for stopwords
+Raku
+
 =head1 DESCRIPTION
 
 Iterators are not new.
@@ -19,7 +22,7 @@ Python, throws an exception C<StopIteration>;
 
 =item *
 
-Raku returns a special sentinal value C<IterationEnd>;
+Raku returns a special sentinel value C<IterationEnd>;
 
 =item *
 

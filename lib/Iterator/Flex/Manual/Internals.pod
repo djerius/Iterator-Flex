@@ -17,7 +17,7 @@ iterator to be called without method lookup overhead:
   $value = $iter->();
 
 The roles incorporate optional capabilities or different ways of implementing
-a behavior (e.g., signalling exhaustion via throwing an exception versus returning
+a behavior (e.g., signaling exhaustion via throwing an exception versus returning
 a sentinel).  They are also used to implement interfaces to alien iterators.
 
 =head2 Object Attributes
@@ -72,7 +72,7 @@ subclass thereof.
 The fundamental constructor is
 C<Iterator::Flex::Base::new_from_attrs>.  Everything else calls it. It
 accepts two hash arguments, one for parameters specific to the
-particular iterator, the other for specifyin general behaviors, such
+particular iterator, the other for specifying general behaviors, such
 as how the iterator should signal exhaustion or error.
 
 =head4 Roles

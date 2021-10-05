@@ -2,7 +2,7 @@ package Iterator::Flex;
 
 # ABSTRACT: Iterators with flexible behaviors
 
-use v5.26;
+use v5.28.0;
 our $VERSION = '0.12';
 
 1;
@@ -59,7 +59,7 @@ iterators need the bells and whistles, but sometimes they are very handy.
 =head2 Where are the iterators?
 
 See L<Iterator::Flex::Common> for a set of common iterators.  These
-are premade for you.  See L<Iterator::Flex::Manual::Using> for how to
+are pre-made for you.  See L<Iterator::Flex::Manual::Using> for how to
 use them.
 
 =head2 I need to write my own.

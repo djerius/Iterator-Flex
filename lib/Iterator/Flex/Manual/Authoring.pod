@@ -100,7 +100,7 @@ caller.
 Unlike in some iterator models, calling C<next> after the iterator is
 exhausted is always a defined operation, always resulting in the same
 behavior.  C<next> should thus I<always> call C<signal_exhaustion> when
-exhausted, even if the iterator has already signalled exhaustion.
+exhausted, even if the iterator has already signaled exhaustion.
 
 =head4 Iteration Phase
 
@@ -117,7 +117,7 @@ return the proper values:
 
 =head4 Initialization Phase
 
-Finally, we'll get to the iterator intialization phase, which may make
+Finally, we'll get to the iterator initialization phase, which may make
 more sense now that we've gone through the other phases.  Recall that
 we are using closed over variables to keep track of state. That means
 our C<next> sub must be created for every iterator so it can close
@@ -185,7 +185,7 @@ into later.
 
 =head3 Wrapping up
 
-At this point C<%AttrHash> is functionaly complete. The only thing left unknown is
+At this point C<%AttrHash> is functionally complete. The only thing left unknown is
 the array to iterate over, which has to be kept variable, so wrapping the above
 code into a subroutine
 
@@ -200,7 +200,7 @@ code into a subroutine
 
 =head2 Passing the C<%AttrHash> to the factory
 
-Now we'r ready to use the C<%AttrHash> to construct an
+Now we're ready to use the C<%AttrHash> to construct an
 iterator. Iterators may be constructed on-the-fly, or may be
 formalized as classes.
 
@@ -290,7 +290,7 @@ the last argument should be reserved for a hashref containing general
 iterator arguments (such as the C<exhaustion> key).  This hashref is
 documented in L<Iterator::Flex::Base/new_from_attrs>.
 
-The superclass' constructor takes two arguments: a variable containing
+The super class' constructor takes two arguments: a variable containing
 iterator specific data (state), and the above-mentioned general
 argument hash.  The state variable can take any form, it is not
 interpreted by the C<Iterator::Flex> framework.
@@ -305,7 +305,7 @@ Here's the code for L<Iterator::Flex::Array/new>:
 
 It's pretty simple. It saves the general options hash if present,
 stores the passed array (the state) in a hash, and passes both of
-them to the superclass' constructor.  ( A hash is used here because
+them to the super class' constructor.  ( A hash is used here because
 L<Iterator::Flex::Array> can be serialized, and extra state is
 required to do so).
 
