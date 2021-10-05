@@ -212,7 +212,7 @@ An object which inherits from L<Iterator::Flex::Base>.
 # TODO: this is too restrictive. It should allow simple coderefs, or
 # things with a next or __next__.
 
-sub _is_iterator ( $class, $obj ) {
+sub _is_iterator ( $, $obj ) {
     return Ref::Util::is_blessed_ref( $obj ) && $obj->isa( __PACKAGE__ );
 }
 

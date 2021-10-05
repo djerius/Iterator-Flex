@@ -241,7 +241,7 @@ sub construct_from_iterable ( $CLASS, $obj, $pars = {} ) {
 
 =cut
 
-sub construct_from_array ( $class, $obj, $pars={} ) {
+sub construct_from_array ( $, $obj, $pars={} ) {
     require Iterator::Flex::Array;
     return Iterator::Flex::Array->new( $obj, $pars );
 }

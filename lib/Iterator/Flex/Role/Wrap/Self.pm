@@ -17,7 +17,7 @@ use experimental 'signatures';
 
 use namespace::clean;
 
-sub _construct_next ( $class, $ipar, $ ) {
+sub _construct_next ( $, $ipar, $ ) {
 
     # ensure we don't hold any strong references in the subroutine
     my $next = $ipar->{+NEXT};

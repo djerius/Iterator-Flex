@@ -28,11 +28,11 @@ Raku returns a special sentinel value C<IterationEnd>;
 
 JavaScript returns an object with C<value> and C<done> properties, with C<done> false;
 
-=item * 
+=item *
 
 Ruby (via the Enumerator class) raises the C<StopIteration> exception;
 
-=item * 
+=item *
 
 Java throws a C<NoSuchElementException> exception.
 

@@ -203,7 +203,7 @@ L<icycle|/Iterator::Flex::Common/icycle>, L<Iterator::Flex::Cycle>
 L<iproduct|/Iterator::Flex::Common/iproduct>,
 L<Iterator::Flex::Product>
 
-=item Caching/Buffering 
+=item Caching/Buffering
 
 L<icache|/Iterator::Flex::Common/icache>, L<Iterator::Flex::Cache>
 
