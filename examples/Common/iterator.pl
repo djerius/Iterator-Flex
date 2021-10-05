@@ -1,5 +1,5 @@
-#! perl
-use v5.10;
+#! /usr/bin/perl
+
 use Iterator::Flex::Common ':all';
 
 my $seq = 0;
