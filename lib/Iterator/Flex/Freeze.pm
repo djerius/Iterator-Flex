@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use experimental 'signatures';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Iterator::Flex::Factory;
 use Iterator::Flex::Utils qw( RETURN EXHAUSTION :IterAttrs :Methods );

@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Error::Throw;
 use strict;
 use warnings;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Iterator::Flex::Utils qw( :default :RegistryKeys );
 use Ref::Util;

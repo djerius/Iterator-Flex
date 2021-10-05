@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Prev::Closure;
 use strict;
 use warnings;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Iterator::Flex::Utils qw( :default ITERATOR PREV );
 use Role::Tiny;

@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use experimental 'signatures', 'postderef';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Scalar::Util;
 use List::Util;

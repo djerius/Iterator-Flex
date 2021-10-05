@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use experimental 'signatures';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 # Package::Variant based modules generate constructor functions
 # dynamically when those modules are imported.  However, loading the
