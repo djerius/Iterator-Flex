@@ -2,6 +2,18 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.13      2021-10-06 11:24:26-04:00 America/New_York
+
+  [BUG FIX]
+
+    * incorrectly set %INC value to undef to register generated module; caused failures under
+      Perl >= 5.32
+
+  [DOCUMENTATION]
+
+    * updates
+
+
 0.12      2021-10-05 17:40:04-04:00 America/New_York
 
     * First public release
