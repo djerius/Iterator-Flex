@@ -4,7 +4,7 @@ Iterator::Flex - Iterators with flexible behaviors
 
 # VERSION
 
-version 0.13
+version 0.14
 
 # SYNOPSIS
 
@@ -55,7 +55,7 @@ together.
 
 ## Bugs
 
-Please report any bugs or feature requests to bug-iterator-flex@rt.cpan.org  or through the web interface at: https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex
+Please report any bugs or feature requests to bug-iterator-flex@rt.cpan.org  or through the web interface at: [https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex](https://rt.cpan.org/Public/Dist/Display.html?Name=Iterator-Flex)
 
 ## Source
 
