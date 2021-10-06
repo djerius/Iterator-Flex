@@ -39,6 +39,7 @@ sub get_state ( $self ) {
     $REGISTRY{ refaddr $self }{+ITERATOR}{+STATE};
 }
 
+with 'Iterator::Flex::Role::State';
 
 1;
 

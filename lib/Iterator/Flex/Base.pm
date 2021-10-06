@@ -132,7 +132,20 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
         }
     }
 
-    $class = Iterator::Flex::Utils::create_class_with_roles( $class, @roles );
+    @roles = map { $class->_load_role( $_ ) } @roles;
+    $class = Role::Tiny->create_class_with_roles( $class, @roles );
+
+    unless ( $class->can( '_construct_next' ) ) {
+        throw_failure( class =>
+              "Constructed class '$class' does not provide the required _construct_next method\n"
+        );
+    }
+
+    unless ( $class->does( 'Iterator::Flex::Role::State' ) ) {
+        throw_failure( class =>
+              "Constructed class '$class' does not provide a State role\n"
+        );
+    }
 
     $ipar{ +_NAME } //= $class;
 

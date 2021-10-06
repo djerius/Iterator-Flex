@@ -60,8 +60,8 @@ method.
 
 =cut
 
-sub _load_role ( $class, $path ) {
-    $class->_load_module( $path, [ $class->_role_namespaces ] );
+sub _load_role ( $class, $role ) {
+    $class->_load_module( $role, [ $class->_role_namespaces ] );
 }
 
 

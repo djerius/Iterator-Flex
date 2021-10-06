@@ -83,7 +83,7 @@ our %EXPORT_TAGS = (
           check_invalid_signal_parameters
           check_valid_interface_parameters
           check_valid_signal_parameters
-          create_class_with_roles throw_failure
+          throw_failure
           parse_pars
         )
     ],
@@ -103,20 +103,6 @@ sub throw_failure ( $failure, $msg ) {
     my $type = join( '::', 'Iterator::Flex::Failure', $failure );
     $type->throw(
         { msg => $msg, trace => Iterator::Flex::Failure->croak_trace } );
-}
-
-sub create_class_with_roles ( $base, @roles ) {
-
-    my $class = Role::Tiny->create_class_with_roles( $base,
-        map { $base->_load_role( $_ ) } @roles );
-
-    unless ( $class->can( '_construct_next' ) ) {
-        throw_failure( class =>
-              "Constructed class '$class' does not provide the required _construct_next method\n"
-        );
-    }
-
-    return $class;
 }
 
 =sub parse_pars
