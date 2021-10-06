@@ -113,11 +113,9 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
                   "value for 'methods' parameter key '$name' must be a code reference"
             ) unless Ref::Util::is_coderef( $code );
 
-            my $cap_name = ucfirst( $name );
-
             # create role for the method
             my $role
-              = eval { Iterator::Flex::Method::Maker( $cap_name, name => $name ) };
+              = eval { Iterator::Flex::Method::Maker( $name, name => $name ) };
 
             if ( $@ ne '' ) {
                 my $error = $@;
