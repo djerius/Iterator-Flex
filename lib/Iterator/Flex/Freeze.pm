@@ -27,7 +27,7 @@ can do as it pleases.
 
 <$coderef> I<is> executed when C<$iterator> is exhausted.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
 
 The returned iterator supports the following methods:

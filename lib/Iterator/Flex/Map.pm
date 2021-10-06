@@ -24,10 +24,9 @@ the specified code.
 
 C<CODE> is I<not> run if C<$iterable> is exhausted.
 
-If required, C<$iterable> is converted into an iterator via
-C<$class->to_iterator>.
+C<$iterable> is converted into an iterator via L<Iterator::Flex::Factory/to_iterator> if required.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
 
 The iterator supports the following capabilities:

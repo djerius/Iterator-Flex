@@ -232,11 +232,11 @@ sub __iter__ ( $self ) {
 
   $bool = $iter->may( $method );
 
-Similar to L<can|UNIVERSAL/can>, except it checks to ensure that the
-method can be called on the iterators which C<$iter> depends on.  For
-example, it's possible that C<$iter> implements a C<rewind> method,
-but that it's dependencies do not.  In that case C<can|UNIVESAL/can>
-will return true, but C<may> will return false.
+Similar to L<can|UNIVERSAL/can>, except it checks that the method can
+be called on the iterators which C<$iter> depends on.  For example,
+it's possible that C<$iter> implements a C<rewind> method, but that
+it's dependencies do not.  In that case L<can|UNIVESAL/can> will
+return true, but C<may> will return false.
 
 =cut
 
@@ -248,16 +248,49 @@ sub may ( $self, $meth, $attributes = $self->__regentry( +ITERATOR ) ) {
       : 1;
 }
 
+=method _namespaces
+
+ @namespaces = $class->_namespaces;
+
+Returns a list of namespaces to search for classes.  When called on the base class,
+this returns
+
+ Iterator::Flex
+
+=cut
+
 sub _namespaces {
     return 'Iterator::Flex';
 }
+
+=method _role_namespaces
+
+ @namespaces = $class->_role_namespaces;
+
+Returns a list of namespaces to search for roles.  When called on the base class,
+returns
+
+ Iterator::Flex::Role
+
+=cut
 
 sub _role_namespaces {
     return 'Iterator::Flex::Role';
 }
 
 
-# return the role name for a given method
+=method _add_roles
+
+  $class->_add_roles( @roles );
+
+Add roles to the class. If the name begins with a C<+>, it is assumed
+to be a fully qualified name, otherwise it is searched for in the
+namespaces returned by the C<<
+L<_role_namespaces|Iterator::Flex::Base/_role_namespaces> >> class
+method.
+
+=cut
+
 sub _add_roles ( $class, @roles ) {
     Role::Tiny->apply_roles_to_package( $class,
         map { $class->_load_role( $_ ) } @roles );
@@ -281,21 +314,73 @@ sub _apply_method_to_depends ( $self, $meth ) {
     }
 }
 
+=method is_exhausted
+
+An object method which returns true if the iterator is in the
+L<exhausted state|Iterator::Flex::Manual::Overview/Exhausted State>
+
+=cut
+
 sub is_exhausted ( $self ) {
     $self->get_state == +IterState_EXHAUSTED;
 }
+
+=method set_exhausted
+
+I<Internal method.>
+
+An object method which sets the iterator state status to
+L<exhausted|Iterator::Flex::Manual::Overview/Exhausted State>.
+
+It does I<not> signal exhaustion.
+
+=cut
 
 sub set_exhausted ( $self ) {
     $self->set_state( +IterState_EXHAUSTED );
 }
 
+=begin internal
+
+=method _clear_state
+
+I<Internal method.>
+
+An  object method which clears the state status.  After
+this call, this will hold:
+
+  $iter->is_error => false
+  $iter->is_exhausted => false
+
+=end internal
+
+=cut
+
 sub _clear_state ( $self ) {
     $self->set_state( +IterState_CLEAR );
 }
 
+=method is_error
+
+An object method which returns true if the iterator is in the
+L<error state|Iterator::Flex::Manual::Overview/Error State>
+
+=cut
+
 sub is_error ( $self ) {
     $_[0]->get_state == +IterState_ERROR;
 }
+
+=method set_error
+
+I<Internal method.>
+
+An object method which sets the iterator state status to
+L<error|Iterator::Flex::Manual::Overview/Error State>.
+
+It does I<not> signal error.
+
+=cut
 
 sub set_error ( $self ) {
     $self->set_state( +IterState_ERROR );

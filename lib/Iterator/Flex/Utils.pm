@@ -123,7 +123,11 @@ sub create_class_with_roles ( $base, @roles ) {
 
   ( $mpars, $ipars, $spars ) = parse_params( \%args  );
 
-Returns the I<model>, I<interface>, and I<signal> parameters from C<%args>.
+Returns the
+L<model|Iterator::Flex::Manual::Overview/Model Parameters>
+L<interface|Iterator::Flex::Manual::Overview/Interface Parameters>
+L<signal|Iterator::Flex::Manual::Overview/Signal Parameters>
+parameters from C<%args>.
 
 =cut
 

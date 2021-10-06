@@ -25,7 +25,7 @@ Wrap an array-like object in an iterator.  An array like object must
 provide two methods, one which returns the number of elements, and
 another which returns the element at a given index.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters> as well
 as the following model parameters:
 

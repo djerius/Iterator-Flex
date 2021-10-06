@@ -396,12 +396,12 @@ These indicate that the named capability is present and implemented as a closure
 
 =head4 All together
 
-package My::Array;
+  package My::Array;
 
-use strict;
-use warnings;
+  use strict;
+  use warnings;
 
-use parent 'Iterator::Flex::Base';
+  use parent 'Iterator::Flex::Base';
 
   sub new {
       my $class = shift;

@@ -24,7 +24,7 @@ The iterator caches values of C<$iterable> (by default, the previous and current
 
 C<$iterable> is converted into an iterator via L<Iterator::Flex::Factory/to_iterator> if required.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters> as well
 as the following model parameters:
 

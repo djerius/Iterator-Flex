@@ -50,11 +50,13 @@ sub _load_module ( $class, $path, $namespaces ) {
 
 =method _load_role
 
-  $module = $class->_load_role( @path );
+  $module = $class->_load_role( $role );
 
-Simply calls
-
-  $class->_load_module( 'Role', @path );
+Loads the named role.  If the name begins with a C<+>, it is assumed
+to be a fully qualified name, otherwise it is searched for in the
+namespaces returned by the C<<
+L<_role_namespaces|Iterator::Flex::Base/_role_namespaces> >> class
+method.
 
 =cut
 

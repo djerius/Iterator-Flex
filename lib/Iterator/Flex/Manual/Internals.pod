@@ -81,6 +81,10 @@ as how the iterator should signal exhaustion or error.
 
 =item
 
+L<Iterator::Flex::Role>
+
+=item
+
 L<Iterator::Flex::Role::Freeze>
 
 =item

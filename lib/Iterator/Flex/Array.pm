@@ -20,7 +20,7 @@ use parent 'Iterator::Flex::Base';
 
 Wrap an array in an iterator.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
 
 The returned iterator supports the following capabilities:

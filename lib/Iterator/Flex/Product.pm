@@ -34,7 +34,7 @@ The iterables are converted into iterators via L<Iterator::Flex::Factory/to_iter
 
 All of the iterables must support the C<rewind> method.
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
 
 The iterator supports the following capabilities:

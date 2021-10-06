@@ -1,6 +1,6 @@
 package Iterator::Flex::Role::Exhaustion::Return;
 
-# ABSTRACT: signal exhaustion by setting exhausted flag;
+# ABSTRACT: signal exhaustion by returning a sentinel value.
 
 use strict;
 use warnings;
@@ -30,8 +30,8 @@ sub sentinel ($self) {
 
    $sentinel = $iterator->signal_exhaustion;
 
-Signal that the iterator is exhausted, by setting the iterators I<exhausted> flag
-and returning the iterator's sentinel value.
+Signal that the iterator is exhausted, by calling C<<
+$self->set_exhausted >> and returning the iterator's sentinel value.
 
 =cut
 

@@ -22,7 +22,7 @@ use namespace::clean;
 
 Wrapper for iterator next callback optimized for the case where
 iterator exhaustion is handled by the iterator.  Typically this means
-the iterator closure calls C<$self->signal_exhaustion>, which is added
+the iterator closure calls C<< $self->signal_exhaustion >>, which is added
 by a specific C<Iterator::Flex::Role::Exhaustion> role.
 
 =cut

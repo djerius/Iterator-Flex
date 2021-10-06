@@ -27,7 +27,7 @@ use namespace::clean;
   # sequence starting at $begin, incrementing by $step, ending <= $end
   $iterator = Iterator::Flex::Sequence->new( $begin, $end, $step, ?\%pars );
 
-The optional C<%pars> hash may contain standard I<signal
+The optional C<%pars> hash may contain standard L<signal
 parameters|Iterator::Flex::Manual::Overview/Signal Parameters>.
 
 The iterator supports the following capabilities:
