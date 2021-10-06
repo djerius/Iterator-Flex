@@ -35,7 +35,7 @@ package Iterator::Flex::Method::Maker {
                 { payload => $package } );
         }
 
-        $INC{ Module::Runtime::module_notional_filename( $package ) } = undef;
+        $INC{ Module::Runtime::module_notional_filename( $package ) } = 1;
         return $package;
     }
 
