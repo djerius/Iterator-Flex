@@ -1,6 +1,6 @@
 package Iterator::Flex::Role::Exhaustion::PassthroughThrow;
 
-# ABSTRACT: signal exhaustion by setting exhausted flag;
+# ABSTRACT: signal exhaustion by transitioning to exhausted state and throwing exception
 
 use strict;
 use warnings;
@@ -15,10 +15,20 @@ use namespace::clean;
 
    $iterator->signal_exhaustion( @exception );
 
-Signal that the iterator is exhausted.  This version sets the
-iterator's exhausted flag and throws C<@exception> if provided,
-else C<Iterator::Flex::Failure::Exhausted>.
+Signal that the iterator is exhausted.
 
+=over
+
+=item 1
+
+Transition to the L<exhausted state|Iterator::Flex::Manual::Overview/Exhausted Stae>
+via the L<Iterator::Flex::Base/set_exhausted> method.
+
+=item 2
+
+die with C<@exception> if provided, else throw L<Iterator::Flex::Failure/Exhausted>.
+
+=back
 
 =cut
 

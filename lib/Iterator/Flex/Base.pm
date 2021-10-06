@@ -235,7 +235,7 @@ sub __iter__ ( $self ) {
 Similar to L<can|UNIVERSAL/can>, except it checks that the method can
 be called on the iterators which C<$iter> depends on.  For example,
 it's possible that C<$iter> implements a C<rewind> method, but that
-it's dependencies do not.  In that case L<can|UNIVESAL/can> will
+it's dependencies do not.  In that case L<can|UNIVERSAL/can> will
 return true, but C<may> will return false.
 
 =cut
