@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Wrap::Throw;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Iterator::Flex::Utils qw( :RegistryKeys INPUT_EXHAUSTION );
 use Scalar::Util;

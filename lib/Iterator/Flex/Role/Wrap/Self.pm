@@ -7,7 +7,7 @@ package Iterator::Flex::Role::Wrap::Self;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Scalar::Util;
 use Iterator::Flex::Utils 'NEXT';

@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Rewind::Closure;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Iterator::Flex::Base ();
 use Iterator::Flex::Utils qw( :default ITERATOR REWIND );

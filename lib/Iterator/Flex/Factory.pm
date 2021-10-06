@@ -8,7 +8,7 @@ use warnings;
 
 use experimental qw( signatures declared_refs refaliasing);
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Ref::Util        ();
 use Role::Tiny       ();

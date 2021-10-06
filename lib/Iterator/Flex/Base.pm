@@ -9,7 +9,7 @@ use warnings;
 
 use experimental qw( signatures postderef );
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Ref::Util;
 use List::Util;

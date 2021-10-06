@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Reset::Closure;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Scalar::Util;
 use List::Util;
