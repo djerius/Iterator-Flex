@@ -2,6 +2,12 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.14      2021-10-06 15:00:47-04:00 America/New_York
+
+  [BUILD]
+
+    * require Role::Tiny >= 2.002004, or role composition doesn't work correctly.
+
 0.13      2021-10-06 11:24:26-04:00 America/New_York
 
   [BUG FIX]
