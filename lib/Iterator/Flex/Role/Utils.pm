@@ -44,7 +44,7 @@ sub _load_module ( $class, $path, $namespaces ) {
 
     $class->_throw(
         class => join ' ',
-        "unable to find a module for '$path' in @{[ join( ', ', $class->_namespaces ) ]}"
+        "unable to find a module for '$path' in @{[ join( ', ', $namespaces->@* ) ]}"
     );
 }
 
