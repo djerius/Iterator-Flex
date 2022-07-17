@@ -25,9 +25,9 @@ iterator's error flag and throws an exception.
 
 =cut
 
-sub signal_error ($self) {
+sub signal_error ( $self ) {
     $self->set_error;
-    my $exception = $REGISTRY{refaddr $self}{+GENERAL}{+ERROR}[1];
+    my $exception = $REGISTRY{ refaddr $self}{ +GENERAL }{ +ERROR }[1];
 
     $exception->() if Ref::Util::is_coderef( $exception );
 

@@ -20,7 +20,7 @@ use namespace::clean;
 sub _construct_next ( $, $ipar, $ ) {
 
     # ensure we don't hold any strong references in the subroutine
-    my $next = $ipar->{+NEXT};
+    my $next = $ipar->{ +NEXT };
     Scalar::Util::weaken $next;
 
     my $sub;

@@ -31,20 +31,19 @@ sub freeze ( $obj ) {
 
     my @freeze;
 
-    if ( defined $ipar->{+_DEPENDS} ) {
+    if ( defined $ipar->{ +_DEPENDS } ) {
 
         # first check if dependencies can freeze.
         my $cant = List::Util::first { !$_->can( 'freeze' ) }
-        @{ $ipar->{+_DEPENDS} };
-        $obj->_throw( parameter =>
-              "dependency: @{[ $cant->_name ]} is not serializeable" )
+        @{ $ipar->{ +_DEPENDS } };
+        $obj->_throw( parameter => "dependency: @{[ $cant->_name ]} is not serializeable" )
           if $cant;
 
         # now freeze them
-        @freeze = map $_->freeze, @{ $ipar->{+_DEPENDS} };
+        @freeze = map $_->freeze, @{ $ipar->{ +_DEPENDS } };
     }
 
-    push @freeze, $ipar->{+FREEZE}->( $obj ), $obj->is_exhausted;
+    push @freeze, $ipar->{ +FREEZE }->( $obj ), $obj->is_exhausted;
 
     return \@freeze;
 }

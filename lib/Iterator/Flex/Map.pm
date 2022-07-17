@@ -41,7 +41,7 @@ The iterator supports the following capabilities:
 
 =cut
 
-sub new ( $class, $code, $iterable, $pars={} ) {
+sub new ( $class, $code, $iterable, $pars = {} ) {
     $class->_throw( parameter => "'code' parameter is not a coderef" )
       unless Ref::Util::is_coderef( $code );
 
@@ -53,22 +53,22 @@ sub construct ( $class, $state ) {
     $class->_throw( parameter => "'state' parameter must be a HASH reference" )
       unless Ref::Util::is_hashref( $state );
 
-    my ( $code, $src ) = @{$state}{ qw[ code src ] };
+    my ( $code, $src ) = @{$state}{qw[ code src ]};
 
     $src
-      = Iterator::Flex::Factory->to_iterator( $src, { (+EXHAUSTION) => +THROW } );
+      = Iterator::Flex::Factory->to_iterator( $src, { ( +EXHAUSTION ) => +THROW } );
 
     my $self;
     my $iterator_state;
 
     return {
-        (+_NAME) => 'imap',
+        ( +_NAME ) => 'imap',
 
-        (+_SELF) => \$self,
+        ( +_SELF ) => \$self,
 
-        (+STATE) => \$iterator_state,
+        ( +STATE ) => \$iterator_state,
 
-        (+NEXT) => sub {
+        ( +NEXT ) => sub {
             return $self->signal_exhaustion if $iterator_state == +IterState_EXHAUSTED;
 
             my $ret = eval {
@@ -85,8 +85,8 @@ sub construct ( $class, $state ) {
             return $ret;
         },
 
-        (+RESET)   => sub { },
-        (+_DEPENDS) => $src,
+        ( +RESET )    => sub { },
+        ( +_DEPENDS ) => $src,
     };
 }
 

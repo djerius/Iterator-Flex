@@ -23,7 +23,7 @@ Return a new iterator caching the original iterator via L<Iterator::Flex/icache>
 
 =cut
 
-sub icache ( $iter, $code ) { Iterator::Flex::icache( \&{ $code }, $iter ) }
+sub icache ( $iter, $code ) { Iterator::Flex::icache( \&{$code}, $iter ) }
 
 =method igrep
 
@@ -33,7 +33,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/igrep
 
 =cut
 
-sub igrep ( $iter, $code ) { Iterator::Flex::igrep( \&{ $code }, $iter ) }
+sub igrep ( $iter, $code ) { Iterator::Flex::igrep( \&{$code}, $iter ) }
 
 =method imap
 
@@ -43,7 +43,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/ifree
 
 =cut
 
-sub imap ( $iter, $code ) { Iterator::Flex::imap( \&{ $code }, $iter ) }
+sub imap ( $iter, $code ) { Iterator::Flex::imap( \&{$code}, $iter ) }
 
 =method ifreeze
 
@@ -53,7 +53,7 @@ Return a new iterator modifying the original iterator via L<Iterator::Flex/ifree
 
 =cut
 
-sub ifreeze ( $iter, $code ) { Iterator::Flex::ifreeze( \&{ $code }, $iter ) }
+sub ifreeze ( $iter, $code ) { Iterator::Flex::ifreeze( \&{$code}, $iter ) }
 
 1;
 

@@ -30,12 +30,12 @@ by a specific C<Iterator::Flex::Role::Exhaustion> role.
 sub _construct_next ( $class, $ipar, $ ) {
 
     # ensure we don't hold any strong references in the subroutine
-    my $sub = $ipar->{+NEXT} // $class->_throw( parameter =>  "Missing 'next' parameter" );
-    Scalar::Util::weaken $ipar->{+NEXT};
+    my $sub = $ipar->{ +NEXT } // $class->_throw( parameter => "Missing 'next' parameter" );
+    Scalar::Util::weaken $ipar->{ +NEXT };
     return $sub;
 }
 
-sub next ( $self ) { &{ $self } }
+sub next ( $self ) { &{$self} }
 *__next__ = \&next;
 
 1;

@@ -68,9 +68,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
         push @roles, 'Error::Throw';
     }
     else {
-        $class->_throw(
-            "unknown specification of iterator error signaling behavior:",
-            $gpar{ +ERROR }[0] );
+        $class->_throw( "unknown specification of iterator error signaling behavior:", $gpar{ +ERROR }[0] );
     }
 
     my $exhaustion_action = $gpar{ +EXHAUSTION } // [ ( +RETURN ) => undef ];
@@ -93,29 +91,25 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
           : 'Exhaustion::Throw';
     }
     else {
-        $class->_throw(
-            parameter => "unknown exhaustion action: $exhaustion_action[0]" );
+        $class->_throw( parameter => "unknown exhaustion action: $exhaustion_action[0]" );
     }
 
     if ( defined( my $par = $ipar{ +METHODS } ) ) {
 
         require Iterator::Flex::Method;
 
-        $class->_throw( parameter =>
-              "value for methods parameter must be a hash reference" )
+        $class->_throw( parameter => "value for methods parameter must be a hash reference" )
           unless Ref::Util::is_hashref( $par );
 
         for my $name ( keys $par->%* ) {
 
             my $code = $par->{$name};
 
-            $class->_throw( parameter =>
-                  "value for 'methods' parameter key '$name' must be a code reference"
-            ) unless Ref::Util::is_coderef( $code );
+            $class->_throw( parameter => "value for 'methods' parameter key '$name' must be a code reference" )
+              unless Ref::Util::is_coderef( $code );
 
             # create role for the method
-            my $role
-              = eval { Iterator::Flex::Method::Maker( $name, name => $name ) };
+            my $role = eval { Iterator::Flex::Method::Maker( $name, name => $name ) };
 
             if ( $@ ne '' ) {
                 my $error = $@;
@@ -125,10 +119,7 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
                 $role = $error->payload;
             }
 
-            push @roles,
-              '+'
-              . $role
-              ;    # need '+', as these are fully qualified role module names.
+            push @roles, '+' . $role;    # need '+', as these are fully qualified role module names.
         }
     }
 
@@ -136,24 +127,21 @@ sub new_from_attrs ( $class, $in_ipar = {}, $in_gpar = {} ) {
     $class = Role::Tiny->create_class_with_roles( $class, @roles );
 
     unless ( $class->can( '_construct_next' ) ) {
-        throw_failure( class =>
-              "Constructed class '$class' does not provide the required _construct_next method\n"
-        );
+        throw_failure(
+            class => "Constructed class '$class' does not provide the required _construct_next method\n" );
     }
 
     unless ( $class->does( 'Iterator::Flex::Role::State' ) ) {
-        throw_failure( class =>
-              "Constructed class '$class' does not provide a State role\n"
-        );
+        throw_failure( class => "Constructed class '$class' does not provide a State role\n" );
     }
 
     $ipar{ +_NAME } //= $class;
 
     my $self = bless $class->_construct_next( \%ipar, \%gpar ), $class;
 
-    $class->_throw( parameter =>
-          "attempt to register an iterator subroutine which has already been registered."
-    ) if exists $REGISTRY{ refaddr $self };
+    $class->_throw(
+        parameter => "attempt to register an iterator subroutine which has already been registered." )
+      if exists $REGISTRY{ refaddr $self };
 
     $REGISTRY{ refaddr $self }
       = { ( +ITERATOR ) => \%ipar, ( +GENERAL ) => \%gpar };
@@ -171,19 +159,18 @@ sub _validate_interface_pars ( $class, $pars ) {
       if @bad;
 
     $class->_throw( parameter => "@{[ +_ROLES ]}  must be an arrayref" )
-      if defined $pars->{+_ROLES} && ! Ref::Util::is_arrayref( $pars->{+_ROLES} );
+      if defined $pars->{ +_ROLES } && !Ref::Util::is_arrayref( $pars->{ +_ROLES } );
 
-    if ( defined( my $par = $pars->{+_DEPENDS} ) ) {
-        $pars->{+_DEPENDS} = $par = [$par] unless Ref::Util::is_arrayref( $par );
-        $class->_throw(
-            parameter => "dependency #$_ is not an iterator object" )
+    if ( defined( my $par = $pars->{ +_DEPENDS } ) ) {
+        $pars->{ +_DEPENDS } = $par = [$par] unless Ref::Util::is_arrayref( $par );
+        $class->_throw( parameter => "dependency #$_ is not an iterator object" )
           unless List::Util::all { $class->_is_iterator( $_ ) } $par->@*;
     }
 
     return;
 }
 
-sub _validate_signal_pars( $class, $pars ) {
+sub _validate_signal_pars ( $class, $pars ) {
 
     my @bad = check_invalid_signal_parameters( [ keys $pars->%* ] );
 
@@ -303,21 +290,15 @@ method.
 =cut
 
 sub _add_roles ( $class, @roles ) {
-    Role::Tiny->apply_roles_to_package( $class,
-        map { $class->_load_role( $_ ) } @roles );
+    Role::Tiny->apply_roles_to_package( $class, map { $class->_load_role( $_ ) } @roles );
 }
 
 sub _apply_method_to_depends ( $self, $meth ) {
 
-    if (
-        defined(
-            my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{ +_DEPENDS } )
-      )
-    {
+    if ( defined( my $depends = $REGISTRY{ refaddr $self }{ +ITERATOR }{ +_DEPENDS } ) ) {
         # first check if dependencies have method
         my $cant = List::Util::first { !$_->can( $meth ) } $depends->@*;
-        $self->_throw( Unsupported =>
-              "dependency: @{[ $cant->_name ]} does not have a '$meth' method" )
+        $self->_throw( Unsupported => "dependency: @{[ $cant->_name ]} does not have a '$meth' method" )
           if $cant;
 
         # now apply the method

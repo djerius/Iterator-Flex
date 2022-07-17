@@ -30,7 +30,7 @@ Resets the iterator to its initial value.
 sub reset ( $self ) {
     $self->_apply_method_to_depends( 'reset' );
 
-    $REGISTRY{ refaddr $self }{ +ITERATOR }{+RESET}->( $self );
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{ +RESET }->( $self );
     $self->_clear_state;
 
     return;

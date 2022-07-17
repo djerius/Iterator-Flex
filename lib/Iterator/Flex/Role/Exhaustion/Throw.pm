@@ -28,7 +28,7 @@ iterator's exhausted flag and throws an exception.
 sub signal_exhaustion ( $self, @ ) {
     $self->set_exhausted;
 
-    my $exception = $REGISTRY{refaddr $self}{+GENERAL}{+EXHAUSTION}[1];
+    my $exception = $REGISTRY{ refaddr $self}{ +GENERAL }{ +EXHAUSTION }[1];
 
     $exception->() if Ref::Util::is_coderef( $exception );
 

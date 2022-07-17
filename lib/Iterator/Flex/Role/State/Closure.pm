@@ -22,11 +22,11 @@ Set the iterator's state to $state
 
 =cut
 
-sub set_state ($self, $state ) {
+sub set_state ( $self, $state ) {
 
     ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } } = $state
-      unless ( ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } }
-        // +IterState_CLEAR ) == +IterState_ERROR;
+      unless ( ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } } // +IterState_CLEAR )
+      == +IterState_ERROR;
 }
 
 =method set_state
@@ -37,8 +37,8 @@ Get the iterator's state;
 
 =cut
 
-sub get_state ($self) {
-    ${ $REGISTRY{ refaddr $self }{+ITERATOR}{+STATE} };
+sub get_state ( $self ) {
+    ${ $REGISTRY{ refaddr $self }{ +ITERATOR }{ +STATE } };
 }
 
 with 'Iterator::Flex::Role::State';

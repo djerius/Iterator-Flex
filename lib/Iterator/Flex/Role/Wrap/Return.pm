@@ -16,7 +16,7 @@ use namespace::clean;
 
 around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
-    my $next  = $class->$orig( $ipar, $gpar );
+    my $next = $class->$orig( $ipar, $gpar );
 
     # this will be weakened latter.
     my $wsub;
@@ -26,14 +26,14 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "internal error: input exhaustion policy was not registered" );
-          }
+        }
     )->[1];
 
     # undef
     if ( !defined $sentinel ) {
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = $next->( $self );
+            my $val  = $next->( $self );
             return !defined $val ? $self->signal_exhaustion : $val;
         };
     }
@@ -55,7 +55,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
     elsif ( Scalar::Util::looks_like_number( $sentinel ) ) {
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = $next->( $self );
+            my $val  = $next->( $self );
             return defined $val
               && $val == $sentinel ? $self->signal_exhaustion : $val;
         };
@@ -65,7 +65,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
     else {
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = $next->( $_[0] );
+            my $val  = $next->( $_[0] );
             return defined $val
               && $val eq $sentinel ? $self->signal_exhaustion : $val;
         };

@@ -2,7 +2,7 @@ package Iterator::Flex::Utils;
 
 # ABSTRACT: Internal utilities
 
-use 5.28.0; # hash slices
+use 5.28.0;    # hash slices
 
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use experimental 'signatures', 'postderef';
 our $VERSION = '0.15';
 
 use Scalar::Util qw( refaddr );
-use Ref::Util qw( is_hashref );;
+use Ref::Util qw( is_hashref );
 use Exporter 'import';
 
 our %REGISTRY;
@@ -27,9 +27,7 @@ BEGIN {
     %ExhaustionActions = ( map { $_ => lc $_ } qw[ THROW RETURN PASSTHROUGH ] );
 
     %RegistryKeys
-      = ( map { $_ => lc $_ }
-          qw[ INPUT_EXHAUSTION EXHAUSTION ERROR STATE ITERATOR GENERAL METHODS ]
-      );
+      = ( map { $_ => lc $_ } qw[ INPUT_EXHAUSTION EXHAUSTION ERROR STATE ITERATOR GENERAL METHODS ] );
 
     %IterAttrs = (
         map { $_ => lc $_ }
@@ -67,7 +65,7 @@ use constant InterfaceParameters => @InterfaceParameters;
 use constant SignalParameters    => @SignalParameters;
 use constant GeneralParameters   => +InterfaceParameters, +SignalParameters;
 
-our %SignalParameters   = {}->%{ +SignalParameters };
+our %SignalParameters    = {}->%{ +SignalParameters };
 our %InterfaceParameters = {}->%{ +InterfaceParameters };
 
 our %EXPORT_TAGS = (
@@ -77,8 +75,7 @@ our %EXPORT_TAGS = (
     IterStates        => [ keys %IterStates ],
     Methods           => [ keys %Methods ],
     GeneralParameters => [GeneralParameters],
-    Functions         => [
-        qw(
+    Functions         => [ qw(
           check_invalid_interface_parameters
           check_invalid_signal_parameters
           check_valid_interface_parameters
@@ -101,8 +98,7 @@ with 'Iterator::Flex::Role::Utils';
 sub throw_failure ( $failure, $msg ) {
     require Iterator::Flex::Failure;
     my $type = join( '::', 'Iterator::Flex::Failure', $failure );
-    $type->throw(
-        { msg => $msg, trace => Iterator::Flex::Failure->croak_trace } );
+    $type->throw( { msg => $msg, trace => Iterator::Flex::Failure->croak_trace } );
 }
 
 =sub parse_pars
@@ -128,15 +124,14 @@ sub parse_pars ( @args ) {
         }
 
         else {
-            throw_failure(
-                parameter => "expected an even number of arguments for hash" )
+            throw_failure( parameter => "expected an even number of arguments for hash" )
               if @args % 2;
             @args;
         }
     };
 
-    my %ipars = delete %pars{ check_valid_interface_parameters( [keys %pars] ) };
-    my %spars = delete %pars{ check_valid_signal_parameters( [keys %pars] ) };
+    my %ipars = delete %pars{ check_valid_interface_parameters( [ keys %pars ] ) };
+    my %spars = delete %pars{ check_valid_signal_parameters( [ keys %pars ] ) };
 
     return ( \%pars, \%ipars, \%spars );
 }

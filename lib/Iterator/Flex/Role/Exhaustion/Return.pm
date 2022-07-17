@@ -22,8 +22,8 @@ returns the sentinel which the iterator will return to signal exhaustion
 
 =cut
 
-sub sentinel ($self) {
-    return $REGISTRY{ refaddr $self }{+GENERAL}{+EXHAUSTION}[1];
+sub sentinel ( $self ) {
+    return $REGISTRY{ refaddr $self }{ +GENERAL }{ +EXHAUSTION }[1];
 }
 
 =method signal_exhaustion
@@ -35,7 +35,7 @@ $self->set_exhausted >> and returning the iterator's sentinel value.
 
 =cut
 
-sub signal_exhaustion ($self, @) {
+sub signal_exhaustion ( $self, @ ) {
     $self->set_exhausted;
     return $self->sentinel;
 }

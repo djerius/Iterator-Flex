@@ -43,7 +43,7 @@ The returned iterator supports the following capabilities:
 
 =cut
 
-sub new ( $class, $array, $pars={} ) {
+sub new ( $class, $array, $pars = {} ) {
     $class->_throw( parameter => "argument must be an ARRAY reference" )
       unless Ref::Util::is_arrayref( $array );
 
@@ -79,30 +79,30 @@ sub construct ( $class, $state ) {
 
     return {
 
-        (+_SELF) => \$self,
+        ( +_SELF ) => \$self,
 
-        (+RESET) => sub {
+        ( +RESET ) => sub {
             $prev = $current = undef;
             $next = 0;
         },
 
-        (+REWIND) => sub {
+        ( +REWIND ) => sub {
             $next = 0;
         },
 
-        (+PREV) => sub {
+        ( +PREV ) => sub {
             return defined $prev ? $arr->[$prev] : undef;
         },
 
-        (+CURRENT) => sub {
+        ( +CURRENT ) => sub {
             return defined $current ? $arr->[$current] : undef;
         },
 
-        (+NEXT) => sub {
+        ( +NEXT ) => sub {
             if ( $next == $len ) {
                 # if first time through, set prev
                 $prev = $current
-                  if ! $self->is_exhausted;
+                  if !$self->is_exhausted;
                 return $current = $self->signal_exhaustion;
             }
             $prev    = $current;
@@ -111,7 +111,7 @@ sub construct ( $class, $state ) {
             return $arr->[$current];
         },
 
-        (+FREEZE) => sub {
+        ( +FREEZE ) => sub {
             return [
                 $class,
                 {

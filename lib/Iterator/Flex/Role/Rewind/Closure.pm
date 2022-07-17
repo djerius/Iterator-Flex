@@ -28,7 +28,7 @@ sub rewind ( $self ) {
 
     $self->_apply_method_to_depends( 'rewind' );
 
-    $REGISTRY{ refaddr $self }{ +ITERATOR }{+REWIND}->( $self );
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{ +REWIND }->( $self );
     $self->_clear_state;
 
     return;

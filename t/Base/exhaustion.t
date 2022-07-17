@@ -80,13 +80,15 @@ subtest 'return' => sub {
 
         my $len = my @data = ( 1 .. 10 );
         my @got;
-        my $ref = [];
+        my $ref  = [];
         my $iter = iterator { shift @data // $ref }
         { input_exhaustion => [ return => $ref ] };
 
         my $data;
-        while ( @got <= $len and ( $data = $iter->next
-                                  and !( defined refaddr $data && refaddr $data == $ref ) ) )
+        while (
+            @got <= $len
+            and ( $data = $iter->next
+                and !( defined refaddr $data && refaddr $data == $ref ) ) )
         {
             push @got, $data;
         }
@@ -104,7 +106,7 @@ subtest 'return' => sub {
         my $iter = iterator {
             shift @data;
         }
-          { exhaustion => 'throw' } ;
+        { exhaustion => 'throw' };
 
         isa_ok(
             dies {
@@ -133,7 +135,7 @@ subtest 'throw' => sub {
         }
         {
             input_exhaustion => 'throw',
-            exhaustion          => 'return'
+            exhaustion       => 'return'
         };
 
         ok(
@@ -182,7 +184,7 @@ subtest 'throw' => sub {
             }
             {
                 input_exhaustion => [ throw => qr/exhausted/ ],
-                exhaustion          => 'throw'
+                exhaustion       => 'throw'
             };
 
             isa_ok(
@@ -210,7 +212,7 @@ subtest 'throw' => sub {
             }
             {
                 input_exhaustion => [ throw => qr/exhausted/ ],
-                exhaustion          => 'throw'
+                exhaustion       => 'throw'
             };
 
             like(
@@ -241,9 +243,8 @@ subtest 'throw' => sub {
                 shift @data;
             }
             {
-                input_exhaustion =>
-                  [ throw => sub { $_[0] =~ 'exhausted' } ],
-                exhaustion => 'throw'
+                input_exhaustion => [ throw => sub { $_[0] =~ 'exhausted' } ],
+                exhaustion       => 'throw'
             };
 
             isa_ok(
@@ -270,9 +271,8 @@ subtest 'throw' => sub {
                 shift @data;
             }
             {
-                input_exhaustion =>
-                  [ throw => sub { $_[0] =~ 'exhausted' } ],
-                exhaustion => 'throw'
+                input_exhaustion => [ throw => sub { $_[0] =~ 'exhausted' } ],
+                exhaustion       => 'throw'
             };
 
             like(

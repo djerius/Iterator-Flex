@@ -54,7 +54,7 @@ sub new ( $class, @args ) {
     my $pars = Ref::Util::is_hashref( $args[-1] ) ? pop @args : {};
 
     $class->_throw( parameter => "incorrect number of arguments for sequence" )
-      if @args < 1 || @args > 3 ;
+      if @args < 1 || @args > 3;
 
     my %state;
     $state{step}  = pop @args if @args == 3;
@@ -84,7 +84,7 @@ sub construct ( $class, $state ) {
         $next  = $begin unless defined $next;
 
         %params = (
-            (+NEXT) => sub {
+            ( +NEXT ) => sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
                         $prev    = $current;
@@ -96,7 +96,7 @@ sub construct ( $class, $state ) {
                 $current = $next++;
                 return $current;
             },
-            (+FREEZE) => sub {
+            ( +FREEZE ) => sub {
                 [
                     $class,
                     {
@@ -113,16 +113,14 @@ sub construct ( $class, $state ) {
 
     else {
 
-        $class->_throw(
-            "sequence will be inifinite as \$step is zero or has the incorrect sign"
-          )
+        $class->_throw( "sequence will be inifinite as \$step is zero or has the incorrect sign" )
           if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
 
         $next = $begin unless defined $next;
         $iter = 0      unless defined $iter;
 
         %params = (
-            (+FREEZE) => sub {
+            ( +FREEZE ) => sub {
                 [
                     $class,
                     {
@@ -136,7 +134,7 @@ sub construct ( $class, $state ) {
                     } ]
             },
 
-            (+NEXT) => $begin < $end
+            ( +NEXT ) => $begin < $end
             ? sub {
                 if ( $next > $end ) {
                     if ( !$self->is_exhausted ) {
@@ -170,21 +168,21 @@ sub construct ( $class, $state ) {
 
     return {
         %params,
-        (+CURRENT) => sub { $current },
-        (+PREV)    => sub { $prev },
-        (+REWIND)  => sub {
+        ( +CURRENT ) => sub { $current },
+        ( +PREV )    => sub { $prev },
+        ( +REWIND )  => sub {
             $next = $begin;
             $iter = 0;
         },
-        (+RESET) => sub {
+        ( +RESET ) => sub {
             $prev = $current = undef;
             $next = $begin;
             $iter = 0;
         },
 
-        (+_SELF) => \$self,
+        ( +_SELF ) => \$self,
 
-        (+STATE) => \$iterator_state,
+        ( +STATE ) => \$iterator_state,
     };
 
 }

@@ -12,8 +12,7 @@ our $VERSION = '0.15';
 
 use Exporter 'import';
 
-our @EXPORT_OK
-  = qw[ iterator iter iarray icycle icache igrep imap iproduct iseq ifreeze thaw ];
+our @EXPORT_OK   = qw[ iterator iter iarray icycle icache igrep imap iproduct iseq ifreeze thaw ];
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 use Ref::Util qw[ is_arrayref is_hashref is_ref is_globref ];
@@ -47,7 +46,7 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub iterator :prototype(&@) ($code, $pars={} ) {
+sub iterator : prototype(&@) ( $code, $pars = {} ) {
     Iterator::Flex::Factory->construct_from_iterable( $code, $pars );
 }
 
@@ -66,7 +65,7 @@ See L</Parameters> for a description of C<%pars>
 
 =cut
 
-sub iter ( $iterable, $pars={} ) {
+sub iter ( $iterable, $pars = {} ) {
     Iterator::Flex::Factory->to_iterator( $iterable, $pars );
 }
 
@@ -97,7 +96,7 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub iarray ($array, $pars={} ) {
+sub iarray ( $array, $pars = {} ) {
     require Iterator::Flex::Array;
     return Iterator::Flex::Array->new( $array, $pars );
 }
@@ -130,7 +129,7 @@ The returned iterator supports the following methods:
 
 =cut
 
-sub icache ( $iterable, $pars={} ) {
+sub icache ( $iterable, $pars = {} ) {
     require Iterator::Flex::Cache;
     Iterator::Flex::Cache->new( $iterable, $pars );
 }
@@ -160,7 +159,7 @@ See L<Iterator::Flex::Cycle> for more details.
 
 =cut
 
-sub icycle ( $array, $pars={} ) {
+sub icycle ( $array, $pars = {} ) {
     require Iterator::Flex::Cycle;
     return Iterator::Flex::Cycle->new( $array, $pars );
 }
@@ -187,7 +186,7 @@ The iterator supports the following methods:
 
 =cut
 
-sub igrep :prototype(&$) ($code, $pars = {} )  {
+sub igrep : prototype(&$) ( $code, $pars = {} ) {
     require Iterator::Flex::Grep;
     Iterator::Flex::Grep->new( $code, $pars );
 }
@@ -215,7 +214,7 @@ The iterator supports the following methods:
 
 =cut
 
-sub imap :prototype(&$) ($code, $pars={} ) {
+sub imap : prototype(&$) ( $code, $pars = {} ) {
     require Iterator::Flex::Map;
     Iterator::Flex::Map->new( $code, $pars );
 }
@@ -330,7 +329,7 @@ See L<Iterator::Flex::Manual::Serialization> for more information.
 
 =cut
 
-sub ifreeze :prototype(&$) ($code, $pars={} ){
+sub ifreeze : prototype(&$) ( $code, $pars = {} ) {
     require Iterator::Flex::Freeze;
     Iterator::Flex::Freeze->new( $code, $pars );
 }
@@ -347,7 +346,7 @@ See L<Iterator::Flex::Manual::Serialization> for more information.
 
 =cut
 
-sub thaw ($frozen, $pars={} ) {
+sub thaw ( $frozen, $pars = {} ) {
 
     my @steps = $frozen->@*;
 
@@ -365,7 +364,7 @@ sub thaw ($frozen, $pars={} ) {
     require_module( $package );
     my $new_from_state = $package->can( 'new_from_state' )
       or
-    throw_failure( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
+      throw_failure( parameter => "unable to thaw: $package doesn't provide 'new_from_state' method" );
 
     $state->{depends} = \@depends
       if @depends;

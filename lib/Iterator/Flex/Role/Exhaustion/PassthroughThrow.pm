@@ -32,7 +32,7 @@ die with C<@exception> if provided, else throw L<Iterator::Flex::Failure/Exhaust
 
 =cut
 
-sub signal_exhaustion ($self, @exception) {
+sub signal_exhaustion ( $self, @exception ) {
     $self->set_exhausted;
 
     die( @exception ) if @exception;

@@ -17,14 +17,14 @@ use namespace::clean;
 
 around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
-    my $next  = $class->$orig( $ipar, $gpar );
+    my $next = $class->$orig( $ipar, $gpar );
 
     my $exception = (
         $gpar->{ +INPUT_EXHAUSTION } // do {
             require Iterator::Flex::Failure;
             Iterator::Flex::Failure::parameter->throw(
                 "internal error: input exhaustion policy was not registered" );
-          }
+        }
     )->[1];
 
     my $wsub;
@@ -33,7 +33,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = eval { $next->( $self ) };
+            my $val  = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
                 return $self->signal_exhaustion( $e )
@@ -48,7 +48,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = eval { $next->( $self ) };
+            my $val  = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
                 return $self->signal_exhaustion( $e ) if $e =~ $exception;
@@ -62,7 +62,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = eval { $next->( $self ) };
+            my $val  = eval { $next->( $self ) };
             if ( $@ ne '' ) {
                 my $e = $@;
                 return $self->signal_exhaustion( $e ) if $exception->( $e );
@@ -76,7 +76,7 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
         $wsub = sub {
             my $self = $_[0] // $wsub;
-            my $val = eval { $next->( $self ) };
+            my $val  = eval { $next->( $self ) };
             return $@ ne '' ? $self->signal_exhaustion( $@ ) : $val;
         };
     }

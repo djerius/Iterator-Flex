@@ -36,7 +36,7 @@ sub _load_module ( $class, $path, $namespaces ) {
     else {
         $namespaces //= [ $class->_namespaces ];
 
-        for my $namespace ( @{ $namespaces} ) {
+        for my $namespace ( @{$namespaces} ) {
             my $module = $namespace . '::' . $path;
             return $module if eval { Module::Runtime::require_module( $module ) };
         }
@@ -103,15 +103,14 @@ sub _can_meth ( $self, @methods ) {
 
     my $par = Ref::Util::is_hashref( $methods[-1] ) ? pop @methods : {};
 
-    for my $method ( @methods) {
+    for my $method ( @methods ) {
         $self->_throw( parameter => "'method' parameters must be a string" )
           if Ref::Util::is_ref( $method );
 
         my $sub;
         foreach ( "__${method}__", $method ) {
             if ( defined( $sub = $thing->can( $_ ) ) ) {
-                my @ret = ( ( !!$par->{name} ? $_ : () ),
-                            ( !!$par->{code} ? $sub : () ) );
+                my @ret = ( ( !!$par->{name} ? $_ : () ), ( !!$par->{code} ? $sub : () ) );
                 push @ret, $sub unless @ret;
                 return @ret > 1 ? @ret : $ret[0];
             }
@@ -149,8 +148,7 @@ sub _resolve_meth ( $obj, $target, $method, @fallbacks ) {
             Ref::Util::is_coderef( $method )
               ? $method
               : $target->can( $method )
-              // $obj->_throw( parameter =>
-                  qq{method '$method' is not provided by the object} );
+              // $obj->_throw( parameter => qq{method '$method' is not provided by the object} );
         }
 
         else {
@@ -173,7 +171,7 @@ Throw an exception object of class C<Iterator::Flex::Failure::$type> with the gi
 sub _throw ( $self, $failure, $msg ) {
     require Iterator::Flex::Failure;
     local @Iterator::Flex::Role::Utils::CARP_NOT = scalar caller;
-    my $type  = join( '::', 'Iterator::Flex::Failure', $failure );
+    my $type = join( '::', 'Iterator::Flex::Failure', $failure );
     $type->throw( { msg => $msg, trace => Iterator::Flex::Failure->croak_trace } );
 }
 
@@ -188,3 +186,5 @@ This is a C<Role::Tiny> role which adds a variety of utility methods to
 a class.  They are structured that way so that they may be overridden
 if necessary.  (Well, technically I<under-ridden> if they already exist before
 this role is applied).
+
+=cut

@@ -23,7 +23,7 @@ Rewind the iterator.
 
 around rewind => sub {
     my $orig = shift;
-    my $self  = shift;
+    my $self = shift;
     $self->_apply_method_to_depends( 'rewind' );
 
     $self->$orig;

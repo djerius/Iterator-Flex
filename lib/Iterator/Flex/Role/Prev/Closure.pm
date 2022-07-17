@@ -23,8 +23,8 @@ Returns the previous value.
 
 =cut
 
-sub prev ($self) {
-     $REGISTRY{ refaddr $self }{+ITERATOR}{+PREV}->( $self );
+sub prev ( $self ) {
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{ +PREV }->( $self );
 }
 *__prev__ = \&prev;
 

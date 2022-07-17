@@ -24,7 +24,7 @@ Returns the current value.
 =cut
 
 sub current ( $self ) {
-    $REGISTRY{ refaddr $self }{+ITERATOR}{+CURRENT}->( $_[0] );
+    $REGISTRY{ refaddr $self }{ +ITERATOR }{ +CURRENT }->( $_[0] );
 }
 *__current__ = \&current;
 
