@@ -16,7 +16,7 @@ use experimental 'signatures';
 
   $module = $class->_load_module( $module, ?\@namespaces );
 
-Loads the named module.  If C<$module> begins with a C<+> it is assumedd to be a fully
+Loads the named module.  If C<$module> begins with a C<+> it is assumed to be a fully
 qualified module name, otherwise it is searched for in the namespaces
 provided by C<@namespaces> (which defaults to the namespaces returned
 by the C<< L<_namespaces|Iterator::Flex::Base/_namespaces> >> class method.

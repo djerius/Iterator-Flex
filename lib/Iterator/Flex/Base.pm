@@ -31,7 +31,7 @@ use Iterator::Flex::Utils qw (
 
 use namespace::clean;
 
-use overload ( '<>' => sub ( $self, $, $ ) { &{$self} }, fallback => 1 );
+use overload ( '<>' => sub ( $self, $, $ ) { &{$self}() }, fallback => 1 );
 
 # We separate constructor parameters into two categories:
 #
@@ -360,7 +360,7 @@ L<error state|Iterator::Flex::Manual::Overview/Error State>
 =cut
 
 sub is_error ( $self ) {
-    $_[0]->get_state == +IterState_ERROR;
+    $self->get_state == +IterState_ERROR;
 }
 
 =method set_error

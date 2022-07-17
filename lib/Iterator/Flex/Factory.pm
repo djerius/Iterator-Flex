@@ -61,10 +61,10 @@ I<< L<signal parameters|Iterator::Flex::Manual::Overview/Signal Parameters> >>
 
 sub construct ( $CLASS, $in_ipar = {}, $in_gpar = {} ) {
 
-    $CLASS->_throw( parameter => "iterator parameters parameter must be a hashref" )
+    $CLASS->_throw( parameter => "'iterator parameters' parameter must be a hashref" )
       unless Ref::Util::is_hashref( $in_ipar );
 
-    $CLASS->_throw( parameter => "general parameters parameter must be a hashref" )
+    $CLASS->_throw( parameter => "'general parameters' parameter must be a hashref" )
       unless Ref::Util::is_hashref( $in_gpar );
 
     my %ipar = $in_ipar->%*;

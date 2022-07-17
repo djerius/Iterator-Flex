@@ -37,7 +37,7 @@ sub _construct_next ( $class, $ipar, $ ) {
     return $sub;
 }
 
-sub next ( $self ) { &{$self} }
+sub next ( $self ) { &{$self}() }
 *__next__ = \&next;
 
 1;
