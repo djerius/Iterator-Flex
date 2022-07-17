@@ -1,5 +1,7 @@
 package Iterator::Flex::Method;
 
+# ABSTRACT: Compartmentalize Iterator::Flex::Method::Maker
+
 use strict;
 use warnings;
 use experimental 'signatures';

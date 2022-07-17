@@ -12,14 +12,14 @@ use Ref::Util;
 use Role::Tiny;
 use experimental 'signatures';
 
-=method _load_module
+=class_method _load_module
 
-  $module = $class->_load_module( @path );
+  $module = $class->_load_module( $module, ?\@namespaces );
 
-Search through the namespaces provided by C<< $class->_namespaces >> to load the
-module whose name is given by
-
-   $class->_module_name( $namespace, @path );
+Loads the named module.  If C<$module> begins with a C<+> it is assumedd to be a fully
+qualified module name, otherwise it is searched for in the namespaces
+provided by C<@namespaces> (which defaults to the namespaces returned
+by the C<< L<_namespaces|Iterator::Flex::Base/_namespaces> >> class method.
 
 Throws C<Iterator::Flex::Failure::class> if it couldn't require
 the module (for whatever reason).
@@ -48,11 +48,11 @@ sub _load_module ( $class, $path, $namespaces ) {
     );
 }
 
-=method _load_role
+=class_method _load_role
 
   $module = $class->_load_role( $role );
 
-Loads the named role.  If the name begins with a C<+>, it is assumed
+Loads the named role.  If C<$role>  begins with a C<+>, it is assumed
 to be a fully qualified name, otherwise it is searched for in the
 namespaces returned by the C<<
 L<_role_namespaces|Iterator::Flex::Base/_role_namespaces> >> class
@@ -65,7 +65,7 @@ sub _load_role ( $class, $role ) {
 }
 
 
-=method _can_meth
+=class_method _can_meth
 
   $code = $class->_can_meth( @methods, ?\%pars  );
   $code = $class->_can_meth( $obj, @method, ?\%pars );
@@ -125,7 +125,7 @@ fallbacks
 
 =cut
 
-=method _resolve_meth
+=class_method _resolve_meth
 
   $code = $obj->_resolve_meth( $target, $method, @fallbacks );
 
