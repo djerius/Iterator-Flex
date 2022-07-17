@@ -31,25 +31,27 @@ iterators need the bells and whistles, but sometimes they are very handy.
 
 ## Where are the iterators?
 
-See [Iterator::Flex::Common](https://metacpan.org/pod/Iterator::Flex::Common) for a set of common iterators.  These
-are pre-made for you.  See [Iterator::Flex::Manual::Using](https://metacpan.org/pod/Iterator::Flex::Manual::Using) for how to
+See [Iterator::Flex::Common](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3ACommon) for a set of common iterators.  These
+are pre-made for you.  See [Iterator::Flex::Manual::Using](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3AUsing) for how to
 use them.
 
 ## I need to write my own.
 
-See [Iterator::Flex::Manual::Authoring](https://metacpan.org/pod/Iterator::Flex::Manual::Authoring) for how to write your own
+See [Iterator::Flex::Manual::Authoring](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3AAuthoring) for how to write your own
 flexible iterators.
 
-See [Iterator::Flex::Manual::Internals](https://metacpan.org/pod/Iterator::Flex::Manual::Internals) for how everything links
+See [Iterator::Flex::Manual::Internals](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3AInternals) for how everything links
 together.
 
 ## Show me the Manual
 
-[Iterator::Flex::Manual](https://metacpan.org/pod/Iterator::Flex::Manual)
+[Iterator::Flex::Manual](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual)
 
 ## What doesn't work?  What should frighten me away?
 
-[Iterator::Flex::Manual::Caveats](https://metacpan.org/pod/Iterator::Flex::Manual::Caveats)
+[Iterator::Flex::Manual::Caveats](https://metacpan.org/pod/Iterator%3A%3AFlex%3A%3AManual%3A%3ACaveats)
+
+# INTERNALS
 
 # SUPPORT
 
