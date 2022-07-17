@@ -476,7 +476,7 @@ L<Iterator::Flex::Base>.
 
 A code reference which returns the next element in the data source.
 This will be made available as the object method C<next>, but
-may also be invoked directly as a subroutine (e.g. C<$next->()> ).
+may also be invoked directly as a subroutine (e.g. C<< $next->() >>).
 
 Access to the iterator object can be obtained by either:
 
@@ -621,7 +621,7 @@ be thrown.
 =item C<return>
 
 For both iterators and adapters, indicates that a sentinel value of
-c<undef> will be returned.
+C<undef> will be returned.
 
 =item C<< [ return => $value ] >>
 
