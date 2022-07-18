@@ -5,7 +5,7 @@ package Iterator::Flex::Role::State::Closure;
 use strict;
 use warnings;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Iterator::Flex::Utils qw( :default ITERATOR STATE :IterStates );
 

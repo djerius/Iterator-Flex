@@ -5,7 +5,7 @@ package Iterator::Flex::Role::Exhaustion::Throw;
 use strict;
 use warnings;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Ref::Util;
 use Iterator::Flex::Utils qw( :default :RegistryKeys );

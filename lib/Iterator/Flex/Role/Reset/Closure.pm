@@ -5,12 +5,12 @@ package Iterator::Flex::Role::Reset::Closure;
 use strict;
 use warnings;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Scalar::Util;
 use List::Util;
 
-use Iterator::Flex::Base ();
+use Iterator::Flex::Base  ();
 use Iterator::Flex::Utils qw( :default ITERATOR RESET );
 use Role::Tiny;
 use experimental 'signatures';

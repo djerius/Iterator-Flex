@@ -677,6 +677,8 @@ For both iterators and adapters, indicates that the specified sentinel value wil
 
 =back
 
+=back
+
 =head3 Error
 
 =over

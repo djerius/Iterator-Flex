@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use experimental qw( signatures postderef );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use parent 'Iterator::Flex::Base';
 use Iterator::Flex::Utils qw( STATE :IterAttrs :IterStates throw_failure );

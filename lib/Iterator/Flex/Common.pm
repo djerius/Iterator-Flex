@@ -8,7 +8,7 @@ use warnings;
 
 use experimental ( 'postderef', 'signatures' );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Exporter 'import';
 

@@ -9,10 +9,10 @@ use warnings;
 
 use experimental 'signatures', 'postderef';
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use Scalar::Util qw( refaddr );
-use Ref::Util qw( is_hashref );
+use Ref::Util    qw( is_hashref );
 use Exporter 'import';
 
 our %REGISTRY;
