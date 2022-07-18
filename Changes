@@ -2,6 +2,10 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+  [BUG FIX]
+
+    * resolve RT#141012, always call overload::Method with three arguments. HVDS++
+
 0.14      2021-10-06 15:00:47-04:00 America/New_York
 
   [BUILD]

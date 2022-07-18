@@ -281,16 +281,16 @@ sub construct_from_object ( $CLASS, $obj, $ipar, $gpar ) {
             $ipar{ +NEXT } = $code->( $obj );
         }
         elsif ( $code = $CLASS->_can_meth( $obj, 'next' )
-            || overload::Method( $obj, '<>' ) )
+            || overload::Method( $obj, '<>', undef, undef ) )
         {
             $ipar{ +NEXT } = sub { $code->( $obj ) };
         }
 
-        elsif ( $code = overload::Method( $obj, '&{}' ) ) {
+        elsif ( $code = overload::Method( $obj, '&{}', undef, undef ) ) {
             $ipar{ +NEXT } = $code->( $obj );
         }
 
-        elsif ( $code = overload::Method( $obj, '@{}' ) ) {
+        elsif ( $code = overload::Method( $obj, '@{}', undef, undef ) ) {
             return $CLASS->construct_from_array( $code->( $obj ), \%gpar );
         }
 
