@@ -172,6 +172,67 @@ subtest 'throw' => sub {
         is( \@got, [ 1 .. 8 ], "got data" );
     };
 
+    subtest 'class' => sub {
+
+        subtest 'exhausted' => sub {
+
+            my $len = my @data = ( 1 .. 10, undef );
+            my @got;
+            my $iter = iterator {
+                die( bless [], 'My::Exhausted' ) if $data[0] == 9;
+                shift @data;
+            }
+            {
+                input_exhaustion => [ throw => 'My::Exhausted' ],
+                exhaustion       => 'throw'
+            };
+
+            isa_ok(
+                dies {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
+                        push @got, $data;
+                    }
+                },
+                ['Iterator::Flex::Failure::Exhausted'],
+                "exhaustion"
+            );
+
+            ok( $iter->is_exhausted, "exhausted flag" );
+            is( \@got, [ 1 .. 8 ], "got data" );
+
+        };
+
+        subtest 'died' => sub {
+
+            my $len = my @data = ( 1 .. 10, undef );
+            my @got;
+            my $iter = iterator {
+                die( "died" ) if $data[0] == 9;
+                shift @data;
+            }
+            {
+                input_exhaustion => [ throw => 'My::Exhausted' ],
+                exhaustion       => 'throw'
+            };
+
+            like(
+                dies {
+                    while ( @got <= $len and defined( my $data = $iter->next ) ) {
+                        push @got, $data;
+                    }
+                },
+                qr/died/,
+                "died"
+            );
+
+            ok( !$iter->is_exhausted, "exhausted flag" );
+            is( \@got, [ 1 .. 8 ], "got data" );
+
+        };
+
+    };
+
+
     subtest 'regexp' => sub {
 
         subtest 'exhausted' => sub {
@@ -231,6 +292,7 @@ subtest 'throw' => sub {
         };
 
     };
+
 
     subtest 'coderef' => sub {
 

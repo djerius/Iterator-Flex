@@ -1,15 +1,14 @@
 package Iterator::Flex::Role::Wrap::Throw;
 
-# ABSTRACT: Role to add throw on exhaustion to an iterator which sets is_exhausted.
+# ABSTRACT: Role to add throw on exhaustion to an iterator which adapts another iterator
 
 use strict;
 use warnings;
 
 our $VERSION = '0.15';
 
-use Iterator::Flex::Utils qw( :RegistryKeys INPUT_EXHAUSTION );
-use Scalar::Util;
-use Ref::Util qw( is_regexpref is_arrayref is_coderef );
+use Iterator::Flex::Utils qw( :RegistryKeys INPUT_EXHAUSTION PASSTHROUGH );
+use Ref::Util             qw( is_ref is_blessed_ref is_regexpref is_arrayref is_coderef );
 use Role::Tiny;
 use experimental 'signatures';
 
@@ -29,7 +28,27 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
 
     my $wsub;
 
-    if ( is_arrayref( $exception ) ) {
+    if ( !defined $exception ) {
+
+        $wsub = sub {
+            my $self = $_[0] // $wsub;
+            my $val  = eval { $next->( $self ) };
+            return $@ ne '' ? $self->signal_exhaustion( $@ ) : $val;
+        };
+    }
+
+    elsif ( !is_ref( $exception ) && $exception eq +PASSTHROUGH ) {
+
+        $wsub = sub {
+            my $self = $_[0] // $wsub;
+            my $val  = eval { $next->( $self ) };
+            return $@ ne '' ? $self->signal_exhaustion( $@ ) : $val;
+        };
+    }
+
+    elsif ( !is_ref( $exception ) || is_arrayref( $exception ) ) {
+        $exception = [$exception]
+          unless is_arrayref( $exception );
 
         $wsub = sub {
             my $self = $_[0] // $wsub;
@@ -73,12 +92,12 @@ around _construct_next => sub ( $orig, $class, $ipar, $gpar ) {
     }
 
     else {
+        require Iterator::Flex::Failure;
+        require Scalar::Util;
+        Iterator::Flex::Failure::parameter->throw(
+            "internal error: unknown type for input exhaustion policy: ${ \Scalar::Util::reftype( $exception ) }"
+        );
 
-        $wsub = sub {
-            my $self = $_[0] // $wsub;
-            my $val  = eval { $next->( $self ) };
-            return $@ ne '' ? $self->signal_exhaustion( $@ ) : $val;
-        };
     }
 
 

@@ -606,11 +606,53 @@ It may have one of the following values:
 
 =item C<throw>
 
-Throw an exception of L<Iterator::Flex::Failure::Exhaustion|Iterator::Flex::Failure/Exhaustion>.
+The consumed iterator throws an indeterminate exception on exhaustion.
+
+=item C<< [ throw => $class ] >>
+
+The consumed iterator throws an exception upon exhaustoin in the given class on exhaustion.
+
+=item C<< [ throw => \@classes ] >>
+
+The consumed iterator throws an exception upon exhaustion in one of the given classes on exhaustion.
+
+=item C<< [ throw => $regexp ] >>
+
+The consumed iterator throws an exception upon exhaustion which when stringified matches the passed
+regular expression.
+
+=item C<< [ throw => $coderef ] >>
+
+The consumed iterator throws an exception; C<< $coderef->( $e ) >> returns true if 
+the exception indicates exhaustion.
+
+=item C<return>
+
+The consumed iterator returns a sentinel value of
+C<undef> on exhaustion.
+
+=item C<< [ return => $value ] >>
+
+The consumed iterator returns a sentinel value of
+C<$value> on exhaustion.
+
+=back
+
+=item C<exhaustion>
+
+This applies to both iterators and adapters, and indicates how they
+signal exhaustion.  It can take the following values:
+
+=over
 
 =item C<< [ throw => 'passthrough' ] >>
 
-Only for adapters; the consumed iterator will throw on exhaustion; let that exception propagate.
+Only for adapters where the consumed iterator will throw on
+exhaustion; this lets that exception propagate.
+
+=item C<throw>
+
+Throw an exception of L<Iterator::Flex::Failure::Exhaustion|Iterator::Flex::Failure/Exhaustion>.
 
 =item C<< [ throw => $coderef ] >>
 
@@ -629,10 +671,9 @@ For both iterators and adapters, indicates that the specified sentinel value wil
 
 =back
 
-=item C<exhaustion>
+=head3 Error
 
-This applies to both iterators and  adapters, and indicates how they signal exhaustion.
-It takes the same values as L</input_exhaustion>
+=over
 
 =item C<error>
 

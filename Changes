@@ -9,9 +9,15 @@ Revision history for {{$dist->name}}
     * sequences did not correctly handle exhaustion => 'throw' or
       exhaustion => [ return => $sentinel ]
 
+    * some of the non-documented ways of handling input exhaustion didn't work
+      as expected.
+
   [DOCUMENTATION]
 
     * rework Iterator::Flex::Manual:Authoring
+
+    * iterator adaptors handling of input exhaustion from their input iterators
+      was not properly/fully documented.
 
 
 0.14      2021-10-06 15:00:47-04:00 America/New_York
