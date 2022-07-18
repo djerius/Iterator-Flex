@@ -6,6 +6,8 @@ Revision history for {{$dist->name}}
 
     * resolve RT#141012, always call overload::Method with three arguments. HVDS++
 
+    * sequences did not correctly handle exhaustion => 'throw' or
+      exhaustion => [ return => $sentinel ]
 
   [DOCUMENTATION]
 

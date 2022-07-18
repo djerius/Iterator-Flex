@@ -148,4 +148,86 @@ for my $test ( @tests ) {
 
 }
 
+subtest 'wrong sign for step' => sub {
+    isa_ok( dies { iseq( 0, 1, -1 ) }, 'Iterator::Flex::Failure::parameter' );
+};
+
+subtest 'throw on exhaustion' => sub {
+
+    subtest 'no step' => sub {
+        my $iter = iseq( 0, 1, { exhaustion => 'throw' } );
+
+        is( $iter->next, 0 );
+        is( $iter->next, 1 );
+
+        # next should repeatedly throw on exhaustion.
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+
+    };
+
+    subtest 'positive step' => sub {
+        my $iter = iseq( 0, 1, 1, { exhaustion => 'throw' } );
+
+        is( $iter->next, 0 );
+        is( $iter->next, 1 );
+
+        # next should repeatedly throw on exhaustion.
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+    };
+
+    subtest 'negative step' => sub {
+        my $iter = iseq( 1, 0, -1, { exhaustion => 'throw' } );
+
+        is( $iter->next, 1 );
+        is( $iter->next, 0 );
+
+        # next should repeatedly throw on exhaustion.
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+        isa_ok( dies { $iter->next }, 'Iterator::Flex::Failure::Exhausted' );
+
+    };
+
+};
+
+subtest 'return sentinel' => sub {
+
+    subtest 'no step' => sub {
+        my $iter = iseq( 0, 1, { exhaustion => [ return => -1 ] } );
+
+        is( $iter->next, 0 );
+        is( $iter->next, 1 );
+
+        # next should repeatedly return -1
+        is( $iter->next, -1 );
+        is( $iter->next, -1 );
+
+    };
+
+    subtest 'positive step' => sub {
+        my $iter = iseq( 0, 1, 1, { exhaustion => [ return => -1 ] } );
+
+        is( $iter->next, 0 );
+        is( $iter->next, 1 );
+
+        # next should repeatedly return -1
+        is( $iter->next, -1 );
+        is( $iter->next, -1 );
+    };
+
+    subtest 'negative step' => sub {
+        my $iter = iseq( 1, 0, -1, { exhaustion => [ return => -1 ] } );
+
+        is( $iter->next, 1 );
+        is( $iter->next, 0 );
+
+        # next should repeatedly return -1
+        is( $iter->next, -1 );
+        is( $iter->next, -1 );
+    };
+
+};
+
+
 done_testing;

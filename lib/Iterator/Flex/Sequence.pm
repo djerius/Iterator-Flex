@@ -86,11 +86,9 @@ sub construct ( $class, $state ) {
         %params = (
             ( +NEXT ) => sub {
                 if ( $next > $end ) {
-                    if ( !$self->is_exhausted ) {
-                        $prev    = $current;
-                        $current = $self->signal_exhaustion;
-                    }
-                    return $current;
+                    $prev = $current
+                      unless $self->is_exhausted;
+                    return $current = $self->signal_exhaustion;
                 }
                 $prev    = $current;
                 $current = $next++;
@@ -113,7 +111,8 @@ sub construct ( $class, $state ) {
 
     else {
 
-        $class->_throw( "sequence will be inifinite as \$step is zero or has the incorrect sign" )
+        $class->_throw(
+            parameter => "sequence will be inifinite as \$step is zero or has the incorrect sign" )
           if ( $begin < $end && $step <= 0 ) || ( $begin > $end && $step >= 0 );
 
         $next = $begin unless defined $next;
@@ -137,12 +136,9 @@ sub construct ( $class, $state ) {
             ( +NEXT ) => $begin < $end
             ? sub {
                 if ( $next > $end ) {
-                    if ( !$self->is_exhausted ) {
-                        $prev    = $current;
-                        $current = undef;
-                        $self->set_exhausted;
-                    }
-                    return undef;
+                    $prev = $current
+                      unless $self->is_exhausted;
+                    return $current = $self->signal_exhaustion;
                 }
                 $prev    = $current;
                 $current = $next;
@@ -151,12 +147,9 @@ sub construct ( $class, $state ) {
             }
             : sub {
                 if ( $next < $end ) {
-                    if ( !$self->is_exhausted ) {
-                        $prev    = $current;
-                        $current = undef;
-                        $self->set_exhausted;
-                    }
-                    return undef;
+                    $prev = $current
+                      unless $self->is_exhausted;
+                    return $current = $self->signal_exhaustion;
                 }
                 $prev    = $current;
                 $current = $next;
